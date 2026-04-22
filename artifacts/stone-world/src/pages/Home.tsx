@@ -5,15 +5,20 @@ import { Link } from "wouter";
 import { ArrowRight, Shield, Truck, Star, Award, Phone } from "lucide-react";
 import { format } from "date-fns";
 
-const CATEGORY_COLORS: Record<string, string> = {
-  marble: "from-stone-200 to-stone-400",
-  tiles: "from-slate-200 to-slate-400",
-  quartz: "from-teal-100 to-teal-300",
-  cement: "from-gray-300 to-gray-500",
-  sanitaryware: "from-sky-100 to-sky-300",
-  ceramic: "from-amber-100 to-amber-300",
-  "tmt bars": "from-zinc-300 to-zinc-500",
-  stone: "from-neutral-200 to-neutral-400",
+const CATEGORY_META: Record<string, { img: string; desc: string }> = {
+  marble: { img: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80&auto=format&fit=crop", desc: "Timeless Italian & Indian slabs for floors, walls and statement pieces." },
+  tiles: { img: "https://images.unsplash.com/photo-1615971677499-5467cbab01b0?w=800&q=80&auto=format&fit=crop", desc: "From porcelain to designer, tiles that define every room." },
+  quartz: { img: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=800&q=80&auto=format&fit=crop", desc: "Engineered precision for countertops, vanities and more." },
+  cement: { img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80&auto=format&fit=crop", desc: "Premium grades for structural foundations and finishes." },
+  "cement & concrete": { img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80&auto=format&fit=crop", desc: "Premium grades for structural foundations and finishes." },
+  sanitaryware: { img: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80&auto=format&fit=crop", desc: "Luxury bathware from the world's leading brands." },
+  ceramic: { img: "https://images.unsplash.com/photo-1553787434-dd9eb4ea4d0e?w=800&q=80&auto=format&fit=crop", desc: "Artisan ceramics blending tradition with modern aesthetics." },
+  "ceramic items": { img: "https://images.unsplash.com/photo-1553787434-dd9eb4ea4d0e?w=800&q=80&auto=format&fit=crop", desc: "Artisan ceramics blending tradition with modern aesthetics." },
+  "tmt bars": { img: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80&auto=format&fit=crop", desc: "High-strength steel for commercial and residential construction." },
+  "tmt bars & steel": { img: "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80&auto=format&fit=crop", desc: "High-strength steel for commercial and residential construction." },
+  stone: { img: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=800&q=80&auto=format&fit=crop", desc: "Natural stone varieties for outdoor and indoor grandeur." },
+  "natural stone": { img: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=800&q=80&auto=format&fit=crop", desc: "Natural stone varieties for outdoor and indoor grandeur." },
+  "sand & aggregates": { img: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&q=80&auto=format&fit=crop", desc: "Quality aggregates for construction and landscaping." },
 };
 
 const MATERIALS = [
@@ -67,12 +72,10 @@ export default function Home() {
           style={{ y: heroY }}
           className="absolute inset-0 w-full h-[115%] top-0"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 opacity-80" />
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            }}
+          <img
+            src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1600&q=80&auto=format&fit=crop"
+            alt="Luxury Marble"
+            className="w-full h-full object-cover opacity-40"
           />
           <div className="absolute inset-0 bg-gradient-to-tr from-teal-900/30 via-transparent to-transparent" />
         </motion.div>
@@ -211,7 +214,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {displayCategories.map((cat, i) => {
-              const colorClass = CATEGORY_COLORS[cat.name.toLowerCase()] || "from-gray-200 to-gray-400";
+              const meta = CATEGORY_META[cat.name.toLowerCase()] || { img: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80&auto=format&fit=crop", desc: "" };
               return (
                 <motion.div
                   key={cat.id}
@@ -224,10 +227,15 @@ export default function Home() {
                     href={`/discover?categoryId=${cat.id}`}
                     className="group relative flex flex-col aspect-[3/4] overflow-hidden rounded-2xl sm:rounded-3xl"
                   >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${colorClass} transition-transform duration-700 group-hover:scale-105`} />
+                    <img
+                      src={meta.img}
+                      alt={cat.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                     <div className="relative mt-auto p-5">
                       <h3 className="text-white font-bold text-lg">{cat.name}</h3>
+                      <p className="text-white/60 text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">{meta.desc}</p>
                       <div className="flex items-center gap-1 mt-1 text-teal-300 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Explore <ArrowRight className="w-3 h-3" />
                       </div>
@@ -451,9 +459,8 @@ export default function Home() {
 
       {/* ── CTA ── */}
       <section className="py-28 sm:py-36 bg-gray-950 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04]">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-400 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-400 rounded-full blur-3xl" />
+        <div className="absolute inset-0 opacity-10">
+          <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1200&q=80&auto=format&fit=crop" alt="" className="w-full h-full object-cover" />
         </div>
         <div className="relative max-w-3xl mx-auto px-6 text-center">
           <motion.div

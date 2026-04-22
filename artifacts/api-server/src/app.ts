@@ -5,6 +5,7 @@ import { join } from "path";
 import { mkdirSync } from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { backfillProductImages } from "./seed";
 
 const MEDIA_DIR = "/tmp/sw-media";
 try { mkdirSync(MEDIA_DIR, { recursive: true }); } catch {}
@@ -36,5 +37,9 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use("/api/media/file", express.static(MEDIA_DIR));
 app.use("/api", router);
+
+backfillProductImages().catch((err) => {
+  logger.warn({ err }, "Product image backfill failed — non-fatal");
+});
 
 export default app;

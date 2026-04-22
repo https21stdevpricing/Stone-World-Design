@@ -1,75 +1,159 @@
 import { Link } from "wouter";
 import { useGetPublicSettings } from "@workspace/api-client-react";
+import { MapPin, Phone, Mail, MessageCircle, Instagram, Facebook } from "lucide-react";
 
 export function Footer() {
   const { data: settings } = useGetPublicSettings();
 
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="bg-foreground text-background pt-24 pb-12 font-sans">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-16 md:gap-8 mb-24">
-          
-          <div className="md:col-span-4 space-y-8">
-            <img src="/sw-logo.png" alt="AB Stone World" className="h-12 invert brightness-0" />
-            <p className="text-white/60 font-medium leading-relaxed max-w-sm text-sm">
-              India's premier marketplace for luxury building materials. Crafting breathtaking spaces since 2003. Where raw geological magnificence meets refined craftsmanship.
-            </p>
-          </div>
-          
-          <div className="md:col-span-2 space-y-6">
-            <h4 className="text-xs font-bold tracking-widest uppercase text-white/40">Discover</h4>
-            <ul className="space-y-4">
-              <li><Link href="/discover?categoryId=1" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Marbles</Link></li>
-              <li><Link href="/discover?categoryId=2" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Tiles</Link></li>
-              <li><Link href="/discover?categoryId=3" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Quartz</Link></li>
-              <li><Link href="/discover?categoryId=4" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Sanitaryware</Link></li>
-            </ul>
-          </div>
+    <footer className="bg-white border-t border-gray-100 font-sans">
+      <div className="max-w-7xl mx-auto px-6 pt-20 pb-10">
 
-          <div className="md:col-span-2 space-y-6">
-            <h4 className="text-xs font-bold tracking-widest uppercase text-white/40">Company</h4>
-            <ul className="space-y-4">
-              <li><Link href="/about" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Our Story</Link></li>
-              <li><Link href="/blog" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Journal</Link></li>
-              <li><Link href="/contact" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Contact Us</Link></li>
-              <li><Link href="/admin" className="text-white/80 hover:text-white transition-colors font-medium text-sm">Admin</Link></li>
-            </ul>
-          </div>
+        {/* Top section */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 pb-16 border-b border-gray-100">
 
+          {/* Brand */}
           <div className="md:col-span-4 space-y-6">
-            <h4 className="text-xs font-bold tracking-widest uppercase text-white/40">Headquarters</h4>
-            <div className="space-y-4 font-medium text-sm text-white/80 leading-relaxed">
-              {settings?.address ? <p>{settings.address}</p> : <p>Pitampura, New Delhi<br/>India</p>}
-              
-              <div className="pt-4 space-y-2">
-                {settings?.phone && (
-                  <p><a href={`tel:${settings.phone}`} className="hover:text-white transition-colors">{settings.phone}</a></p>
-                )}
-                {settings?.email && (
-                  <p><a href={`mailto:${settings.email}`} className="hover:text-white transition-colors">{settings.email}</a></p>
-                )}
-              </div>
+            <div className="flex items-center gap-3">
+              <img src="/sw-logo.png" alt="AB Stone World" className="h-10 w-auto object-contain" />
             </div>
-            
-            <div className="flex gap-6 pt-4">
+            <p className="text-gray-500 leading-relaxed text-sm max-w-xs">
+              India's premier destination for luxury building materials — Marble, Quartz, Tiles, Sanitaryware, and more. Crafting remarkable spaces since 2003.
+            </p>
+            <div className="flex items-center gap-3 pt-2">
               {settings?.instagramUrl && (
-                <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">
-                  Instagram
+                <a
+                  href={settings.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-teal-50 flex items-center justify-center transition-colors group"
+                >
+                  <Instagram className="w-4 h-4 text-gray-500 group-hover:text-teal-600 transition-colors" />
                 </a>
               )}
               {settings?.facebookUrl && (
-                <a href={settings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold tracking-widest uppercase text-white/60 hover:text-white transition-colors">
-                  Facebook
+                <a
+                  href={settings.facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-teal-50 flex items-center justify-center transition-colors group"
+                >
+                  <Facebook className="w-4 h-4 text-gray-500 group-hover:text-teal-600 transition-colors" />
+                </a>
+              )}
+              {settings?.whatsapp && (
+                <a
+                  href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-teal-50 flex items-center justify-center transition-colors group"
+                >
+                  <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-teal-600 transition-colors" />
                 </a>
               )}
             </div>
           </div>
 
+          {/* Materials */}
+          <div className="md:col-span-2 space-y-5">
+            <h4 className="text-[10px] font-black tracking-[0.25em] uppercase text-gray-400">Materials</h4>
+            <ul className="space-y-3.5">
+              {[
+                { label: "Marble", href: "/discover?search=marble" },
+                { label: "Quartz", href: "/discover?search=quartz" },
+                { label: "Tiles", href: "/discover?search=tiles" },
+                { label: "Sanitaryware", href: "/discover?search=sanitaryware" },
+                { label: "Cement", href: "/discover?search=cement" },
+                { label: "TMT Bars", href: "/discover?search=tmt" },
+              ].map(l => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-sm text-gray-500 hover:text-teal-600 transition-colors font-medium">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div className="md:col-span-2 space-y-5">
+            <h4 className="text-[10px] font-black tracking-[0.25em] uppercase text-gray-400">Company</h4>
+            <ul className="space-y-3.5">
+              {[
+                { label: "Our Story", href: "/about" },
+                { label: "The Journal", href: "/blog" },
+                { label: "Browse All", href: "/discover" },
+                { label: "Contact Us", href: "/contact" },
+                { label: "Track Enquiry", href: "/track" },
+              ].map(l => (
+                <li key={l.href}>
+                  <Link href={l.href} className="text-sm text-gray-500 hover:text-teal-600 transition-colors font-medium">
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div className="md:col-span-4 space-y-5">
+            <h4 className="text-[10px] font-black tracking-[0.25em] uppercase text-gray-400">Get in Touch</h4>
+            <div className="space-y-4">
+              <div className="flex gap-3 items-start">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-teal-500" />
+                </div>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  {settings?.address || "Pitampura, New Delhi, India"}
+                </p>
+              </div>
+              {settings?.phone && (
+                <div className="flex gap-3 items-center">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <Phone className="w-3.5 h-3.5 text-teal-500" />
+                  </div>
+                  <a href={`tel:${settings.phone}`} className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors">
+                    {settings.phone}
+                  </a>
+                </div>
+              )}
+              {settings?.email && (
+                <div className="flex gap-3 items-center">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <Mail className="w-3.5 h-3.5 text-teal-500" />
+                  </div>
+                  <a href={`mailto:${settings.email}`} className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors">
+                    {settings.email}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2">
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-teal-500 text-white text-sm font-semibold hover:bg-teal-600 transition-colors shadow-sm"
+              >
+                Send Enquiry
+              </Link>
+            </div>
+          </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-bold text-white/40 uppercase tracking-widest">
-          <p>© {new Date().getFullYear()} <span className="font-bold">{settings?.companyName ?? "AB Stone World Pvt. Ltd."}</span></p>
-          <p>All Rights Reserved</p>
+        {/* Bottom bar */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-gray-400">
+            © {year} {settings?.companyName ?? "AB Stone World Pvt. Ltd."} All rights reserved.
+          </p>
+          <div className="flex items-center gap-5">
+            <span className="text-xs text-gray-400">Est. 2003</span>
+            <span className="text-xs text-gray-200">·</span>
+            <span className="text-xs text-gray-400">Pitampura, New Delhi</span>
+            <span className="text-xs text-gray-200">·</span>
+            <Link href="/admin" className="text-xs text-gray-400 hover:text-gray-600 transition-colors">Admin</Link>
+          </div>
         </div>
       </div>
     </footer>

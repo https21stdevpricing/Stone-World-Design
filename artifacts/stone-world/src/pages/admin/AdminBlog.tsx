@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useListBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost, useGenerateBlogPost, getListBlogPostsQueryKey, type BlogPost } from "@workspace/api-client-react";
+import { useListBlogPosts, useCreateBlogPost, useUpdateBlogPost, useDeleteBlogPost, useGenerateBlogPost, useListMedia, getListBlogPostsQueryKey, type BlogPost } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Wand2, Eye, PenLine } from "lucide-react";
+import { Plus, Pencil, Trash2, Wand2, Eye, PenLine, ImageIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -26,6 +26,62 @@ const postSchema = z.object({
   coverImageUrl: z.string().optional(),
   published: z.boolean(),
 });
+
+function MediaPickerDialog({ onSelect }: { onSelect: (url: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const { data: media } = useListMedia();
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setOpen(true)}
+        className="gap-2"
+      >
+        <ImageIcon className="h-4 w-4" />
+        Pick from Media
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Select Cover Image</DialogTitle>
+          </DialogHeader>
+          {!media || (media as any[]).length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <ImageIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No media files yet. Upload images in the Media section.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-2">
+              {(media as any[]).map((item: any) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => { onSelect(item.url); setOpen(false); }}
+                  className="group relative aspect-square rounded-lg overflow-hidden border-2 border-transparent hover:border-teal-500 transition-all"
+                >
+                  {item.mimeType?.startsWith("image/") ? (
+                    <img
+                      src={item.url}
+                      alt={item.filename}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
 
 export default function AdminBlog() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -194,9 +250,43 @@ export default function AdminBlog() {
                       </Tabs>
                     </FormItem>
                   )} />
+
+                  {/* Cover Image with media picker */}
                   <FormField control={form.control} name="coverImageUrl" render={({ field }) => (
-                    <FormItem><FormLabel>Cover Image URL</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                    <FormItem>
+                      <FormLabel>Cover Image</FormLabel>
+                      <div className="space-y-2">
+                        {field.value && (
+                          <div className="relative w-full aspect-[16/7] rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                            <img
+                              src={field.value}
+                              alt="Cover preview"
+                              className="w-full h-full object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => field.onChange("")}
+                              className="absolute top-2 right-2 p-1 bg-white/90 rounded-full shadow-sm hover:bg-white transition-colors"
+                            >
+                              <X className="h-3.5 w-3.5 text-gray-600" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex gap-2 items-center">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Paste image URL or pick from media library"
+                              className="flex-1"
+                            />
+                          </FormControl>
+                          <MediaPickerDialog onSelect={(url) => field.onChange(url)} />
+                        </div>
+                      </div>
+                    </FormItem>
                   )} />
+
                   <FormField control={form.control} name="published" render={({ field }) => (
                     <FormItem className="flex items-center gap-2"><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl><FormLabel className="!mt-0">Published</FormLabel></FormItem>
                   )} />
@@ -213,6 +303,7 @@ export default function AdminBlog() {
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
+              <TableHead>Cover</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>AI Generated</TableHead>
               <TableHead>Date</TableHead>
@@ -221,12 +312,23 @@ export default function AdminBlog() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={5} className="text-center">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center">Loading...</TableCell></TableRow>
             ) : data?.posts.map((post) => (
               <TableRow key={post.id}>
-                <TableCell className="font-medium">{post.title}</TableCell>
+                <TableCell className="font-medium max-w-[200px] truncate">{post.title}</TableCell>
                 <TableCell>
-                  {post.published ? <span className="text-green-600 text-xs font-medium">Published</span> : <span className="text-orange-600 text-xs font-medium">Draft</span>}
+                  {post.coverImageUrl ? (
+                    <img src={post.coverImageUrl} alt="" className="w-12 h-8 object-cover rounded" />
+                  ) : (
+                    <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center">
+                      <ImageIcon className="w-3.5 h-3.5 text-gray-300" />
+                    </div>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {post.published
+                    ? <span className="text-green-600 text-xs font-medium">Published</span>
+                    : <span className="text-orange-600 text-xs font-medium">Draft</span>}
                 </TableCell>
                 <TableCell>{post.aiGenerated ? 'Yes' : 'No'}</TableCell>
                 <TableCell>{format(new Date(post.createdAt), 'MMM d, yyyy')}</TableCell>

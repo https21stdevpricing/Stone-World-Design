@@ -9,8 +9,17 @@ interface GlobalSearchProps {
   onClose: () => void;
 }
 
+const PLACEHOLDER_CYCLE = [
+  "Italian marble for living room...",
+  "Quartz kitchen countertop...",
+  "Bathroom tiles collection...",
+  "Rajasthan sandstone...",
+  "Luxury sanitaryware...",
+];
+
 export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const [query, setQuery] = useState("");
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [, navigate] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,8 +45,17 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 80);
       setQuery("");
+      setPlaceholderIdx(0);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || query.length > 0) return;
+    const timer = setInterval(() => {
+      setPlaceholderIdx(i => (i + 1) % PLACEHOLDER_CYCLE.length);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, [isOpen, query]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -78,17 +96,32 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
-            {/* Search input */}
+            {/* Search input with animated placeholder */}
             <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100">
-              <Search className="w-5 h-5 text-gray-400 shrink-0" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="Search products, categories, articles..."
-                className="flex-1 text-lg font-medium text-gray-900 placeholder-gray-400 bg-transparent outline-none"
-              />
+              <Search className="w-5 h-5 text-teal-500 shrink-0" />
+              <div className="relative flex-1 overflow-hidden">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  className="w-full text-lg font-medium text-gray-900 bg-transparent outline-none"
+                />
+                {query.length === 0 && (
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={placeholderIdx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                      className="absolute left-0 top-0 text-lg font-medium text-gray-400 pointer-events-none whitespace-nowrap overflow-hidden"
+                    >
+                      {PLACEHOLDER_CYCLE[placeholderIdx]}
+                    </motion.span>
+                  </AnimatePresence>
+                )}
+              </div>
               <button
                 onClick={onClose}
                 className="p-1 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
@@ -104,10 +137,10 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                   <p className="text-xs font-bold tracking-widest text-gray-400 uppercase">Quick Links</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { label: "Marble Collection", path: "/discover?categoryId=1", icon: Grid3X3 },
-                      { label: "Tiles & Ceramic", path: "/discover?categoryId=2", icon: Grid3X3 },
-                      { label: "Quartz Surfaces", path: "/discover?categoryId=3", icon: Package },
-                      { label: "Sanitaryware", path: "/discover?categoryId=4", icon: Package },
+                      { label: "Marble Collection", path: "/discover?search=marble", icon: Grid3X3 },
+                      { label: "Tiles & Ceramic", path: "/discover?search=tiles", icon: Grid3X3 },
+                      { label: "Quartz Surfaces", path: "/discover?search=quartz", icon: Package },
+                      { label: "Sanitaryware", path: "/discover?search=sanitaryware", icon: Package },
                       { label: "The Journal", path: "/blog", icon: BookOpen },
                       { label: "Contact Us", path: "/contact", icon: ArrowRight },
                     ].map(item => (
@@ -202,8 +235,10 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             </div>
 
             <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-xs text-gray-400">Press <kbd className="font-mono bg-white border border-gray-200 rounded px-1.5 py-0.5 text-gray-500 shadow-sm">Esc</kbd> to close</span>
-              <span className="text-xs text-gray-400">⌘K to open anywhere</span>
+              <span className="text-xs text-gray-400">
+                Press <kbd className="font-mono bg-white border border-gray-200 rounded px-1.5 py-0.5 text-gray-500 shadow-sm">Esc</kbd> to close
+              </span>
+              <span className="hidden sm:inline text-xs text-gray-400">⌘K to open anywhere</span>
             </div>
           </motion.div>
         </motion.div>

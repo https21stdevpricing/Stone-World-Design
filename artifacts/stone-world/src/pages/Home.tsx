@@ -1,9 +1,19 @@
 import { Footer } from "@/components/Footer";
 import { useListProducts, useListCategories, useListBlogPosts } from "@workspace/api-client-react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Shield, Truck, Star, Award, Phone } from "lucide-react";
 import { format } from "date-fns";
+import { useState, useEffect } from "react";
+
+const HERO_WORDS = ["Marble", "Quartz", "Stone", "Tiles", "Vision"];
+const HERO_BACKGROUNDS = [
+  "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1615971677499-5467cbab01b0?w=1600&q=80&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1600&q=80&auto=format&fit=crop",
+];
 
 const CATEGORY_META: Record<string, { img: string; desc: string }> = {
   marble: { img: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80&auto=format&fit=crop", desc: "Timeless Italian & Indian slabs for floors, walls and statement pieces." },
@@ -46,6 +56,15 @@ export default function Home() {
   const heroY = useTransform(scrollY, [0, 600], [0, 180]);
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
 
+  const [wordIdx, setWordIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setWordIdx(i => (i + 1) % HERO_WORDS.length);
+    }, 2400);
+    return () => clearInterval(timer);
+  }, []);
+
   const { data: featuredData } = useListProducts({ limit: 4 });
   const featuredProducts = featuredData?.products || [];
 
@@ -68,18 +87,26 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden bg-gray-950">
-        <motion.div
-          style={{ y: heroY }}
-          className="absolute inset-0 w-full h-[115%] top-0"
-        >
-          <img
-            src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1600&q=80&auto=format&fit=crop"
-            alt="Luxury Marble"
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-tr from-teal-900/30 via-transparent to-transparent" />
-        </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50" />
+        {/* Background cycling */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={wordIdx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2 }}
+            style={{ y: heroY }}
+            className="absolute inset-0 w-full h-[115%] top-0"
+          >
+            <img
+              src={HERO_BACKGROUNDS[wordIdx]}
+              alt="Luxury Materials"
+              className="w-full h-full object-cover opacity-35"
+            />
+            <div className="absolute inset-0 bg-gradient-to-tr from-teal-900/20 via-transparent to-transparent" />
+          </motion.div>
+        </AnimatePresence>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/60" />
 
         <motion.div
           style={{ opacity: heroOpacity }}
@@ -98,11 +125,27 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-white font-black tracking-[-0.04em] leading-[1.0] mb-6"
+            className="text-white font-black tracking-[-0.04em] leading-[1.05] mb-6"
             style={{ fontSize: "clamp(2.8rem, 8.5vw, 6.5rem)" }}
           >
-            Where Stone<br />
-            <span className="text-teal-400">Meets Vision.</span>
+            Where{" "}
+            <span className="relative inline-block">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={wordIdx}
+                  initial={{ opacity: 0, y: 20, rotateX: -30 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  exit={{ opacity: 0, y: -20, rotateX: 30 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="inline-block text-teal-400"
+                  style={{ transformOrigin: "center", transformStyle: "preserve-3d" }}
+                >
+                  {HERO_WORDS[wordIdx]}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+            <br />
+            Meets Vision.
           </motion.h1>
 
           <motion.p
@@ -133,6 +176,24 @@ export default function Home() {
             >
               Get a Free Quote
             </Link>
+          </motion.div>
+
+          {/* Material pill strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.8 }}
+            className="flex flex-wrap items-center justify-center gap-2 mt-10"
+          >
+            {["Marble", "Quartz", "Tiles", "Sanitaryware", "Cement", "TMT Bars", "Stone"].map((mat) => (
+              <Link
+                key={mat}
+                href={`/discover?search=${mat.toLowerCase()}`}
+                className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 text-white/70 hover:text-white text-[11px] font-semibold tracking-wide transition-all duration-200"
+              >
+                {mat}
+              </Link>
+            ))}
           </motion.div>
         </motion.div>
 

@@ -11,10 +11,10 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { scrollY } = useScroll();
 
-  const textOpacity = useTransform(scrollY, [0, 60], [1, 0]);
-  const textX = useTransform(scrollY, [0, 60], [0, -6]);
-  const imgOpacity = useTransform(scrollY, [20, 70], [0, 1]);
-  const imgScale = useTransform(scrollY, [20, 70], [0.85, 1]);
+  const textOpacity = useTransform(scrollY, [0, 48], [1, 0]);
+  const textY = useTransform(scrollY, [0, 48], [0, -4]);
+  const imgOpacity = useTransform(scrollY, [8, 52], [0, 1]);
+  const imgY = useTransform(scrollY, [8, 52], [6, 0]);
 
   useEffect(() => {
     const unsub = scrollY.on("change", (y) => setScrolled(y > 20));
@@ -52,43 +52,45 @@ export function Navbar() {
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isHero
-            ? "bg-transparent"
-            : "bg-white/96 backdrop-blur-2xl border-b border-black/[0.06] shadow-[0_1px_12px_rgba(0,0,0,0.06)]"
+            ? "h-[72px] bg-transparent"
+            : "h-16 bg-white/96 backdrop-blur-2xl border-b border-black/[0.06] shadow-[0_1px_12px_rgba(0,0,0,0.06)]"
         }`}
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 h-full flex items-center justify-between">
 
+          {/* Logo: seamless text → image morph */}
           <Link href="/" className="flex items-center shrink-0">
-            <div className="relative h-7" style={{ width: 120 }}>
+            <div className="relative h-8" style={{ width: 140 }}>
+              {/* Text logo */}
               <motion.div
-                style={{ opacity: textOpacity, x: textX }}
+                style={{ opacity: textOpacity, y: textY }}
                 className="absolute inset-0 flex items-center pointer-events-none"
               >
                 <span
-                  className={`font-black tracking-[-0.045em] text-[18px] leading-none whitespace-nowrap select-none ${
+                  className={`font-black tracking-[-0.045em] text-[19px] leading-none whitespace-nowrap select-none transition-colors duration-300 ${
                     isHero ? "text-white" : "text-gray-950"
                   }`}
                 >
                   Stone World
                 </span>
               </motion.div>
+              {/* Image logo */}
               <motion.div
-                style={{ opacity: imgOpacity, scale: imgScale }}
+                style={{ opacity: imgOpacity, y: imgY }}
                 className="absolute inset-0 flex items-center pointer-events-none"
               >
                 <img
                   src="/sw-logo.png"
                   alt="Stone World"
-                  className={`h-7 w-auto object-contain transition-all duration-300 ${
-                    isHero ? "brightness-0 invert" : ""
-                  }`}
+                  className="h-8 w-auto object-contain"
                 />
               </motion.div>
             </div>
           </Link>
 
+          {/* Center nav links */}
           <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
             {links.map((link) => {
               const isActive = location.startsWith(link.href);
@@ -117,6 +119,7 @@ export function Navbar() {
             })}
           </div>
 
+          {/* Right actions */}
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => setSearchOpen(true)}
@@ -154,6 +157,7 @@ export function Navbar() {
         </div>
       </nav>
 
+      {/* Mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -175,7 +179,7 @@ export function Navbar() {
               className="fixed top-0 right-0 bottom-0 z-[70] w-[80vw] max-w-[320px] bg-white shadow-2xl flex flex-col"
             >
               <div className="flex items-center justify-between px-6 h-16 border-b border-gray-100">
-                <span className="font-black tracking-[-0.045em] text-[17px] text-gray-950">Stone World</span>
+                <img src="/sw-logo.png" alt="Stone World" className="h-7 w-auto object-contain" />
                 <button
                   onClick={() => setMobileOpen(false)}
                   className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"

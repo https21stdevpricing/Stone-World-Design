@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Footer } from "@/components/Footer";
 import { useCreateEnquiry, useGetPublicSettings } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, ArrowRight, MapPin, Phone, Mail, MessageCircle, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ArrowRight, MapPin, Phone, Mail, MessageCircle, ArrowLeft, AlertCircle } from "lucide-react";
 import { EnquiryAudience } from "@workspace/api-client-react";
 import { Link } from "wouter";
 
@@ -35,6 +35,7 @@ export default function Contact() {
     message: "",
   });
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const createEnquiry = useCreateEnquiry();
   const { data: settings } = useGetPublicSettings();
 
@@ -51,6 +52,7 @@ export default function Contact() {
 
   const submit = () => {
     if (!canSubmit) return;
+    setSubmitError(null);
     createEnquiry.mutate(
       {
         data: {
@@ -67,6 +69,9 @@ export default function Contact() {
         onSuccess: (data) => {
           setReferenceNumber(data.referenceNumber ?? "");
           setStep(5);
+        },
+        onError: () => {
+          setSubmitError("Something went wrong. Please try again or contact us directly.");
         },
       }
     );
@@ -258,6 +263,12 @@ export default function Contact() {
                     />
                     <p className="text-xs text-gray-400 mt-2">{formData.message.length} characters</p>
                   </div>
+                  {submitError && (
+                    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl">
+                      <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                      <p className="text-sm text-red-600">{submitError}</p>
+                    </div>
+                  )}
                   <button
                     onClick={submit}
                     disabled={!canSubmit || createEnquiry.isPending}

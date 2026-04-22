@@ -17,18 +17,28 @@ export default function Blog() {
   const gridPosts = posts.length > 1 ? posts.slice(1) : [];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background font-sans">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
       <Navbar />
       
-      <main className="flex-1 pt-24 pb-32">
-        <div className="container mx-auto px-4 mb-20 text-center">
-          <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-foreground mb-6">The Journal</h1>
-          <p className="text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
-            Design perspectives, material deep-dives, and architectural inspiration curated by our experts.
-          </p>
+      <main className="flex-1 pt-16 pb-32">
+        <div className="py-16 sm:py-20 bg-gray-950">
+          <div className="max-w-5xl mx-auto px-6 space-y-4">
+            <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase">Insights & Ideas</p>
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white">The Journal</h1>
+            <p className="text-base text-gray-400 max-w-xl">
+              Design perspectives, material deep-dives, and architectural inspiration curated by our team.
+            </p>
+          </div>
         </div>
 
-        <div className="container mx-auto px-4 max-w-7xl">
+        <div className="sticky top-16 z-30 bg-white border-b border-gray-100">
+          <div className="max-w-5xl mx-auto px-6 py-3 flex items-center gap-2">
+            <svg className="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            <span className="text-sm font-semibold text-gray-600">Journal</span>
+          </div>
+        </div>
+
+        <div className="container mx-auto px-4 max-w-5xl mt-16">
           {isLoading ? (
             <div className="flex justify-center py-32">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />

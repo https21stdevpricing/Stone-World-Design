@@ -24,22 +24,31 @@ export default function Discover() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-background font-sans">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
       <Navbar />
       
-      <main className="flex-1 pt-24">
-        {/* Header */}
-        <div className="py-20 bg-foreground text-background">
-          <div className="container mx-auto px-4 text-center space-y-6">
-            <h1 className="text-6xl md:text-7xl font-bold tracking-tight">The Collection</h1>
-            <p className="text-lg font-medium tracking-wide text-background/80 max-w-2xl mx-auto">
-              A curated catalog of the world's most exquisite materials. Filter by origin, category, or search directly.
+      <main className="flex-1 pt-16">
+        {/* Hero Header */}
+        <div className="py-16 sm:py-20 bg-gray-950">
+          <div className="max-w-5xl mx-auto px-6 space-y-4">
+            <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase">Browse</p>
+            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white">The Collection</h1>
+            <p className="text-base text-gray-400 max-w-xl">
+              500+ premium materials across 8 categories. Filter by type, origin, or search to find exactly what you need.
             </p>
           </div>
         </div>
 
+        {/* Sticky Page Header */}
+        <div className="sticky top-16 z-30 bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2">
+            <svg className="w-4 h-4 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            <span className="text-sm font-semibold text-gray-600">All Materials</span>
+          </div>
+        </div>
+
         {/* Filter Bar */}
-        <div className="border-b border-border sticky top-[80px] md:top-[96px] z-40 bg-background/90 backdrop-blur-md">
+        <div className="border-b border-border sticky top-28 z-30 bg-white/95 backdrop-blur-md">
           <div className="container mx-auto px-4 py-4 flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex gap-4 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
               <button 

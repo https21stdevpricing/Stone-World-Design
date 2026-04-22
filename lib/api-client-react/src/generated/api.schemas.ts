@@ -150,6 +150,15 @@ export interface BlogListResponse {
   offset: number;
 }
 
+export type EnquiryStatus = (typeof EnquiryStatus)[keyof typeof EnquiryStatus];
+
+export const EnquiryStatus = {
+  new: "new",
+  in_discussion: "in_discussion",
+  quoted: "quoted",
+  closed: "closed",
+} as const;
+
 export type EnquiryAudience =
   (typeof EnquiryAudience)[keyof typeof EnquiryAudience];
 
@@ -162,7 +171,6 @@ export const EnquiryAudience = {
 
 export interface Enquiry {
   id: number;
-  referenceNumber?: string | null;
   name: string;
   email?: string | null;
   phone: string;
@@ -173,41 +181,31 @@ export interface Enquiry {
   productInterest?: string | null;
   location?: string | null;
   isRead: boolean;
-  status: string;
+  referenceNumber?: string | null;
+  status?: EnquiryStatus;
   createdAt: string;
-}
-
-export interface TrackedEnquiry {
-  id: number;
-  referenceNumber: string;
-  name: string;
-  status: string;
-  productInterest?: string | null;
-  createdAt: string;
-}
-
-export type EnquiryStatus = (typeof EnquiryStatus)[keyof typeof EnquiryStatus];
-
-export const EnquiryStatus = {
-  new: "new",
-  in_discussion: "in_discussion",
-  quoted: "quoted",
-  closed: "closed",
-} as const;
-
-export interface UpdateEnquiryStatusBody {
-  status: EnquiryStatus;
 }
 
 export interface CreateEnquiryResponse {
   success: boolean;
-  message: string;
+  message?: string;
   referenceNumber: string;
 }
 
-export type TrackEnquiryParams = {
-  ref: string;
-};
+export interface TrackedEnquiry {
+  id: number;
+  name: string;
+  phone: string;
+  referenceNumber: string;
+  status: EnquiryStatus;
+  message: string;
+  productInterest?: string | null;
+  createdAt: string;
+}
+
+export interface UpdateEnquiryStatusBody {
+  status: EnquiryStatus;
+}
 
 export type CreateEnquiryBodyAudience =
   (typeof CreateEnquiryBodyAudience)[keyof typeof CreateEnquiryBodyAudience];
@@ -351,6 +349,10 @@ export const ListEnquiriesAudience = {
   developer: "developer",
   all: "all",
 } as const;
+
+export type TrackEnquiryParams = {
+  ref: string;
+};
 
 export type ExportEnquiriesParams = {
   audience?: string;

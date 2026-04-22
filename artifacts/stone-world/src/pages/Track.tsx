@@ -54,9 +54,10 @@ export default function Track() {
   const [inputRef, setInputRef] = useState(initialRef);
   const [searchRef, setSearchRef] = useState(initialRef);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: enquiry, isLoading, isError, error } = useTrackEnquiry(
     { ref: searchRef },
-    { query: { enabled: !!searchRef, retry: false } }
+    { query: { enabled: !!searchRef, retry: false } } as any
   );
 
   const handleSearch = (e: React.FormEvent) => {
@@ -68,14 +69,22 @@ export default function Track() {
   const currentStepIndex = enquiry ? getStepIndex(enquiry.status) : -1;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background font-sans">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
       <Navbar />
 
-      <main className="flex-1 flex flex-col pt-24 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl mt-8">
+      {/* Sticky page header */}
+      <div className="sticky top-16 z-30 bg-white border-b border-gray-100">
+        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center gap-2">
+          <Search className="w-4 h-4 text-teal-500" />
+          <span className="text-sm font-semibold text-gray-600">Track Enquiry</span>
+        </div>
+      </div>
+
+      <main className="flex-1 flex flex-col pt-8 pb-16">
+        <div className="container mx-auto px-4 max-w-2xl mt-4">
           <div className="space-y-4 mb-12">
-            <p className="text-primary text-sm tracking-widest uppercase">Enquiry Status</p>
-            <h1 className="text-4xl md:text-5xl font-serif text-foreground">Track Your Enquiry</h1>
+            <p className="text-teal-500 text-sm tracking-widest uppercase font-bold">Enquiry Status</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">Track Your Enquiry</h1>
             <p className="text-muted-foreground text-lg font-light">
               Enter the reference number from your confirmation to check the status of your enquiry.
             </p>

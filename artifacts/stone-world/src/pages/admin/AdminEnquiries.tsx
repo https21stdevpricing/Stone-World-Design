@@ -65,7 +65,7 @@ export default function AdminEnquiries() {
 
   const handleStatusChange = (enq: Enquiry, newStatus: string) => {
     updateStatus.mutate({ id: enq.id, data: { status: newStatus as EnquiryStatus } }, {
-      onSuccess: (updated) => {
+      onSuccess: (updated: Enquiry) => {
         queryClient.invalidateQueries({ queryKey: getListEnquiriesQueryKey() });
         if (selectedEnquiry?.id === enq.id) {
           setSelectedEnquiry({ ...selectedEnquiry, status: updated.status });
@@ -212,8 +212,8 @@ export default function AdminEnquiries() {
                 <TableCell>{enq.phone}</TableCell>
                 <TableCell className="truncate max-w-[150px] text-muted-foreground text-sm">{enq.productInterest || "-"}</TableCell>
                 <TableCell>
-                  <Badge variant={STATUS_BADGE_VARIANTS[enq.status] ?? "outline"} className="whitespace-nowrap">
-                    {STATUS_LABELS[enq.status] ?? enq.status}
+                  <Badge variant={STATUS_BADGE_VARIANTS[(enq.status ?? 'new') as EnquiryStatus] ?? "outline"} className="whitespace-nowrap">
+                    {STATUS_LABELS[(enq.status ?? 'new') as EnquiryStatus] ?? enq.status}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
@@ -299,8 +299,8 @@ export default function AdminEnquiries() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Badge variant={STATUS_BADGE_VARIANTS[selectedEnquiry.status] ?? "outline"}>
-                  {STATUS_LABELS[selectedEnquiry.status] ?? selectedEnquiry.status}
+                <Badge variant={STATUS_BADGE_VARIANTS[(selectedEnquiry.status ?? 'new') as EnquiryStatus] ?? "outline"}>
+                  {STATUS_LABELS[(selectedEnquiry.status ?? 'new') as EnquiryStatus] ?? selectedEnquiry.status}
                 </Badge>
               </div>
 

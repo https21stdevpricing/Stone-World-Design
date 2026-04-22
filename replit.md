@@ -81,6 +81,21 @@ Tables: `categories`, `products`, `blog_posts`, `enquiries` (with `reference_num
 - Primary color: Teal (#00B4B4 / `hsl(180 100% 35%)`)
 - Logo: `/sw-logo.png` (in stone-world public folder)
 - Theme: White-themed, minimal, cinematic luxury feel
+- Navbar: h-16 (64px), `top-16` for sticky page headers
+- All page headers: sticky at `top-16` with teal icon + page title
+
+## Frontend Components
+
+- `Navbar.tsx` — Minimal: SW logo always visible, clean nav links, search icon, "Get a Quote" pill CTA, mobile Sheet drawer
+- `GlobalSearch.tsx` — Full-screen search overlay. Opens via search icon or ⌘K. Searches products (API), categories (client filter), blog posts (client filter). Categorized results.
+- `Footer.tsx` — Dark background, company info + category/company links
+
+## Design Patterns
+
+- Each inner page has a sticky `top-16` page header band with a teal icon and page title
+- Page hero sections use `bg-gray-950` dark header with teal accent labels
+- Home page: 8 sections (hero, stats, manifesto, categories, how-it-works, materials, featured products, CTA)
+- ProductDetail has material story, applications, care guide, specs, inquiry CTA
 
 ## Admin Credentials
 

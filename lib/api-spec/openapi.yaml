@@ -543,7 +543,57 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                $ref: "#/components/schemas/CreateEnquiryResponse"
+
+  /enquiries/track:
+    get:
+      operationId: trackEnquiry
+      tags: [enquiries]
+      summary: Track an enquiry by reference number (public)
+      parameters:
+        - name: ref
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Enquiry found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrackedEnquiry"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /enquiries/{id}/status:
+    put:
+      operationId: updateEnquiryStatus
+      tags: [enquiries]
+      summary: Update enquiry status (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEnquiryStatusBody"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enquiry"
 
   /enquiries/{id}/read:
     put:
@@ -1060,6 +1110,10 @@ components:
         - offset
 
     # ─── Enquiries ─────────────────────────────────────────────────────────────
+    EnquiryStatus:
+      type: string
+      enum: [new, in_discussion, quoted, closed]
+
     Enquiry:
       type: object
       properties:
@@ -1091,6 +1145,11 @@ components:
           nullable: true
         isRead:
           type: boolean
+        referenceNumber:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/EnquiryStatus"
         createdAt:
           type: string
           format: date-time
@@ -1102,6 +1161,57 @@ components:
         - message
         - isRead
         - createdAt
+
+    CreateEnquiryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        referenceNumber:
+          type: string
+      required:
+        - success
+        - referenceNumber
+
+    TrackedEnquiry:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        phone:
+          type: string
+        referenceNumber:
+          type: string
+        status:
+          $ref: "#/components/schemas/EnquiryStatus"
+        message:
+          type: string
+        productInterest:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - phone
+        - referenceNumber
+        - status
+        - message
+        - createdAt
+
+    UpdateEnquiryStatusBody:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/EnquiryStatus"
+      required:
+        - status
 
     CreateEnquiryBody:
       type: object

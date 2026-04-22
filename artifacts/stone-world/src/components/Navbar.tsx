@@ -1,125 +1,167 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, Search } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { GlobalSearch } from "./GlobalSearch";
 
 export function Navbar() {
   const [location] = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener("scroll", handleScroll);
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
   const links = [
-    { href: "/", label: "HOME" },
-    { href: "/discover", label: "DISCOVER" },
-    { href: "/about", label: "ABOUT" },
-    { href: "/blog", label: "JOURNAL" },
-    { href: "/contact", label: "CONTACT" },
-    { href: "/track", label: "TRACK" },
+    { href: "/discover", label: "Discover" },
+    { href: "/about", label: "About" },
+    { href: "/blog", label: "Journal" },
+    { href: "/track", label: "Track Order" },
   ];
 
-  const wordmark = "Stone World";
-  const chars = wordmark.split("");
+  const isHero = location === "/" && !scrolled;
 
   return (
-    <nav className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled || location !== "/" ? 'bg-white/90 backdrop-blur-md border-b' : 'bg-transparent'}`}>
-      <div className="container mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
-        
-        <Link href="/" className="flex items-center relative w-[180px] h-10">
-          <div className="absolute inset-0 flex items-center">
-            {chars.map((char, i) => (
-              <span
-                key={i}
-                className={`text-2xl font-bold tracking-tight transition-opacity duration-300 ${location === "/" && !scrolled ? 'text-white' : 'text-foreground'}`}
-                style={{
-                  opacity: scrolled ? 0 : 1,
-                  transitionDelay: scrolled ? `${i * 20}ms` : `${(chars.length - i) * 15}ms`
-                }}
-              >
-                {char === " " ? "\u00A0" : char}
-              </span>
-            ))}
-          </div>
-          <div className="absolute inset-0 flex items-center">
-            <img 
-              src="/sw-logo.png" 
-              alt="Stone World" 
-              className="h-10 object-contain transition-all duration-300"
-              style={{
-                opacity: scrolled ? 1 : 0,
-                transform: scrolled ? 'scale(1)' : 'scale(0.9)',
-                pointerEvents: scrolled ? 'auto' : 'none',
-                transitionDelay: scrolled ? '200ms' : '0ms'
-              }}
+    <>
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      <nav
+        className={`fixed top-0 z-50 w-full transition-all duration-500 ${
+          isHero
+            ? "bg-transparent border-transparent"
+            : "bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+
+          {/* Logo */}
+          <Link href="/" className="shrink-0">
+            <img
+              src="/sw-logo.png"
+              alt="Stone World"
+              className={`h-9 object-contain transition-all duration-300 ${isHero ? "brightness-0 invert" : ""}`}
             />
+          </Link>
+
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
+            {links.map(link => {
+              const isActive = link.href !== "/" && location.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative text-sm font-medium tracking-wide transition-colors duration-200 py-1 ${
+                    isHero
+                      ? "text-white/80 hover:text-white"
+                      : isActive
+                      ? "text-gray-900"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                >
+                  {link.label}
+                  {isActive && !isHero && (
+                    <motion.div
+                      layoutId="nav-active"
+                      className="absolute -bottom-0.5 left-0 right-0 h-[2px] bg-teal-500 rounded-full"
+                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                    />
+                  )}
+                </Link>
+              );
+            })}
           </div>
-        </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-10">
-          {links.map((link) => {
-            const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
-            const isHeroTransparent = location === "/" && !scrolled;
-            return (
-              <Link 
-                key={link.href} 
-                href={link.href} 
-                className={`text-xs font-bold tracking-[0.2em] transition-all duration-300 relative py-2 ${isHeroTransparent ? 'text-white/90 hover:text-white' : 'text-foreground/80 hover:text-foreground'}`}
-              >
-                {link.label}
-                {isActive && (
-                  <motion.div 
-                    layoutId="navbar-indicator"
-                    className="absolute bottom-0 left-0 w-full h-[2px] bg-primary"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </Link>
-            );
-          })}
-          <Button asChild className="rounded-full px-8 text-xs tracking-widest font-bold ml-4">
-            <Link href="/contact">ENQUIRE NOW</Link>
-          </Button>
-        </div>
+          {/* Right actions */}
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                isHero
+                  ? "text-white/80 hover:text-white hover:bg-white/10"
+                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+              }`}
+              aria-label="Search"
+            >
+              <Search className="w-5 h-5" />
+            </button>
 
-        {/* Mobile Nav */}
-        <div className="md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className={location === "/" && !scrolled ? 'text-white' : 'text-foreground'}>
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-[400px] border-l-0 pt-24 px-8">
-              <div className="flex flex-col gap-8">
-                {links.map((link) => {
-                  const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
-                  return (
-                    <Link 
-                      key={link.href} 
-                      href={link.href} 
-                      className={`text-3xl font-bold tracking-tight transition-colors ${isActive ? 'text-primary' : 'text-foreground hover:text-primary'}`}
-                    >
-                      {link.label}
-                    </Link>
-                  );
-                })}
-                <div className="pt-8 border-t mt-4">
-                  <Button asChild size="lg" className="w-full rounded-full text-sm tracking-widest h-14 font-bold">
-                    <Link href="/contact">ENQUIRE NOW</Link>
-                  </Button>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+            <Link
+              href="/contact"
+              className={`hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                isHero
+                  ? "bg-teal-500 text-white hover:bg-teal-400"
+                  : "bg-gray-900 text-white hover:bg-gray-700"
+              }`}
+            >
+              Get a Quote
+            </Link>
+
+            {/* Mobile Menu */}
+            <div className="md:hidden">
+              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+                <SheetTrigger asChild>
+                  <button
+                    className={`p-2 rounded-full transition-colors ${isHero ? "text-white" : "text-gray-700"}`}
+                    aria-label="Menu"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-full sm:w-80 p-0">
+                  <div className="flex flex-col h-full">
+                    <div className="p-6 border-b border-gray-100">
+                      <img src="/sw-logo.png" alt="Stone World" className="h-8 object-contain" />
+                    </div>
+                    <nav className="flex-1 p-6 space-y-1">
+                      {[{ href: "/", label: "Home" }, ...links].map(link => {
+                        const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
+                        return (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMobileOpen(false)}
+                            className={`flex items-center px-4 py-3 rounded-xl text-base font-medium transition-colors ${
+                              isActive ? "bg-teal-50 text-teal-700" : "text-gray-700 hover:bg-gray-50"
+                            }`}
+                          >
+                            {link.label}
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                    <div className="p-6 border-t border-gray-100">
+                      <Link
+                        href="/contact"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center justify-center w-full py-3 rounded-full bg-gray-900 text-white font-semibold text-sm"
+                      >
+                        Get a Quote
+                      </Link>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

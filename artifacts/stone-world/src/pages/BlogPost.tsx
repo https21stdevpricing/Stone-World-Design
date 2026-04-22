@@ -42,7 +42,7 @@ export default function BlogPost() {
     <div className="min-h-screen flex flex-col bg-background font-sans">
       <Navbar />
       
-      <main className="flex-1 pt-24 pb-32">
+      <main className="flex-1 pt-16 pb-32">
         <article className="container mx-auto px-4 max-w-4xl">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}

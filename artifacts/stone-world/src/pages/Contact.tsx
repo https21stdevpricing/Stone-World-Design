@@ -61,10 +61,18 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background font-sans">
+    <div className="min-h-screen flex flex-col bg-white font-sans">
       <Navbar />
+
+      {/* Sticky page header */}
+      <div className="sticky top-16 z-30 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-teal-500" />
+          <span className="text-sm font-semibold text-gray-600">Get in Touch</span>
+        </div>
+      </div>
       
-      <main className="flex-1 flex flex-col pt-24 pb-12">
+      <main className="flex-1 flex flex-col pt-6 pb-12">
         <div className="container mx-auto px-4 flex-1 flex flex-col md:flex-row gap-16 mt-8 max-w-6xl">
           
           {/* Main Flow Area */}

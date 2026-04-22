@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, Search } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { motion } from "framer-motion";
+import { Menu, Search, X } from "lucide-react";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { GlobalSearch } from "./GlobalSearch";
 
 export function Navbar() {
@@ -10,12 +9,21 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { scrollY } = useScroll();
+
+  const textOpacity = useTransform(scrollY, [0, 60], [1, 0]);
+  const textX = useTransform(scrollY, [0, 60], [0, -6]);
+  const imgOpacity = useTransform(scrollY, [20, 70], [0, 1]);
+  const imgScale = useTransform(scrollY, [20, 70], [0.85, 1]);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const unsub = scrollY.on("change", (y) => setScrolled(y > 20));
+    return unsub;
+  }, [scrollY]);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -23,10 +31,14 @@ export function Navbar() {
         e.preventDefault();
         setSearchOpen(true);
       }
+      if (e.key === "Escape") setMobileOpen(false);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
+
+  const isHome = location === "/";
+  const isHero = isHome && !scrolled;
 
   const links = [
     { href: "/discover", label: "Discover" },
@@ -35,52 +47,69 @@ export function Navbar() {
     { href: "/track", label: "Track Order" },
   ];
 
-  const isHero = location === "/" && !scrolled;
-
   return (
     <>
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <nav
-        className={`fixed top-0 z-50 w-full transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-500 ${
           isHero
-            ? "bg-transparent border-transparent"
-            : "bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm"
+            ? "bg-transparent"
+            : "bg-white/96 backdrop-blur-2xl border-b border-black/[0.06] shadow-[0_1px_12px_rgba(0,0,0,0.06)]"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-full flex items-center justify-between">
 
-          {/* Logo */}
-          <Link href="/" className="shrink-0">
-            <img
-              src="/sw-logo.png"
-              alt="Stone World"
-              className={`h-9 object-contain transition-all duration-300 ${isHero ? "brightness-0 invert" : ""}`}
-            />
+          <Link href="/" className="flex items-center shrink-0">
+            <div className="relative h-7" style={{ width: 120 }}>
+              <motion.div
+                style={{ opacity: textOpacity, x: textX }}
+                className="absolute inset-0 flex items-center pointer-events-none"
+              >
+                <span
+                  className={`font-black tracking-[-0.045em] text-[18px] leading-none whitespace-nowrap select-none ${
+                    isHero ? "text-white" : "text-gray-950"
+                  }`}
+                >
+                  Stone World
+                </span>
+              </motion.div>
+              <motion.div
+                style={{ opacity: imgOpacity, scale: imgScale }}
+                className="absolute inset-0 flex items-center pointer-events-none"
+              >
+                <img
+                  src="/sw-logo.png"
+                  alt="Stone World"
+                  className={`h-7 w-auto object-contain transition-all duration-300 ${
+                    isHero ? "brightness-0 invert" : ""
+                  }`}
+                />
+              </motion.div>
+            </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
-            {links.map(link => {
-              const isActive = link.href !== "/" && location.startsWith(link.href);
+          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            {links.map((link) => {
+              const isActive = location.startsWith(link.href);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative text-sm font-medium tracking-wide transition-colors duration-200 py-1 ${
+                  className={`relative text-[13px] font-medium tracking-wide py-1 transition-colors duration-200 ${
                     isHero
-                      ? "text-white/80 hover:text-white"
+                      ? "text-white/75 hover:text-white"
                       : isActive
-                      ? "text-gray-900"
+                      ? "text-gray-950 font-semibold"
                       : "text-gray-500 hover:text-gray-900"
                   }`}
                 >
                   {link.label}
                   {isActive && !isHero && (
-                    <motion.div
-                      layoutId="nav-active"
-                      className="absolute -bottom-0.5 left-0 right-0 h-[2px] bg-teal-500 rounded-full"
-                      transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                    <motion.span
+                      layoutId="nav-underline"
+                      className="absolute -bottom-px left-0 right-0 h-[2px] bg-teal-500 rounded-full"
+                      transition={{ type: "spring", stiffness: 500, damping: 40 }}
                     />
                   )}
                 </Link>
@@ -88,80 +117,104 @@ export function Navbar() {
             })}
           </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => setSearchOpen(true)}
-              className={`p-2 rounded-full transition-colors duration-200 ${
+              className={`p-2.5 rounded-full transition-all duration-200 ${
                 isHero
-                  ? "text-white/80 hover:text-white hover:bg-white/10"
+                  ? "text-white/70 hover:text-white hover:bg-white/10"
                   : "text-gray-500 hover:text-gray-900 hover:bg-gray-100"
               }`}
               aria-label="Search"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-[17px] h-[17px]" />
             </button>
 
             <Link
               href="/contact"
-              className={`hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+              className={`hidden md:inline-flex items-center px-5 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 ${
                 isHero
-                  ? "bg-teal-500 text-white hover:bg-teal-400"
-                  : "bg-gray-900 text-white hover:bg-gray-700"
+                  ? "bg-white text-gray-950 hover:bg-gray-50"
+                  : "bg-teal-500 text-white hover:bg-teal-600 shadow-sm"
               }`}
             >
               Get a Quote
             </Link>
 
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetTrigger asChild>
-                  <button
-                    className={`p-2 rounded-full transition-colors ${isHero ? "text-white" : "text-gray-700"}`}
-                    aria-label="Menu"
-                  >
-                    <Menu className="w-5 h-5" />
-                  </button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:w-80 p-0">
-                  <div className="flex flex-col h-full">
-                    <div className="p-6 border-b border-gray-100">
-                      <img src="/sw-logo.png" alt="Stone World" className="h-8 object-contain" />
-                    </div>
-                    <nav className="flex-1 p-6 space-y-1">
-                      {[{ href: "/", label: "Home" }, ...links].map(link => {
-                        const isActive = location === link.href || (link.href !== "/" && location.startsWith(link.href));
-                        return (
-                          <Link
-                            key={link.href}
-                            href={link.href}
-                            onClick={() => setMobileOpen(false)}
-                            className={`flex items-center px-4 py-3 rounded-xl text-base font-medium transition-colors ${
-                              isActive ? "bg-teal-50 text-teal-700" : "text-gray-700 hover:bg-gray-50"
-                            }`}
-                          >
-                            {link.label}
-                          </Link>
-                        );
-                      })}
-                    </nav>
-                    <div className="p-6 border-t border-gray-100">
-                      <Link
-                        href="/contact"
-                        onClick={() => setMobileOpen(false)}
-                        className="flex items-center justify-center w-full py-3 rounded-full bg-gray-900 text-white font-semibold text-sm"
-                      >
-                        Get a Quote
-                      </Link>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
+            <button
+              onClick={() => setMobileOpen(true)}
+              className={`md:hidden p-2.5 rounded-full transition-colors ${
+                isHero ? "text-white" : "text-gray-700"
+              }`}
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </nav>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              key="drawer"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 400, damping: 38 }}
+              className="fixed top-0 right-0 bottom-0 z-[70] w-[80vw] max-w-[320px] bg-white shadow-2xl flex flex-col"
+            >
+              <div className="flex items-center justify-between px-6 h-16 border-b border-gray-100">
+                <span className="font-black tracking-[-0.045em] text-[17px] text-gray-950">Stone World</span>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <nav className="flex-1 px-4 py-4 overflow-y-auto">
+                {[{ href: "/", label: "Home" }, ...links].map((link) => {
+                  const isActive =
+                    location === link.href ||
+                    (link.href !== "/" && location.startsWith(link.href));
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`flex items-center px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors mb-1 ${
+                        isActive
+                          ? "bg-teal-50 text-teal-700 font-semibold"
+                          : "text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+              <div className="px-5 pb-8 pt-3 border-t border-gray-100">
+                <Link
+                  href="/contact"
+                  className="flex items-center justify-center w-full py-4 rounded-2xl bg-teal-500 text-white font-bold text-[15px] hover:bg-teal-600 transition-colors"
+                >
+                  Get a Free Quote
+                </Link>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

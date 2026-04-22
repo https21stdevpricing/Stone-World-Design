@@ -1,21 +1,38 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { Link } from "wouter";
+import { motion } from "framer-motion";
+import { ArrowRight, Home } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
-          </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        className="space-y-6 max-w-md"
+      >
+        <p className="text-[120px] font-black tracking-tight text-gray-100 leading-none select-none">404</p>
+        <div className="-mt-4 space-y-3">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-gray-950">Page Not Found</h1>
+          <p className="text-gray-400 text-sm leading-relaxed">
+            The page you're looking for doesn't exist or may have been moved. Let's get you back on track.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+          >
+            <Home className="w-4 h-4" /> Go Home
+          </Link>
+          <Link
+            href="/discover"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+          >
+            Browse Materials <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </motion.div>
     </div>
   );
 }

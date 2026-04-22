@@ -1,13 +1,26 @@
 import { useState } from "react";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useCreateEnquiry, useGetPublicSettings } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, ArrowRight, MapPin, Phone, Mail, MessageSquare } from "lucide-react";
+import { CheckCircle2, ArrowRight, MapPin, Phone, Mail, MessageCircle, ArrowLeft } from "lucide-react";
 import { EnquiryAudience } from "@workspace/api-client-react";
+import { Link } from "wouter";
+
+const AUDIENCES = [
+  { id: "homeowner" as EnquiryAudience, label: "Homeowner", sub: "Renovating or building a personal space" },
+  { id: "contractor" as EnquiryAudience, label: "Contractor", sub: "Managing construction projects for clients" },
+  { id: "architect" as EnquiryAudience, label: "Architect / Designer", sub: "Specifying materials for design projects" },
+  { id: "developer" as EnquiryAudience, label: "Developer", sub: "Large-scale residential or commercial projects" },
+];
+
+const INTERESTS = ["Marble", "Quartz", "Tiles", "Sanitaryware", "Ceramic", "TMT Bars", "Cement", "Natural Stone"];
+
+const SLIDE = {
+  initial: { opacity: 0, x: 28, y: 0 },
+  animate: { opacity: 1, x: 0, y: 0 },
+  exit: { opacity: 0, x: -28, y: 0 },
+  transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+};
 
 export default function Contact() {
   const [step, setStep] = useState(1);
@@ -19,123 +32,130 @@ export default function Contact() {
     phone: "",
     email: "",
     location: "",
-    message: ""
+    message: "",
   });
 
   const createEnquiry = useCreateEnquiry();
   const { data: settings } = useGetPublicSettings();
 
-  const handleAudienceSelect = (val: EnquiryAudience) => {
-    setFormData({ ...formData, audience: val });
-    setStep(2);
-  };
-
-  const toggleInterest = (interest: string) => {
-    setFormData(prev => ({
+  const toggleInterest = (tag: string) => {
+    setFormData((prev) => ({
       ...prev,
-      productInterest: prev.productInterest.includes(interest)
-        ? prev.productInterest.filter(i => i !== interest)
-        : [...prev.productInterest, interest]
+      productInterest: prev.productInterest.includes(tag)
+        ? prev.productInterest.filter((i) => i !== tag)
+        : [...prev.productInterest, tag],
     }));
   };
 
-  const submitForm = () => {
-    if (!formData.name || !formData.phone || !formData.message) return;
-    
-    createEnquiry.mutate({
-      data: {
-        audience: formData.audience || "homeowner",
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email || null,
-        location: formData.location || null,
-        message: formData.message,
-        productInterest: formData.productInterest.join(", ") || null
+  const canSubmit = formData.name.trim() && formData.phone.trim() && formData.message.trim();
+
+  const submit = () => {
+    if (!canSubmit) return;
+    createEnquiry.mutate(
+      {
+        data: {
+          audience: formData.audience || "homeowner",
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email || null,
+          location: formData.location || null,
+          message: formData.message,
+          productInterest: formData.productInterest.join(", ") || null,
+        },
+      },
+      {
+        onSuccess: (data) => {
+          setReferenceNumber(data.referenceNumber ?? "");
+          setStep(5);
+        },
       }
-    }, {
-      onSuccess: (data) => {
-        setReferenceNumber(data.referenceNumber ?? "");
-        setStep(4);
-      }
-    });
+    );
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-white font-sans">
-      <Navbar />
+  const stepLabel = ["", "Who are you?", "Interests", "Your details", "Your project", "Done!"][step] || "";
+  const progress = ((step - 1) / 4) * 100;
 
-      {/* Sticky page header */}
-      <div className="sticky top-16 z-30 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-teal-500" />
-          <span className="text-sm font-semibold text-gray-600">Get in Touch</span>
-        </div>
-      </div>
-      
-      <main className="flex-1 flex flex-col pt-6 pb-12">
-        <div className="container mx-auto px-4 flex-1 flex flex-col md:flex-row gap-16 mt-8 max-w-6xl">
-          
-          {/* Main Flow Area */}
-          <div className="flex-1 min-h-[600px] relative">
-            <AnimatePresence mode="wait">
-              {step === 1 && (
-                <motion.div 
-                  key="step1"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-12 pt-12"
+  return (
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="flex-1 flex flex-col lg:flex-row">
+
+        {/* ── LEFT: FORM ── */}
+        <div className="flex-1 flex flex-col pt-16 min-h-screen">
+
+          {/* Progress header */}
+          <div className="border-b border-gray-100 bg-white sticky top-16 z-30">
+            <div className="max-w-2xl mx-auto px-6 py-4 flex items-center gap-4">
+              {step > 1 && step < 5 && (
+                <button
+                  onClick={() => setStep(s => s - 1)}
+                  className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700"
                 >
-                  <div className="space-y-4">
-                    <p className="text-primary text-sm tracking-widest uppercase font-bold">Step 01</p>
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Who are you?</h1>
-                    <p className="text-muted-foreground text-lg font-medium">Help us tailor the experience to your needs.</p>
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              )}
+              <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                  className="h-full bg-teal-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.3 }}
+                />
+              </div>
+              <span className="text-[11px] text-gray-400 font-medium shrink-0">
+                {step < 5 ? `${step} / 4` : "Done"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex-1 max-w-2xl mx-auto px-6 py-12 w-full">
+            <AnimatePresence mode="wait" initial={false}>
+
+              {/* STEP 1: Who are you */}
+              {step === 1 && (
+                <motion.div key="s1" {...SLIDE} className="space-y-10">
+                  <div>
+                    <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 1 of 4</p>
+                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                      Who are you?
+                    </h1>
+                    <p className="text-gray-400 text-base">Help us tailor the experience to your needs.</p>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { id: "homeowner", label: "Homeowner" },
-                      { id: "contractor", label: "Contractor / Builder" },
-                      { id: "architect", label: "Architect / Designer" },
-                      { id: "developer", label: "Real Estate Developer" }
-                    ].map((role) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {AUDIENCES.map((role) => (
                       <button
                         key={role.id}
-                        onClick={() => handleAudienceSelect(role.id as EnquiryAudience)}
-                        className="p-8 text-left border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-primary/60 rounded-2xl transition-all duration-300 group"
+                        onClick={() => { setFormData(p => ({ ...p, audience: role.id })); setStep(2); }}
+                        className="group p-6 text-left border border-gray-200 rounded-2xl hover:border-teal-400 hover:bg-teal-50/40 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-400"
                       >
-                        <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">{role.label}</h3>
+                        <h3 className="text-lg font-bold text-gray-950 group-hover:text-teal-700 transition-colors">{role.label}</h3>
+                        <p className="text-sm text-gray-400 mt-1 leading-snug">{role.sub}</p>
                       </button>
                     ))}
                   </div>
                 </motion.div>
               )}
 
+              {/* STEP 2: Interests */}
               {step === 2 && (
-                <motion.div 
-                  key="step2"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-12 pt-12"
-                >
-                  <div className="space-y-4">
-                    <p className="text-primary text-sm tracking-widest uppercase font-bold">Step 02</p>
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">What are you looking for?</h1>
-                    <p className="text-muted-foreground text-lg font-medium">Select all that apply to your project.</p>
+                <motion.div key="s2" {...SLIDE} className="space-y-10">
+                  <div>
+                    <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 2 of 4</p>
+                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                      What are you looking for?
+                    </h1>
+                    <p className="text-gray-400 text-base">Select all that apply to your project.</p>
                   </div>
-                  
                   <div className="flex flex-wrap gap-3">
-                    {["Marble", "Quartz", "Tiles", "Sanitaryware", "Ceramic", "TMT Bars", "Cement", "Stone"].map((tag) => {
-                      const isSelected = formData.productInterest.includes(tag);
+                    {INTERESTS.map((tag) => {
+                      const active = formData.productInterest.includes(tag);
                       return (
                         <button
                           key={tag}
                           onClick={() => toggleInterest(tag)}
-                          className={`px-6 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 border ${
-                            isSelected 
-                              ? 'bg-primary text-primary-foreground border-primary' 
-                              : 'bg-transparent border-border text-foreground hover:border-foreground'
+                          className={`px-5 py-2.5 rounded-full text-sm font-semibold border transition-all duration-200 ${
+                            active
+                              ? "bg-teal-500 text-white border-teal-500 shadow-sm"
+                              : "bg-white text-gray-700 border-gray-200 hover:border-teal-400 hover:text-teal-600"
                           }`}
                         >
                           {tag}
@@ -143,167 +163,245 @@ export default function Contact() {
                       );
                     })}
                   </div>
-
-                  <div className="pt-8 flex gap-4">
-                    <Button variant="ghost" onClick={() => setStep(1)} className="rounded-full font-bold">Back</Button>
-                    <Button onClick={() => setStep(3)} className="rounded-full px-8 font-bold">Continue <ArrowRight className="ml-2 w-4 h-4" /></Button>
-                  </div>
+                  <button
+                    onClick={() => setStep(3)}
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+                  >
+                    Continue <ArrowRight className="w-4 h-4" />
+                  </button>
                 </motion.div>
               )}
 
+              {/* STEP 3: Details (fill-in style) */}
               {step === 3 && (
-                <motion.div 
-                  key="step3"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-12 pt-12 max-w-2xl"
-                >
-                  <div className="space-y-4">
-                    <p className="text-primary text-sm tracking-widest uppercase font-bold">Step 03</p>
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Tell us about your project</h1>
+                <motion.div key="s3" {...SLIDE} className="space-y-10">
+                  <div>
+                    <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 3 of 4</p>
+                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                      A little about you.
+                    </h1>
+                    <p className="text-gray-400 text-base">We need just your name and number to get started.</p>
                   </div>
-                  
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold">Name *</label>
-                        <Input 
-                          value={formData.name} 
-                          onChange={e => setFormData({...formData, name: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
-                          placeholder="Your full name"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold">Phone *</label>
-                        <Input 
-                          value={formData.phone} 
-                          onChange={e => setFormData({...formData, phone: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
-                          placeholder="+91 98765 43210"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold">Email (Optional)</label>
-                        <Input 
-                          value={formData.email} 
-                          onChange={e => setFormData({...formData, email: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
-                          placeholder="your@email.com"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-bold">Location / City</label>
-                        <Input 
-                          value={formData.location} 
-                          onChange={e => setFormData({...formData, location: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
-                          placeholder="Delhi, Mumbai..."
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-bold">Message *</label>
-                      <Textarea 
-                        value={formData.message} 
-                        onChange={e => setFormData({...formData, message: e.target.value})} 
-                        className="rounded-none border-2 border-border focus-visible:ring-0 focus-visible:border-primary bg-transparent min-h-[120px] resize-none transition-colors"
-                        placeholder="Briefly describe your requirement or vision..."
+
+                  <div className="space-y-8">
+                    <div>
+                      <label className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold block mb-2">Your Name *</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
+                        placeholder="Full name"
+                        className="w-full text-xl font-bold text-gray-950 placeholder:text-gray-300 border-0 border-b-2 border-gray-200 focus:border-teal-500 outline-none pb-2 bg-transparent transition-colors duration-200"
                       />
                     </div>
+                    <div>
+                      <label className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold block mb-2">Phone Number *</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
+                        placeholder="+91 _____ _____"
+                        className="w-full text-xl font-bold text-gray-950 placeholder:text-gray-300 border-0 border-b-2 border-gray-200 focus:border-teal-500 outline-none pb-2 bg-transparent transition-colors duration-200"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div>
+                        <label className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold block mb-2">Email (optional)</label>
+                        <input
+                          type="email"
+                          value={formData.email}
+                          onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+                          placeholder="your@email.com"
+                          className="w-full text-base font-medium text-gray-700 placeholder:text-gray-300 border-0 border-b border-gray-200 focus:border-teal-500 outline-none pb-2 bg-transparent transition-colors duration-200"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold block mb-2">City (optional)</label>
+                        <input
+                          type="text"
+                          value={formData.location}
+                          onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
+                          placeholder="Delhi, Mumbai, Bangalore..."
+                          className="w-full text-base font-medium text-gray-700 placeholder:text-gray-300 border-0 border-b border-gray-200 focus:border-teal-500 outline-none pb-2 bg-transparent transition-colors duration-200"
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="pt-4 flex gap-4">
-                    <Button variant="ghost" onClick={() => setStep(2)} className="rounded-full font-bold">Back</Button>
-                    <Button 
-                      onClick={submitForm} 
-                      disabled={!formData.name || !formData.phone || !formData.message || createEnquiry.isPending}
-                      className="rounded-full px-8 font-bold"
-                    >
-                      {createEnquiry.isPending ? "Sending..." : "Submit Enquiry"}
-                    </Button>
-                  </div>
+                  <button
+                    onClick={() => { if (formData.name && formData.phone) setStep(4); }}
+                    disabled={!formData.name || !formData.phone}
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Continue <ArrowRight className="w-4 h-4" />
+                  </button>
                 </motion.div>
               )}
 
+              {/* STEP 4: Project message */}
               {step === 4 && (
-                <motion.div 
-                  key="step4"
-                  initial={{ opacity: 0, scale: 0.95 }}
+                <motion.div key="s4" {...SLIDE} className="space-y-10">
+                  <div>
+                    <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 4 of 4</p>
+                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                      Tell us your vision.
+                    </h1>
+                    <p className="text-gray-400 text-base">Describe your project, requirements, or any questions you have.</p>
+                  </div>
+                  <div>
+                    <textarea
+                      value={formData.message}
+                      onChange={e => setFormData(p => ({ ...p, message: e.target.value }))}
+                      placeholder="I'm renovating my living room and looking for Italian marble flooring. My budget is around ₹80k and I want something that's easy to maintain..."
+                      rows={6}
+                      className="w-full text-base text-gray-700 placeholder:text-gray-300 border border-gray-200 rounded-2xl p-5 focus:border-teal-500 outline-none bg-transparent transition-colors duration-200 resize-none leading-relaxed"
+                    />
+                    <p className="text-xs text-gray-400 mt-2">{formData.message.length} characters</p>
+                  </div>
+                  <button
+                    onClick={submit}
+                    disabled={!canSubmit || createEnquiry.isPending}
+                    className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-teal-500 text-white font-semibold text-sm hover:bg-teal-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-teal-500/25"
+                  >
+                    {createEnquiry.isPending ? "Sending..." : "Submit Enquiry"}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              )}
+
+              {/* STEP 5: Success */}
+              {step === 5 && (
+                <motion.div
+                  key="s5"
+                  initial={{ opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center h-full text-center space-y-6 pt-16"
+                  transition={{ duration: 0.35 }}
+                  className="flex flex-col items-center text-center py-12 space-y-6"
                 >
-                  <CheckCircle2 className="w-20 h-20 text-primary mb-4" />
-                  <h1 className="text-4xl font-bold tracking-tight text-foreground">Enquiry Received</h1>
-                  <p className="text-muted-foreground text-lg font-medium max-w-md">
-                    Thank you for reaching out to AB Stone World. One of our experts will contact you shortly to discuss your project.
-                  </p>
+                  <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-teal-500" />
+                  </div>
+                  <div>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950 mb-3">
+                      Enquiry Received!
+                    </h1>
+                    <p className="text-gray-500 leading-relaxed max-w-md">
+                      Thank you, <strong className="text-gray-800">{formData.name}</strong>. Our material specialists will reach out to you at <strong className="text-gray-800">{formData.phone}</strong> within 24 hours.
+                    </p>
+                  </div>
+
                   {referenceNumber && (
-                    <div className="border border-border/50 bg-muted/20 px-8 py-6 space-y-2 max-w-sm w-full">
-                      <p className="text-sm text-muted-foreground uppercase tracking-widest">Your Reference Number</p>
-                      <p className="text-2xl font-mono font-bold tracking-widest text-primary">{referenceNumber}</p>
-                      <p className="text-xs text-muted-foreground">Save this number to track your enquiry status</p>
+                    <div className="border border-teal-200 bg-teal-50/50 rounded-2xl px-8 py-6 space-y-2 w-full max-w-sm">
+                      <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold">Your Reference Number</p>
+                      <p className="text-2xl font-black tracking-widest text-teal-600 font-mono">{referenceNumber}</p>
+                      <p className="text-xs text-gray-400">Save this to track your enquiry status</p>
                     </div>
                   )}
-                  <div className="flex gap-3 flex-wrap justify-center mt-4">
+
+                  <div className="flex flex-col sm:flex-row gap-3">
                     {referenceNumber && (
-                      <Button className="rounded-full px-6 font-bold" onClick={() => window.location.href = `/track?ref=${referenceNumber}`}>
+                      <Link
+                        href={`/track?ref=${referenceNumber}`}
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+                      >
                         Track Enquiry
-                      </Button>
+                      </Link>
                     )}
-                    <Button variant="outline" className="rounded-full mt-2 font-bold" onClick={() => window.location.reload()}>
-                      Send Another Message
-                    </Button>
+                    <Link
+                      href="/discover"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+                    >
+                      Browse Materials
+                    </Link>
                   </div>
                 </motion.div>
               )}
+
             </AnimatePresence>
           </div>
+        </div>
 
-          {/* Contact Sidebar */}
-          <div className="w-full md:w-80 flex-shrink-0 pt-12 md:border-l border-border/40 md:pl-16">
-            <div className="space-y-10 sticky top-32">
-              <div>
-                <h3 className="font-bold tracking-tight text-2xl mb-6">Connect Directly</h3>
-                <p className="text-muted-foreground font-medium text-sm">
-                  Prefer speaking with someone immediately? Reach out through our direct channels.
-                </p>
-              </div>
+        {/* ── RIGHT: SIDEBAR ── */}
+        <div className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-gray-100 bg-gray-50/50 pt-16">
+          <div className="sticky top-16 p-10 space-y-10">
+            <div>
+              <h3 className="font-black text-xl text-gray-950 tracking-tight mb-2">Connect Directly</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Prefer to speak with someone immediately? Reach out directly.
+              </p>
+            </div>
 
-              <div className="space-y-6">
-                {settings?.address && (
-                  <div className="flex gap-4 items-start">
-                    <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <div className="text-sm font-medium text-foreground/80 leading-relaxed">{settings.address}</div>
+            <div className="space-y-5">
+              {settings?.address && (
+                <div className="flex gap-3 items-start">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 text-teal-500" />
                   </div>
-                )}
-                {settings?.phone && (
-                  <div className="flex gap-4 items-start">
-                    <Phone className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <a href={`tel:${settings.phone}`} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">{settings.phone}</a>
+                  <div className="text-sm text-gray-600 leading-relaxed">{settings.address}</div>
+                </div>
+              )}
+              {!settings?.address && (
+                <div className="flex gap-3 items-start">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <MapPin className="w-4 h-4 text-teal-500" />
                   </div>
-                )}
-                {settings?.whatsapp && (
-                  <div className="flex gap-4 items-start">
-                    <MessageSquare className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <a href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">WhatsApp Us</a>
+                  <div className="text-sm text-gray-600">Pitampura, New Delhi, India</div>
+                </div>
+              )}
+              {(settings?.phone || true) && (
+                <div className="flex gap-3 items-center">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <Phone className="w-4 h-4 text-teal-500" />
                   </div>
-                )}
-                {settings?.email && (
-                  <div className="flex gap-4 items-start">
-                    <Mail className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <a href={`mailto:${settings.email}`} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">{settings.email}</a>
+                  <a href={`tel:${settings?.phone || "+919999999999"}`} className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors">
+                    {settings?.phone || "+91 99999 99999"}
+                  </a>
+                </div>
+              )}
+              {settings?.whatsapp && (
+                <div className="flex gap-3 items-center">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <MessageCircle className="w-4 h-4 text-teal-500" />
                   </div>
-                )}
+                  <a
+                    href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors"
+                  >
+                    WhatsApp Us
+                  </a>
+                </div>
+              )}
+              {settings?.email && (
+                <div className="flex gap-3 items-center">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                    <Mail className="w-4 h-4 text-teal-500" />
+                  </div>
+                  <a href={`mailto:${settings.email}`} className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors">
+                    {settings.email}
+                  </a>
+                </div>
+              )}
+            </div>
+
+            <div className="pt-6 border-t border-gray-200">
+              <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold mb-4">Business Hours</p>
+              <div className="space-y-2 text-sm text-gray-500">
+                <div className="flex justify-between">
+                  <span>Monday – Saturday</span>
+                  <span className="font-semibold text-gray-700">9 AM – 7 PM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Sunday</span>
+                  <span className="font-semibold text-gray-700">11 AM – 4 PM</span>
+                </div>
               </div>
             </div>
           </div>
-
         </div>
-      </main>
+
+      </div>
 
       <Footer />
     </div>

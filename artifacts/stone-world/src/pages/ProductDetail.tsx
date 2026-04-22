@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useGetProduct, getGetProductQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -88,8 +87,7 @@ export default function ProductDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-white">
-        <Navbar />
+      <div className="min-h-screen flex flex-col bg-white pt-16">
         <div className="flex-1 flex justify-center items-center">
           <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
         </div>
@@ -99,14 +97,13 @@ export default function ProductDetail() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex flex-col bg-white">
-        <Navbar />
-        <div className="flex-1 flex flex-col justify-center items-center gap-6 pt-32 px-6 text-center">
+      <div className="min-h-screen flex flex-col bg-white pt-16">
+        <div className="flex-1 flex flex-col justify-center items-center gap-6 pt-16 px-6 text-center">
           <div className="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center">
             <Package className="w-8 h-8 text-gray-400" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Product Not Found</h2>
-          <p className="text-gray-500 max-w-sm">This product may have been removed or the link may be incorrect.</p>
+          <h2 className="text-2xl font-black text-gray-950">Product Not Found</h2>
+          <p className="text-gray-400 max-w-sm text-sm">This product may have been removed or the link may be incorrect.</p>
           <Button asChild variant="outline" className="rounded-full font-semibold px-8">
             <Link href="/discover">Browse Collection</Link>
           </Button>
@@ -120,26 +117,25 @@ export default function ProductDetail() {
   const matStory = MATERIAL_STORY[matKey] || MATERIAL_STORY["marble"];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-white">
 
-      {/* ── STICKY HEADER ── */}
-      <div className="sticky top-16 z-30 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-3">
-          <Link href="/discover" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-            Collection
+      {/* Sticky breadcrumb */}
+      <div className="pt-16 sticky top-16 z-30 bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2 text-sm">
+          <Link href="/discover" className="flex items-center gap-1 text-gray-400 hover:text-gray-700 transition-colors font-medium">
+            <ChevronLeft className="w-4 h-4" /> Collection
           </Link>
           <span className="text-gray-200">/</span>
-          <Link href={`/discover?categoryId=${product.categoryId}`} className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+          <Link href={`/discover?categoryId=${product.categoryId}`} className="text-gray-400 hover:text-gray-700 transition-colors font-medium">
             {product.categoryName}
           </Link>
           <span className="text-gray-200">/</span>
-          <span className="text-sm font-semibold text-gray-900 truncate">{product.name}</span>
+          <span className="font-semibold text-gray-900 truncate">{product.name}</span>
         </div>
       </div>
 
-      <main className="flex-1 pt-8 pb-16">
+      <main className="flex-1 py-10 pb-16">
+
         {/* ── PRODUCT MAIN ── */}
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-start">
@@ -160,7 +156,7 @@ export default function ProductDetail() {
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-teal-400 to-slate-800 flex items-center justify-center">
-                    <span className="text-white/20 font-bold text-7xl">SW</span>
+                    <span className="text-white/20 font-black text-7xl">SW</span>
                   </div>
                 )}
                 {product.available && (
@@ -207,13 +203,13 @@ export default function ProductDetail() {
                   )}
                 </div>
 
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950 leading-tight">
                   {product.name}
                 </h1>
 
                 {product.price && (
-                  <div className="flex items-end gap-2 pt-2">
-                    <p className="text-3xl font-bold text-gray-900">₹{product.price}</p>
+                  <div className="flex items-end gap-2 pt-1">
+                    <p className="text-3xl font-black text-gray-950">₹{product.price}</p>
                     <p className="text-sm font-medium text-gray-400 mb-1">/ {product.priceUnit || 'sq.ft'}</p>
                   </div>
                 )}
@@ -221,7 +217,7 @@ export default function ProductDetail() {
 
               {product.description && (
                 <div className="border-t border-gray-100 pt-6">
-                  <p className="text-gray-600 leading-relaxed text-base">{product.description}</p>
+                  <p className="text-gray-500 leading-relaxed text-sm">{product.description}</p>
                 </div>
               )}
 
@@ -247,9 +243,9 @@ export default function ProductDetail() {
 
               {/* CTA */}
               <div className="pt-2 space-y-3">
-                <Button asChild size="lg" className="w-full bg-gray-900 hover:bg-gray-700 text-white rounded-full h-14 font-semibold text-sm tracking-wide transition-all">
+                <Button asChild size="lg" className="w-full bg-gray-950 hover:bg-gray-800 text-white rounded-full h-14 font-semibold text-sm tracking-wide">
                   <Link href={`/contact?interest=${encodeURIComponent(product.name)}`}>
-                    Request Quote & Details <ArrowRight className="ml-2 w-4 h-4" />
+                    Request Quote &amp; Details <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="w-full rounded-full h-14 font-semibold text-sm border-gray-200 hover:bg-gray-50 text-gray-700">
@@ -277,7 +273,7 @@ export default function ProductDetail() {
               {product.tags && product.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 border-t border-gray-100 pt-6">
                   {product.tags.map(tag => (
-                    <span key={tag} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+                    <span key={tag} className="px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
                       {tag}
                     </span>
                   ))}
@@ -288,17 +284,17 @@ export default function ProductDetail() {
         </div>
 
         {/* ── MATERIAL STORY ── */}
-        <section className="mt-24 bg-gray-950 py-20">
+        <section className="mt-20 bg-gray-950 py-20">
           <div className="max-w-5xl mx-auto px-6">
             <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="space-y-6">
-                <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase">Material Story</p>
-                <h2 className="text-2xl sm:text-3xl font-bold text-white">{matStory.tagline}</h2>
+              <div className="space-y-5">
+                <p className="text-teal-400 text-[11px] tracking-[0.35em] font-semibold uppercase">Material Story</p>
+                <h2 className="text-2xl sm:text-3xl font-black text-white leading-snug">{matStory.tagline}</h2>
                 <p className="text-gray-400 leading-relaxed text-sm">{matStory.story}</p>
               </div>
               <div className="space-y-4">
-                <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase">Ideal Applications</p>
-                <ul className="space-y-2">
+                <p className="text-teal-400 text-[11px] tracking-[0.35em] font-semibold uppercase">Ideal Applications</p>
+                <ul className="space-y-2.5">
                   {matStory.applications.map(app => (
                     <li key={app} className="flex items-center gap-3 text-gray-300 text-sm">
                       <div className="w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />
@@ -313,11 +309,11 @@ export default function ProductDetail() {
 
         {/* ── SPECIFICATIONS ── */}
         {(product.origin || product.categoryName) && (
-          <section className="py-20">
+          <section className="py-16">
             <div className="max-w-5xl mx-auto px-6">
-              <div className="mb-10">
-                <p className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase mb-3">Technical Details</p>
-                <h2 className="text-2xl font-bold text-gray-900">Specifications</h2>
+              <div className="mb-8">
+                <p className="text-teal-500 text-[11px] tracking-[0.35em] font-semibold uppercase mb-3">Technical Details</p>
+                <h2 className="text-2xl font-black text-gray-950">Specifications</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {[
@@ -330,7 +326,7 @@ export default function ProductDetail() {
                   <div key={spec.label} className="p-5 rounded-2xl border border-gray-100 space-y-3">
                     <spec.icon className="w-5 h-5 text-teal-500" />
                     <div>
-                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">{spec.label}</p>
+                      <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-1">{spec.label}</p>
                       <p className="font-bold text-gray-900 text-sm">{spec.value}</p>
                     </div>
                   </div>
@@ -341,27 +337,27 @@ export default function ProductDetail() {
         )}
 
         {/* ── CARE GUIDE ── */}
-        <section className="py-16 bg-teal-50">
+        <section className="py-12 bg-teal-50">
           <div className="max-w-4xl mx-auto px-6">
-            <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 rounded-2xl bg-teal-100 flex items-center justify-center shrink-0">
+            <div className="flex gap-5 items-start">
+              <div className="w-11 h-11 rounded-2xl bg-teal-100 flex items-center justify-center shrink-0">
                 <Shield className="w-5 h-5 text-teal-600" />
               </div>
-              <div className="space-y-3">
-                <h3 className="font-bold text-gray-900 text-lg">Care & Maintenance Guide</h3>
-                <p className="text-gray-600 leading-relaxed text-sm max-w-2xl">{matStory.care}</p>
+              <div className="space-y-2">
+                <h3 className="font-bold text-gray-950">Care &amp; Maintenance Guide</h3>
+                <p className="text-gray-500 leading-relaxed text-sm max-w-2xl">{matStory.care}</p>
               </div>
             </div>
           </div>
         </section>
 
         {/* ── ENQUIRY CTA ── */}
-        <section className="py-20">
+        <section className="py-16">
           <div className="max-w-4xl mx-auto px-6">
-            <div className="rounded-2xl bg-gray-900 p-8 sm:p-12 text-center space-y-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-white">Interested in this product?</h2>
-              <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
-                Get in touch with our material specialists for pricing, availability, samples, and installation guidance. We typically respond within 2 business hours.
+            <div className="rounded-2xl bg-gray-950 p-8 sm:p-12 text-center space-y-5">
+              <h2 className="text-2xl sm:text-3xl font-black text-white">Interested in this product?</h2>
+              <p className="text-gray-400 max-w-lg mx-auto text-sm leading-relaxed">
+                Get in touch for pricing, availability, samples, and installation guidance. We typically respond within 2 business hours.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button asChild size="lg" className="bg-teal-500 hover:bg-teal-400 text-white rounded-full px-10 py-6 font-semibold text-sm">
@@ -369,7 +365,7 @@ export default function ProductDetail() {
                     Request a Quote <ArrowRight className="ml-2 w-4 h-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 rounded-full px-10 py-6 font-semibold text-sm bg-transparent">
+                <Button asChild variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 rounded-full px-10 py-6 font-semibold text-sm bg-transparent">
                   <Link href="/discover">
                     Continue Browsing <ArrowUpRight className="ml-2 w-4 h-4" />
                   </Link>

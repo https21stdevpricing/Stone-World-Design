@@ -1,49 +1,45 @@
-import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useListProducts, useListCategories, useListBlogPosts } from "@workspace/api-client-react";
-import { motion, useScroll, useTransform, type Variants } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Link } from "wouter";
-import { ArrowRight, Shield, Truck, Star, Award, CheckCircle2, Phone } from "lucide-react";
+import { ArrowRight, Shield, Truck, Star, Award, Phone } from "lucide-react";
 import { format } from "date-fns";
 
-const FADE_UP: Variants = {
-  hidden: { opacity: 0, y: 32 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.7 } }
-};
-
-const STAGGER: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.1 } }
-};
-
-const CATEGORY_META: Record<string, { img: string; desc: string }> = {
-  marble: { img: "/images/cat-marble.png", desc: "Timeless Italian & Indian slabs for floors, walls and statement pieces." },
-  tiles: { img: "/images/cat-tiles.png", desc: "From porcelain to designer, tiles that define every room." },
-  quartz: { img: "/images/cat-quartz.png", desc: "Engineered precision for countertops, vanities and more." },
-  cement: { img: "/images/cat-cement.png", desc: "Premium grades for structural foundations and finishes." },
-  sanitaryware: { img: "/images/cat-marble.png", desc: "Luxury bathware from the world's leading brands." },
-  ceramic: { img: "/images/cat-tiles.png", desc: "Artisan ceramics blending tradition with modern aesthetics." },
-  "tmt bars": { img: "/images/cat-cement.png", desc: "High-strength steel for commercial and residential construction." },
-  stone: { img: "/images/cat-marble.png", desc: "Natural stone varieties for outdoor and indoor grandeur." },
+const CATEGORY_COLORS: Record<string, string> = {
+  marble: "from-stone-200 to-stone-400",
+  tiles: "from-slate-200 to-slate-400",
+  quartz: "from-teal-100 to-teal-300",
+  cement: "from-gray-300 to-gray-500",
+  sanitaryware: "from-sky-100 to-sky-300",
+  ceramic: "from-amber-100 to-amber-300",
+  "tmt bars": "from-zinc-300 to-zinc-500",
+  stone: "from-neutral-200 to-neutral-400",
 };
 
 const MATERIALS = [
-  { name: "Marble", slug: "marble", tagline: "Geological royalty", desc: "Sourced from Rajasthan quarries and Italian mountains. Each slab is unique — no two patterns repeat in nature.", color: "from-stone-100 to-stone-300" },
-  { name: "Quartz", slug: "quartz", tagline: "Engineered excellence", desc: "93% natural quartz fused with polymer resins for surfaces that are hard, non-porous, and endlessly beautiful.", color: "from-teal-50 to-teal-200" },
-  { name: "Tiles", slug: "tiles", tagline: "Every surface, covered", desc: "Thousands of patterns, textures, and finishes — from rustic terracotta to ultra-glossy large-format porcelain.", color: "from-slate-100 to-slate-300" },
-  { name: "Sanitaryware", slug: "sanitaryware", tagline: "Luxury bathware", desc: "Premium commodes, basins, and shower systems. International brands meet expert installation guidance.", color: "from-sky-50 to-sky-200" },
+  { name: "Marble", tagline: "Geological royalty", desc: "Sourced from Rajasthan quarries and Italian mountains. No two slabs are alike.", search: "marble" },
+  { name: "Quartz", tagline: "Engineered excellence", desc: "93% natural quartz fused with resins for surfaces that are hard, non-porous, and endlessly beautiful.", search: "quartz" },
+  { name: "Tiles", tagline: "Every surface, covered", desc: "From rustic terracotta to ultra-glossy large-format porcelain. Thousands of patterns.", search: "tiles" },
+  { name: "Sanitaryware", tagline: "Luxury bathware", desc: "Premium commodes, basins, and shower systems from international brands.", search: "sanitaryware" },
 ];
 
 const STEPS = [
-  { num: "01", title: "Browse the Collection", desc: "Explore 500+ materials across 8 categories. Filter by type, origin, budget and style." },
-  { num: "02", title: "Submit Your Enquiry", desc: "Tell us your project scope. We match you with the perfect materials and provide expert recommendations." },
-  { num: "03", title: "Receive & Install", desc: "Pan-India delivery to your site, with optional installation coordination and after-sales support." },
+  { num: "01", title: "Browse Our Collection", desc: "Explore 500+ materials across 8 categories. Filter by type, origin, and budget." },
+  { num: "02", title: "Submit Your Enquiry", desc: "Tell us your project. Our experts match you with perfect materials and price." },
+  { num: "03", title: "Receive & Install", desc: "Pan-India delivery to your site, with optional installation coordination." },
+];
+
+const TRUST = [
+  { icon: Shield, label: "Quality Certified", desc: "Every material passes rigorous checks" },
+  { icon: Truck, label: "Pan-India Delivery", desc: "Any pin code, on time" },
+  { icon: Star, label: "Expert Guidance", desc: "Free consultation included" },
+  { icon: Award, label: "50+ Premium Brands", desc: "Indian & International trusted names" },
 ];
 
 export default function Home() {
-  const { scrollYProgress } = useScroll();
-  const heroY = useTransform(scrollYProgress, [0, 0.3], ["0%", "30%"]);
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 600], [0, 180]);
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
 
   const { data: featuredData } = useListProducts({ limit: 4 });
   const featuredProducts = featuredData?.products || [];
@@ -54,146 +50,185 @@ export default function Home() {
   const { data: categoriesData } = useListCategories();
   const categories = (categoriesData || []).slice(0, 4);
 
+  const fallbackCategories = [
+    { id: 1, name: "Marble", slug: "marble" },
+    { id: 2, name: "Tiles", slug: "tiles" },
+    { id: 3, name: "Quartz", slug: "quartz" },
+    { id: 4, name: "Sanitaryware", slug: "sanitaryware" },
+  ];
+  const displayCategories = categories.length > 0 ? categories : fallbackCategories;
+
   return (
-    <div className="min-h-screen flex flex-col bg-white font-sans overflow-x-hidden">
-      <Navbar />
+    <div className="bg-white overflow-x-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative h-screen min-h-[600px] w-full overflow-hidden bg-black flex items-center justify-center">
-        <motion.div style={{ y: heroY }} className="absolute inset-0 w-full h-[120%] -top-[10%]">
-          <img src="/images/hero-marble.png" alt="Luxury Marble" className="w-full h-full object-cover opacity-55" />
+      <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden bg-gray-950">
+        <motion.div
+          style={{ y: heroY }}
+          className="absolute inset-0 w-full h-[115%] top-0"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 opacity-80" />
+          <div
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='1.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-teal-900/30 via-transparent to-transparent" />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50" />
 
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
+        <motion.div
+          style={{ opacity: heroOpacity }}
+          className="relative z-10 text-center px-5 max-w-5xl mx-auto"
+        >
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.2, 0.65, 0.3, 0.9] }}
-            className="space-y-6"
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-teal-400 text-[11px] tracking-[0.35em] font-semibold uppercase mb-6"
           >
-            <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase">Est. 2003 · Pitampura, Delhi</p>
-            <h1 className="text-white text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.02]">
-              Where Every Surface<br />
-              <span className="text-teal-400">Tells a Story</span>
-            </h1>
-            <p className="text-white/70 text-base sm:text-lg font-normal max-w-2xl mx-auto leading-relaxed">
-              India's premier marketplace for marble, stone, quartz, tiles, and luxury building materials.
-              Serving homeowners, architects, and developers across India since 2003.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button asChild size="lg" className="bg-teal-500 hover:bg-teal-400 text-white rounded-full px-10 py-6 text-sm font-semibold shadow-lg shadow-teal-500/30 transition-all duration-300">
-                <Link href="/discover">Explore the Collection</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 rounded-full px-10 py-6 text-sm font-semibold bg-transparent">
-                <Link href="/contact">Get a Free Consultation</Link>
-              </Button>
-            </div>
-          </motion.div>
-        </div>
+            Est. 2003 · Pitampura, Delhi · India
+          </motion.p>
 
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2"
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-white font-black tracking-[-0.04em] leading-[1.0] mb-6"
+            style={{ fontSize: "clamp(2.8rem, 8.5vw, 6.5rem)" }}
           >
-            <div className="w-1 h-2 bg-white/60 rounded-full" />
+            Where Stone<br />
+            <span className="text-teal-400">Meets Vision.</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-white/60 text-base sm:text-lg font-normal max-w-xl mx-auto leading-relaxed mb-10"
+          >
+            India's premier marketplace for marble, quartz, tiles, and luxury building materials.
+            Trusted by 10,000+ projects across the nation.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.55 }}
+            className="flex flex-col sm:flex-row gap-3 justify-center"
+          >
+            <Link
+              href="/discover"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-teal-500 text-white font-semibold text-sm hover:bg-teal-400 transition-all duration-200 shadow-lg shadow-teal-500/25"
+            >
+              Explore the Collection <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/25 text-white font-semibold text-sm hover:bg-white/10 hover:border-white/40 transition-all duration-200"
+            >
+              Get a Free Quote
+            </Link>
           </motion.div>
-        </div>
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+        >
+          <div className="w-5 h-9 border border-white/30 rounded-full flex justify-center pt-1.5">
+            <div className="w-[3px] h-2 bg-white/50 rounded-full" />
+          </div>
+        </motion.div>
       </section>
 
-      {/* ── STATS ── */}
-      <section className="py-14 bg-gray-950 text-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <motion.div
-            variants={STAGGER}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
-          >
+      {/* ── STATS BAR ── */}
+      <section className="bg-gray-950 border-t border-white/5">
+        <div className="max-w-5xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: "20+", label: "Years of legacy" },
-              { value: "10,000+", label: "Projects delivered" },
-              { value: "500+", label: "Premium materials" },
-              { value: "Pan India", label: "Delivery coverage" },
-            ].map(stat => (
-              <motion.div key={stat.label} variants={FADE_UP} className="space-y-1">
-                <p className="text-3xl sm:text-4xl font-bold text-teal-400">{stat.value}</p>
-                <p className="text-xs text-gray-400 font-medium tracking-wider uppercase">{stat.label}</p>
+              { value: "20+", label: "Years of Excellence" },
+              { value: "10,000+", label: "Projects Delivered" },
+              { value: "500+", label: "Premium Materials" },
+              { value: "Pan India", label: "Delivery Coverage" },
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+              >
+                <p className="text-2xl sm:text-3xl font-black text-teal-400 tracking-tight">{stat.value}</p>
+                <p className="text-[11px] text-gray-500 font-medium tracking-wider uppercase mt-1">{stat.label}</p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ── BRAND MANIFESTO ── */}
-      <section className="py-24 sm:py-32 bg-white">
+      {/* ── MANIFESTO ── */}
+      <section className="py-28 sm:py-36 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
-            variants={STAGGER}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            className="space-y-8"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
           >
-            <motion.p variants={FADE_UP} className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase">Our Philosophy</motion.p>
-            <motion.h2 variants={FADE_UP} className="text-3xl sm:text-5xl font-bold tracking-tight text-gray-900 leading-tight">
-              "A space should not just be built.<br />It should be <em className="not-italic text-teal-500">carved, curated,</em><br />and crafted with intention."
-            </motion.h2>
-            <motion.div variants={FADE_UP} className="flex items-center gap-4 justify-center">
-              <div className="h-px w-12 bg-teal-200" />
-              <p className="text-sm text-gray-500 font-medium tracking-widest uppercase">AB Stone World Pvt. Ltd.</p>
-              <div className="h-px w-12 bg-teal-200" />
-            </motion.div>
+            <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-8">Our Philosophy</p>
+            <h2
+              className="font-black tracking-tight text-gray-950 leading-[1.1] mb-8"
+              style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+            >
+              A space shouldn't just be built.{" "}
+              <span className="text-teal-500">It should be carved,</span>{" "}
+              curated, and crafted with intention.
+            </h2>
+            <div className="flex items-center gap-4 justify-center">
+              <div className="h-px w-10 bg-teal-200" />
+              <p className="text-sm text-gray-400 font-medium tracking-widest uppercase">AB Stone World Pvt. Ltd.</p>
+              <div className="h-px w-10 bg-teal-200" />
+            </div>
           </motion.div>
         </div>
       </section>
 
       {/* ── CATEGORIES ── */}
-      <section className="py-16 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-end justify-between mb-12">
+      <section className="py-8 pb-24 bg-white">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8">
+          <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase mb-3">Collections</p>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Shop by Category</h2>
+              <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-2">Collections</p>
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950">Shop by Category</h2>
             </div>
-            <Link href="/discover" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+            <Link href="/discover" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-gray-900 transition-colors">
               View all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <motion.div
-            variants={STAGGER}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
-          >
-            {(categories.length > 0 ? categories : [
-              { id: 1, name: "Marble", slug: "marble" },
-              { id: 2, name: "Tiles", slug: "tiles" },
-              { id: 3, name: "Quartz", slug: "quartz" },
-              { id: 4, name: "Sanitaryware", slug: "sanitaryware" },
-            ]).map((cat) => {
-              const meta = CATEGORY_META[cat.name.toLowerCase()] || { img: "/images/cat-marble.png", desc: "" };
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {displayCategories.map((cat, i) => {
+              const colorClass = CATEGORY_COLORS[cat.name.toLowerCase()] || "from-gray-200 to-gray-400";
               return (
-                <motion.div key={cat.id} variants={FADE_UP}>
+                <motion.div
+                  key={cat.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.07 }}
+                >
                   <Link
                     href={`/discover?categoryId=${cat.id}`}
-                    className="group relative block aspect-[3/4] overflow-hidden bg-gray-200 rounded-2xl"
+                    className="group relative flex flex-col aspect-[3/4] overflow-hidden rounded-2xl sm:rounded-3xl"
                   >
-                    <img
-                      src={meta.img}
-                      alt={cat.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                      <h3 className="text-white text-lg sm:text-xl font-bold">{cat.name}</h3>
-                      <p className="text-white/60 text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">{meta.desc}</p>
-                      <div className="flex items-center gap-1 mt-3 text-teal-400 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${colorClass} transition-transform duration-700 group-hover:scale-105`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                    <div className="relative mt-auto p-5">
+                      <h3 className="text-white font-bold text-lg">{cat.name}</h3>
+                      <div className="flex items-center gap-1 mt-1 text-teal-300 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         Explore <ArrowRight className="w-3 h-3" />
                       </div>
                     </div>
@@ -201,74 +236,54 @@ export default function Home() {
                 </motion.div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-24 sm:py-32 bg-white">
+      {/* ── FULL-WIDTH QUOTE ── */}
+      <section className="py-20 sm:py-28 bg-gray-950 overflow-hidden">
         <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <p className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase mb-3">The Process</p>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">From Browse to Beautiful</h2>
-            <p className="text-gray-500 mt-4 max-w-xl mx-auto">A streamlined journey from discovery to delivery, guided by our expert team at every step.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-10">
-            {STEPS.map((step, i) => (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="relative"
+          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+            <div className="flex-1 space-y-6">
+              <p className="text-[11px] text-teal-400 tracking-[0.3em] uppercase font-semibold">Our Offering</p>
+              <h2
+                className="font-black text-white tracking-tight leading-[1.08]"
+                style={{ fontSize: "clamp(2rem, 5vw, 3.8rem)" }}
               >
-                {i < STEPS.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(100%+1.25rem)] w-10 h-px bg-gray-200 z-0" />
-                )}
-                <div className="space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center">
-                    <span className="text-teal-600 font-bold text-lg">{step.num}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
-                  <p className="text-gray-500 leading-relaxed text-sm">{step.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── MATERIALS SPOTLIGHT ── */}
-      <section className="py-16 sm:py-24 bg-gray-950">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="mb-12">
-            <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase mb-3">Materials</p>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">What We Offer</h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {MATERIALS.map((mat, i) => (
-              <motion.div
-                key={mat.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.08 }}
+                Premium materials.{" "}
+                <span className="text-teal-400">Fair pricing.</span>{" "}
+                Expert guidance.
+              </h2>
+              <p className="text-gray-400 leading-relaxed max-w-lg">
+                We bridge the gap between world-class building materials and the Indian homeowner, architect, and developer — with transparency, expertise, and care at every step.
+              </p>
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-2 text-teal-400 font-semibold text-sm hover:text-teal-300 transition-colors"
               >
-                <Link
-                  href={`/discover?search=${encodeURIComponent(mat.slug)}`}
-                  className="group flex flex-col h-full p-6 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 hover:border-teal-500/40 transition-all duration-300"
+                Our story <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="flex-1 grid grid-cols-2 gap-3 w-full">
+              {MATERIALS.map((mat, i) => (
+                <motion.div
+                  key={mat.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
                 >
-                  <p className="text-xs text-teal-400 font-bold tracking-wider uppercase mb-2">{mat.tagline}</p>
-                  <h3 className="text-xl font-bold text-white mb-3">{mat.name}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed flex-1">{mat.desc}</p>
-                  <div className="flex items-center gap-2 mt-6 text-teal-400 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Browse {mat.name} <ArrowRight className="w-4 h-4" />
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  <Link
+                    href={`/discover?search=${encodeURIComponent(mat.search)}`}
+                    className="group block p-5 rounded-2xl border border-white/8 bg-white/[0.03] hover:bg-white/[0.07] hover:border-teal-500/30 transition-all duration-250"
+                  >
+                    <p className="text-[10px] text-teal-400 font-semibold tracking-wider uppercase mb-2">{mat.tagline}</p>
+                    <h3 className="text-white font-bold text-base mb-2">{mat.name}</h3>
+                    <p className="text-gray-500 text-xs leading-relaxed">{mat.desc}</p>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -276,28 +291,27 @@ export default function Home() {
       {/* ── FEATURED PRODUCTS ── */}
       {featuredProducts.length > 0 && (
         <section className="py-24 sm:py-32 bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-end justify-between mb-12">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8">
+            <div className="flex items-end justify-between mb-10">
               <div>
-                <p className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase mb-3">Handpicked</p>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">Featured Selection</h2>
+                <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-2">Handpicked</p>
+                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950">Featured Selection</h2>
               </div>
-              <Link href="/discover" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+              <Link href="/discover" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-gray-900 transition-colors">
                 View all <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
               {featuredProducts.map((product, i) => (
                 <motion.div
                   key={product.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  transition={{ duration: 0.5, delay: i * 0.07 }}
                 >
                   <Link href={`/discover/${product.id}`} className="group block">
-                    <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 mb-4 relative">
+                    <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 mb-3 relative">
                       {product.imageUrl ? (
                         <img
                           src={product.imageUrl}
@@ -305,16 +319,15 @@ export default function Home() {
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-teal-500 to-slate-800 flex items-center justify-center">
-                          <span className="text-white/20 font-bold text-4xl">SW</span>
+                        <div className="w-full h-full bg-gradient-to-br from-teal-400 to-slate-700 flex items-center justify-center">
+                          <span className="text-white/20 font-black text-5xl tracking-tight">SW</span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 rounded-2xl" />
                     </div>
-                    <p className="text-xs text-teal-500 font-bold tracking-widest uppercase mb-1">{product.categoryName}</p>
-                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition-colors">{product.name}</h3>
+                    <p className="text-[10px] text-teal-500 font-semibold tracking-wider uppercase mb-0.5">{product.categoryName}</p>
+                    <h3 className="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition-colors leading-snug">{product.name}</h3>
                     {product.price && (
-                      <p className="text-xs text-gray-500 mt-1">₹{product.price}/{product.priceUnit || 'sq.ft'}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">₹{product.price}/{product.priceUnit || 'sq.ft'}</p>
                     )}
                   </Link>
                 </motion.div>
@@ -324,49 +337,73 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── WHY STONE WORLD ── */}
+      {/* ── HOW IT WORKS ── */}
       <section className="py-24 sm:py-32 bg-gray-50">
         <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">The Process</p>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950">From Browse to Beautiful</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-10">
+            {STEPS.map((step, i) => (
+              <motion.div
+                key={step.num}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.12 }}
+                className="flex flex-col items-start"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-teal-500/10 flex items-center justify-center mb-5">
+                  <span className="text-teal-600 font-black text-lg">{step.num}</span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-950 mb-2">{step.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHY US ── */}
+      <section className="py-24 sm:py-32 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <div>
-                <p className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase mb-3">Why Us</p>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 leading-snug">Two decades of trust, built material by material.</h2>
-              </div>
-              <p className="text-gray-500 leading-relaxed">
-                From a homeowner renovating their kitchen to a developer building 200 apartments — we serve every scale with the same commitment to quality and transparency.
-                No hidden costs. No compromises. Just the best materials, delivered on time.
+            <div>
+              <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-4">Why Stone World</p>
+              <h2
+                className="font-black tracking-tight text-gray-950 leading-[1.1] mb-6"
+                style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}
+              >
+                Two decades of trust,<br />built material by material.
+              </h2>
+              <p className="text-gray-500 leading-relaxed mb-8 text-sm">
+                From a homeowner renovating their kitchen to a developer building 200 apartments — we serve every scale with the same commitment to quality. No hidden costs. No compromises.
               </p>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { icon: Shield, label: "Quality Guaranteed", desc: "Every material inspected before dispatch" },
-                  { icon: Truck, label: "Pan-India Delivery", desc: "Reliable logistics to any pin code" },
-                  { icon: Star, label: "Expert Guidance", desc: "Free consultation with material specialists" },
-                  { icon: Award, label: "Premium Brands", desc: "50+ trusted international and Indian brands" },
-                ].map(item => (
-                  <div key={item.label} className="flex gap-3 p-4 rounded-xl bg-white border border-gray-100">
-                    <item.icon className="w-5 h-5 text-teal-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-bold text-gray-900">{item.label}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+              >
+                Talk to an expert <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-            <div className="relative">
-              <div className="aspect-[4/5] rounded-2xl overflow-hidden bg-gray-200">
-                <img src="/images/cat-marble.png" alt="Quality Materials" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-5 flex gap-4 items-center">
-                <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-6 h-6 text-teal-500" />
-                </div>
-                <div>
-                  <p className="font-bold text-gray-900 text-sm">10,000+ Projects</p>
-                  <p className="text-xs text-gray-500">Delivered across India</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              {TRUST.map((item, i) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: i * 0.08 }}
+                  className="p-5 rounded-2xl border border-gray-100 bg-white hover:border-teal-200 hover:bg-teal-50/40 transition-all duration-200"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center mb-4">
+                    <item.icon className="w-4 h-4 text-teal-500" />
+                  </div>
+                  <p className="text-sm font-bold text-gray-900 mb-1">{item.label}</p>
+                  <p className="text-xs text-gray-500">{item.desc}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
@@ -374,39 +411,36 @@ export default function Home() {
 
       {/* ── JOURNAL ── */}
       {blogPosts.length > 0 && (
-        <section className="py-24 sm:py-32 bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-end justify-between mb-12">
+        <section className="py-24 sm:py-32 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-5 sm:px-8">
+            <div className="flex items-end justify-between mb-10">
               <div>
-                <p className="text-teal-500 text-xs tracking-[0.4em] font-bold uppercase mb-3">Insights</p>
-                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">The Journal</h2>
+                <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-2">Insights</p>
+                <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950">The Journal</h2>
               </div>
-              <Link href="/blog" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors">
+              <Link href="/blog" className="hidden md:flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-gray-900 transition-colors">
                 All articles <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-6">
               {blogPosts.map((post, i) => (
                 <motion.div
                   key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  transition={{ duration: 0.5, delay: i * 0.08 }}
                 >
                   <Link href={`/blog/${post.slug}`} className="group block">
-                    <div className="aspect-[16/10] overflow-hidden rounded-xl bg-gray-100 mb-5">
+                    <div className="aspect-[16/10] overflow-hidden rounded-xl bg-gray-200 mb-4">
                       {post.coverImageUrl ? (
                         <img src={post.coverImageUrl} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-teal-100 to-slate-200 flex items-center justify-center">
-                          <span className="text-teal-400/50 font-bold text-3xl">SW</span>
-                        </div>
+                        <div className="w-full h-full bg-gradient-to-br from-teal-100 to-slate-200" />
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 font-medium mb-2">{format(new Date(post.createdAt), 'MMM d, yyyy')}</p>
-                    <h3 className="text-base font-bold text-gray-900 group-hover:text-teal-600 transition-colors leading-snug">{post.title}</h3>
+                    <p className="text-[11px] text-gray-400 font-medium mb-1.5">{format(new Date(post.createdAt), 'MMM d, yyyy')}</p>
+                    <h3 className="text-base font-bold text-gray-900 group-hover:text-teal-600 transition-colors leading-snug line-clamp-2">{post.title}</h3>
                   </Link>
                 </motion.div>
               ))}
@@ -416,26 +450,44 @@ export default function Home() {
       )}
 
       {/* ── CTA ── */}
-      <section className="py-24 sm:py-32 bg-gray-950 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <img src="/images/hero-marble.png" alt="" className="w-full h-full object-cover" />
+      <section className="py-28 sm:py-36 bg-gray-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-400 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-400 rounded-full blur-3xl" />
         </div>
-        <div className="relative max-w-4xl mx-auto px-6 text-center space-y-8">
-          <p className="text-teal-400 text-xs tracking-[0.4em] font-bold uppercase">Ready to Begin?</p>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">
-            Your dream space starts<br />with the right material.
-          </h2>
-          <p className="text-gray-400 max-w-xl mx-auto">
-            Speak with our material specialists today. Free consultation for homeowners, architects, and developers.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-teal-500 hover:bg-teal-400 text-white rounded-full px-10 py-6 text-sm font-semibold shadow-lg shadow-teal-500/20">
-              <Link href="/contact">Start Your Enquiry</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10 hover:border-white/30 rounded-full px-10 py-6 text-sm font-semibold bg-transparent">
-              <a href="tel:+919999999999" className="flex items-center gap-2"><Phone className="w-4 h-4" /> Call Us Directly</a>
-            </Button>
-          </div>
+        <div className="relative max-w-3xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="space-y-6"
+          >
+            <p className="text-[11px] text-teal-400 tracking-[0.3em] uppercase font-semibold">Ready to Begin?</p>
+            <h2
+              className="font-black text-white tracking-tight leading-[1.05]"
+              style={{ fontSize: "clamp(2rem, 5.5vw, 4rem)" }}
+            >
+              Your dream space starts<br />with the right material.
+            </h2>
+            <p className="text-gray-500 max-w-md mx-auto text-sm leading-relaxed">
+              Free consultation for homeowners, architects, and developers. Our experts guide you every step of the way.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-teal-500 text-white font-semibold text-sm hover:bg-teal-400 transition-colors shadow-lg shadow-teal-500/20"
+              >
+                Start Your Enquiry
+              </Link>
+              <a
+                href="tel:+919999999999"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/15 text-white font-semibold text-sm hover:bg-white/8 transition-colors"
+              >
+                <Phone className="w-4 h-4" /> Call Us Directly
+              </a>
+            </div>
+          </motion.div>
         </div>
       </section>
 

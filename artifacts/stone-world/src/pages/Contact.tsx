@@ -262,15 +262,10 @@ export default function Contact() {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-3"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-500/30">
-                  <MessageSquare className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
-                </div>
-                <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Get in Touch</p>
-              </div>
+              <p className="text-[10px] text-gray-400 tracking-[0.3em] font-semibold uppercase mb-1">Get in Touch</p>
               <h1
                 className="font-black tracking-tight text-gray-950 leading-[1.02]"
-                style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+                style={{ fontSize: "clamp(2.2rem, 6vw, 4.5rem)" }}
               >
                 Start Your<br />Project Today.
               </h1>

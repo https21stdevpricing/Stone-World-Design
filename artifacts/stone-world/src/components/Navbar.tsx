@@ -21,14 +21,19 @@ const CATEGORIES = [
 
 export function Navbar() {
   const [location] = useLocation();
-  const [scrolled,     setScrolled]     = useState(false);
-  const [searchOpen,   setSearchOpen]   = useState(false);
-  const [mobileOpen,   setMobileOpen]   = useState(false);
-  const [discoverOpen, setDiscoverOpen] = useState(false);
+  const [scrolled,      setScrolled]      = useState(false);
+  const [logoCompact,   setLogoCompact]   = useState(false);
+  const [searchOpen,    setSearchOpen]    = useState(false);
+  const [mobileOpen,    setMobileOpen]    = useState(false);
+  const [discoverOpen,  setDiscoverOpen]  = useState(false);
   const discoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      setLogoCompact(y > 80);
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -61,7 +66,7 @@ export function Navbar() {
   ];
 
   const glass = scrolled
-    ? "bg-white/88 backdrop-blur-2xl border-b border-black/[0.05] shadow-[0_1px_24px_rgba(0,0,0,0.07)]"
+    ? "bg-white/90 backdrop-blur-2xl border-b border-black/[0.05] shadow-[0_1px_24px_rgba(0,0,0,0.07)]"
     : "bg-transparent";
 
   return (
@@ -71,24 +76,33 @@ export function Navbar() {
       <nav className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-400 ${glass}`}>
         <div className="max-w-7xl mx-auto px-5 sm:px-8 h-full flex items-center justify-between">
 
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <motion.img
-              src={`${import.meta.env.BASE_URL}sw-logo.png`}
-              alt="Stone World"
-              className="h-8 w-auto object-contain"
-              initial={{ opacity: 0, scale: 0.85 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            />
-            <motion.span
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.45, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="font-black tracking-[-0.045em] text-[20px] leading-none text-gray-950 select-none"
-            >
-              Stone World
-            </motion.span>
+          {/* Logo — wordmark → icon on scroll */}
+          <Link href="/" className="shrink-0 h-8 flex items-center overflow-hidden" style={{ minWidth: 36 }}>
+            <AnimatePresence mode="wait" initial={false}>
+              {!logoCompact ? (
+                <motion.span
+                  key="wordmark"
+                  initial={{ x: 24, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -28, opacity: 0 }}
+                  transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+                  className="font-black tracking-[-0.05em] text-[21px] leading-none text-gray-950 whitespace-nowrap select-none block"
+                >
+                  Stone World
+                </motion.span>
+              ) : (
+                <motion.img
+                  key="mark"
+                  src={`${import.meta.env.BASE_URL}sw-logo.png`}
+                  alt="Stone World"
+                  className="h-8 w-auto object-contain block"
+                  initial={{ x: 24, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -28, opacity: 0 }}
+                  transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+                />
+              )}
+            </AnimatePresence>
           </Link>
 
           {/* Center nav — desktop */}

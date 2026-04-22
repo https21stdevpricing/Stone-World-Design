@@ -6,13 +6,26 @@ import { AdminLoginBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
-const validTokens = new Set<string>();
+interface TokenEntry {
+  createdAt: number;
+}
 
-// bcrypt hash of "admin@stone2024" — used only on first-run bootstrap when site_settings is empty
-const DEFAULT_PASSWORD_HASH = "$2b$10$F5m1CEEH7mhNmoi5a73/t.g8OOsNKxKyPNHFFPrujv4Q3ImZz28U.";
+// Tokens expire after 8 hours
+const TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
+const validTokens = new Map<string, TokenEntry>();
 
 function generateToken(): string {
   return randomBytes(32).toString("hex");
+}
+
+function isTokenValid(token: string): boolean {
+  const entry = validTokens.get(token);
+  if (!entry) return false;
+  if (Date.now() - entry.createdAt > TOKEN_TTL_MS) {
+    validTokens.delete(token);
+    return false;
+  }
+  return true;
 }
 
 router.post("/admin/login", async (req, res): Promise<void> => {
@@ -25,11 +38,20 @@ router.post("/admin/login", async (req, res): Promise<void> => {
   let [settings] = await db.select().from(siteSettingsTable).limit(1);
 
   if (!settings) {
-    // Bootstrap: insert default settings with default password "admin@stone2024"
+    // First-run bootstrap: generate a random initial password and log it once
+    const initialPassword = randomBytes(12).toString("hex");
+    const hash = await bcrypt.hash(initialPassword, 12);
     [settings] = await db.insert(siteSettingsTable).values({
       companyName: "Stone World",
-      adminPasswordHash: DEFAULT_PASSWORD_HASH,
+      adminPasswordHash: hash,
     }).returning();
+    console.warn(
+      `\n==================================================\n` +
+      `FIRST RUN: Admin account created.\n` +
+      `Initial password: ${initialPassword}\n` +
+      `Log in and change it immediately in Settings.\n` +
+      `==================================================\n`
+    );
   }
 
   const valid = await bcrypt.compare(parsed.data.password, settings.adminPasswordHash);
@@ -39,7 +61,7 @@ router.post("/admin/login", async (req, res): Promise<void> => {
   }
 
   const token = generateToken();
-  validTokens.add(token);
+  validTokens.set(token, { createdAt: Date.now() });
 
   res.json({ success: true, token });
 });
@@ -52,7 +74,7 @@ router.post("/admin/logout", (req, res): void => {
 
 router.get("/admin/session", (req, res): void => {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  if (token && validTokens.has(token)) {
+  if (token && isTokenValid(token)) {
     res.json({ authenticated: true });
   } else {
     res.json({ authenticated: false });
@@ -61,7 +83,7 @@ router.get("/admin/session", (req, res): void => {
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  if (!token || !validTokens.has(token)) {
+  if (!token || !isTokenValid(token)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

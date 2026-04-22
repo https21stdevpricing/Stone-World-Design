@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2, Wand2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Wand2, Eye, PenLine } from "lucide-react";
 import { format } from "date-fns";
+import { marked } from "marked";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -164,7 +166,32 @@ export default function AdminBlog() {
                     <FormItem><FormLabel>Excerpt</FormLabel><FormControl><Textarea {...field} /></FormControl></FormItem>
                   )} />
                   <FormField control={form.control} name="content" render={({ field }) => (
-                    <FormItem><FormLabel>Content (Markdown supported)</FormLabel><FormControl><Textarea className="min-h-[300px]" {...field} /></FormControl></FormItem>
+                    <FormItem>
+                      <FormLabel>Content</FormLabel>
+                      <Tabs defaultValue="edit" className="w-full">
+                        <TabsList className="mb-2">
+                          <TabsTrigger value="edit" data-testid="tab-blog-edit"><PenLine className="h-3 w-3 mr-1" /> Write</TabsTrigger>
+                          <TabsTrigger value="preview" data-testid="tab-blog-preview"><Eye className="h-3 w-3 mr-1" /> Preview</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="edit">
+                          <FormControl>
+                            <Textarea
+                              className="min-h-[300px] font-mono text-sm"
+                              placeholder="Write your article in Markdown..."
+                              {...field}
+                              data-testid="textarea-blog-content"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">Supports Markdown: **bold**, *italic*, ## headings, - lists</p>
+                        </TabsContent>
+                        <TabsContent value="preview">
+                          <div
+                            className="min-h-[300px] border rounded-md p-4 prose prose-sm max-w-none overflow-auto"
+                            dangerouslySetInnerHTML={{ __html: marked(field.value || "") as string }}
+                          />
+                        </TabsContent>
+                      </Tabs>
+                    </FormItem>
                   )} />
                   <FormField control={form.control} name="coverImageUrl" render={({ field }) => (
                     <FormItem><FormLabel>Cover Image URL</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>

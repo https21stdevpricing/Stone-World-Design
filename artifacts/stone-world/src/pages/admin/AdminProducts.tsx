@@ -3,6 +3,7 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
   useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct,
   useListCategories, getListProductsQueryKey, useBulkDeleteProducts, useBulkToggleProductAvailability,
+  useListMedia,
   type Product,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ToggleLeft, ToggleRight, Image } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 const productSchema = z.object({
@@ -39,11 +40,13 @@ export default function AdminProducts() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: categories } = useListCategories();
   const { data, isLoading } = useListProducts({ search, limit: 50 });
+  const { data: mediaItems } = useListMedia();
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
@@ -226,7 +229,59 @@ export default function AdminProducts() {
                   )} />
                 </div>
                 <FormField control={form.control} name="imageUrl" render={({ field }) => (
-                  <FormItem><FormLabel>Image URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem>
+                    <FormLabel>Image URL</FormLabel>
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input {...field} placeholder="https://... or pick from media library" data-testid="input-product-image-url" />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsMediaPickerOpen(true)}
+                        title="Pick from Media Library"
+                        data-testid="button-pick-media"
+                      >
+                        <Image className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    {field.value && (
+                      <img src={field.value} alt="Preview" className="mt-2 h-24 w-auto rounded-md object-cover border" />
+                    )}
+                    <FormMessage />
+                    <Dialog open={isMediaPickerOpen} onOpenChange={setIsMediaPickerOpen}>
+                      <DialogContent className="max-w-3xl">
+                        <DialogHeader>
+                          <DialogTitle>Pick from Media Library</DialogTitle>
+                        </DialogHeader>
+                        {(!mediaItems || mediaItems.length === 0) ? (
+                          <p className="text-center text-muted-foreground py-8">No media uploaded yet. Go to Media Library to upload images.</p>
+                        ) : (
+                          <div className="grid grid-cols-4 gap-3 max-h-96 overflow-y-auto p-1">
+                            {mediaItems.map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                className={`relative rounded-lg overflow-hidden border-2 aspect-square hover:border-primary transition-colors ${field.value === item.url ? "border-primary" : "border-transparent"}`}
+                                onClick={() => { field.onChange(item.url); setIsMediaPickerOpen(false); }}
+                                data-testid={`button-media-item-${item.id}`}
+                              >
+                                <img
+                                  src={item.url}
+                                  alt={item.filename}
+                                  className="w-full h-full object-cover"
+                                />
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 truncate">
+                                  {item.filename}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                  </FormItem>
                 )} />
                 <div className="flex gap-8">
                   <FormField control={form.control} name="available" render={({ field }) => (

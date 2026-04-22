@@ -8,6 +8,7 @@ import {
   MarkEnquiryReadBody,
   ExportEnquiriesQueryParams,
   TrackEnquiryQueryParams,
+  TrackByPhoneQueryParams,
   UpdateEnquiryStatusParams,
   UpdateEnquiryStatusBody,
 } from "@workspace/api-zod";
@@ -92,6 +93,43 @@ router.get("/enquiries/track", async (req, res): Promise<void> => {
   }
 
   res.json(enquiry);
+});
+
+router.get("/enquiries/track-by-phone", async (req, res): Promise<void> => {
+  const query = TrackByPhoneQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: "A valid phone number is required" });
+    return;
+  }
+
+  const normalizedInput = query.data.phone.replace(/\D/g, "").slice(-10);
+
+  if (normalizedInput.length < 6) {
+    res.status(400).json({ error: "Please enter a valid phone number" });
+    return;
+  }
+
+  const likePattern = `%${normalizedInput}`;
+  const rows = await db
+    .select({
+      referenceNumber: enquiriesTable.referenceNumber,
+      status: enquiriesTable.status,
+      productInterest: enquiriesTable.productInterest,
+      createdAt: enquiriesTable.createdAt,
+    })
+    .from(enquiriesTable)
+    .where(
+      sql`regexp_replace(${enquiriesTable.phone}, '[^0-9]', '', 'g') LIKE ${likePattern}`
+    )
+    .orderBy(desc(enquiriesTable.createdAt))
+    .limit(5);
+
+  if (rows.length === 0) {
+    res.status(404).json({ error: "No enquiries found for this phone number. Please check the number or contact us directly." });
+    return;
+  }
+
+  res.json({ enquiries: rows });
 });
 
 router.post("/enquiries", async (req, res): Promise<void> => {

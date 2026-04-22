@@ -43,11 +43,13 @@ import type {
   ListProductsParams,
   MarkReadBody,
   MediaItem,
+  PhoneTrackedEnquiryResponse,
   Product,
   ProductListResponse,
   PublicSettings,
   SiteSettings,
   SuccessResponse,
+  TrackByPhoneParams,
   TrackEnquiryParams,
   TrackedEnquiry,
   UpdateEnquiryStatusBody,
@@ -2276,6 +2278,96 @@ export function useTrackEnquiry<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getTrackEnquiryQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Look up enquiries by phone number (public)
+ */
+export const getTrackEnquiryByPhoneUrl = (params: TrackByPhoneParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/enquiries/track-by-phone?${stringifiedParams}`
+    : `/api/enquiries/track-by-phone`;
+};
+
+export const trackEnquiryByPhone = async (
+  params: TrackByPhoneParams,
+  options?: RequestInit,
+): Promise<PhoneTrackedEnquiryResponse> => {
+  return customFetch<PhoneTrackedEnquiryResponse>(getTrackEnquiryByPhoneUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getTrackEnquiryByPhoneQueryKey = (params?: TrackByPhoneParams) => {
+  return [`/api/enquiries/track-by-phone`, ...(params ? [params] : [])] as const;
+};
+
+export const getTrackEnquiryByPhoneQueryOptions = <
+  TData = Awaited<ReturnType<typeof trackEnquiryByPhone>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: TrackByPhoneParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof trackEnquiryByPhone>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getTrackEnquiryByPhoneQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof trackEnquiryByPhone>>> = ({
+    signal,
+  }) => trackEnquiryByPhone(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof trackEnquiryByPhone>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type TrackEnquiryByPhoneQueryResult = NonNullable<
+  Awaited<ReturnType<typeof trackEnquiryByPhone>>
+>;
+export type TrackEnquiryByPhoneQueryError = ErrorType<ErrorResponse>;
+
+export function useTrackEnquiryByPhone<
+  TData = Awaited<ReturnType<typeof trackEnquiryByPhone>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: TrackByPhoneParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof trackEnquiryByPhone>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getTrackEnquiryByPhoneQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

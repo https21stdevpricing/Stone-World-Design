@@ -354,6 +354,21 @@ export type TrackEnquiryParams = {
   ref: string;
 };
 
+export interface PhoneTrackedEnquiryItem {
+  referenceNumber?: string | null;
+  status: EnquiryStatus;
+  productInterest?: string | null;
+  createdAt: string;
+}
+
+export interface PhoneTrackedEnquiryResponse {
+  enquiries: PhoneTrackedEnquiryItem[];
+}
+
+export type TrackByPhoneParams = {
+  phone: string;
+};
+
 export type ExportEnquiriesParams = {
   audience?: string;
 };

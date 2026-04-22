@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { useListCategories, useListProducts } from "@workspace/api-client-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Loader2, SlidersHorizontal, X } from "lucide-react";
+import { Search, Loader2, SlidersHorizontal, X, Gem } from "lucide-react";
 import { ListProductsOrigin } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -44,9 +44,7 @@ export default function Discover() {
             {/* Stories-style label with icon */}
             <div className="flex items-center gap-2.5 mb-1">
               <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                  <polygon points="8,1 15,5.5 15,10.5 8,15 1,10.5 1,5.5" fill="white" fillOpacity="0.9"/>
-                </svg>
+                <Gem className="w-3.5 h-3.5 text-white" />
               </div>
               <p className="text-[10px] text-teal-600 tracking-[0.3em] font-black uppercase">Materials</p>
             </div>

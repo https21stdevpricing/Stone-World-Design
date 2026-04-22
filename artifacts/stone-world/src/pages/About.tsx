@@ -48,9 +48,7 @@ export default function About() {
           >
             <div className="flex items-center gap-2.5 mb-1">
               <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
-                  <polygon points="8,1 15,5.5 15,10.5 8,15 1,10.5 1,5.5" fill="white" fillOpacity="0.9"/>
-                </svg>
+                <Award className="w-3.5 h-3.5 text-white" />
               </div>
               <p className="text-teal-400 text-[10px] tracking-[0.3em] font-black uppercase">Our Story</p>
             </div>

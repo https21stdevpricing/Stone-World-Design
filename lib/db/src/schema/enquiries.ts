@@ -16,6 +16,8 @@ export const enquiriesTable = pgTable("enquiries", {
   location: text("location"),
   isRead: boolean("is_read").notNull().default(false),
   status: text("status").notNull().default("new"),
+  adminNotes: text("admin_notes"),
+  adminReply: text("admin_reply"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

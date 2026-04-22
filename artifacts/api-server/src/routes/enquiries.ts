@@ -13,7 +13,7 @@ import {
   UpdateEnquiryStatusBody,
 } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
-import { sendStatusNotification } from "../lib/notify";
+import { sendStatusNotification, sendAdminReply } from "../lib/notify";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
@@ -281,6 +281,48 @@ router.get("/enquiries/export", requireAdmin, async (req, res): Promise<void> =>
   res.setHeader("Content-Type", "text/csv");
   res.setHeader("Content-Disposition", "attachment; filename=enquiries.csv");
   res.send(csv);
+});
+
+router.post("/enquiries/:id/reply", requireAdmin, async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  const { notes, reply, sendEmail } = req.body as {
+    notes?: string;
+    reply?: string;
+    sendEmail?: boolean;
+  };
+
+  const updateData: Record<string, string | null> = {};
+  if (typeof notes === "string") updateData.adminNotes = notes;
+  if (typeof reply === "string") updateData.adminReply = reply;
+
+  const [updated] = await db
+    .update(enquiriesTable)
+    .set(updateData)
+    .where(eq(enquiriesTable.id, id))
+    .returning();
+
+  if (!updated) {
+    res.status(404).json({ error: "Enquiry not found" });
+    return;
+  }
+
+  res.json(updated);
+
+  if (sendEmail && reply && updated.email && updated.referenceNumber) {
+    sendAdminReply({
+      customerName: updated.name,
+      customerEmail: updated.email,
+      referenceNumber: updated.referenceNumber,
+      replyMessage: reply,
+    }).catch((err: unknown) => {
+      logger.error({ err, enquiryId: updated.id }, "[notify] Failed to send admin reply email");
+    });
+  }
 });
 
 export default router;

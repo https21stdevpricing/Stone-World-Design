@@ -1,19 +1,12 @@
 import { Footer } from "@/components/Footer";
 import { useListProducts, useListCategories, useListBlogPosts } from "@workspace/api-client-react";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "wouter";
 import { ArrowRight, Shield, Truck, Star, Award, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
 
 const HERO_WORDS = ["Marble", "Quartz", "Stone", "Tiles", "Vision"];
-const HERO_BACKGROUNDS = [
-  "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1600&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1600&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=1600&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1615971677499-5467cbab01b0?w=1600&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1600&q=80&auto=format&fit=crop",
-];
 
 const CATEGORY_META: Record<string, { img: string; desc: string }> = {
   marble: { img: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80&auto=format&fit=crop", desc: "Timeless Italian & Indian slabs for floors, walls and statement pieces." },
@@ -52,10 +45,6 @@ const TRUST = [
 ];
 
 export default function Home() {
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 600], [0, 180]);
-  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.3]);
-
   const [wordIdx, setWordIdx] = useState(0);
 
   useEffect(() => {
@@ -86,130 +75,142 @@ export default function Home() {
     <div className="bg-white overflow-x-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden bg-gray-950">
-        {/* Background cycling */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={wordIdx}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2 }}
-            style={{ y: heroY }}
-            className="absolute inset-0 w-full h-[115%] top-0"
-          >
-            <img
-              src={HERO_BACKGROUNDS[wordIdx]}
-              alt="Luxury Materials"
-              className="w-full h-full object-cover opacity-35"
-            />
-            <div className="absolute inset-0 bg-gradient-to-tr from-teal-900/20 via-transparent to-transparent" />
-          </motion.div>
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/60" />
+      <section className="min-h-[100svh] bg-white pt-16 flex items-center overflow-hidden">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 w-full">
+          <div className="grid lg:grid-cols-2 gap-10 xl:gap-20 items-center py-14 sm:py-20 lg:py-0 min-h-[calc(100svh-64px)]">
 
-        <motion.div
-          style={{ opacity: heroOpacity }}
-          className="relative z-10 text-center px-5 max-w-5xl mx-auto"
-        >
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-teal-400 text-[11px] tracking-[0.35em] font-semibold uppercase mb-6"
-          >
-            Est. 2003 · Pitampura, Delhi · India
-          </motion.p>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-white font-black tracking-[-0.04em] leading-[1.05] mb-6"
-            style={{ fontSize: "clamp(2.8rem, 8.5vw, 6.5rem)" }}
-          >
-            Where{" "}
-            <span className="relative inline-block">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={wordIdx}
-                  initial={{ opacity: 0, y: 20, rotateX: -30 }}
-                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                  exit={{ opacity: 0, y: -20, rotateX: 30 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="inline-block text-teal-400"
-                  style={{ transformOrigin: "center", transformStyle: "preserve-3d" }}
+            {/* Left: Text content */}
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-7 order-2 lg:order-1"
+            >
+              <div className="space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-100">
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                  <p className="text-[11px] text-teal-600 tracking-[0.2em] font-bold uppercase">
+                    Est. 2003 · Pitampura, New Delhi
+                  </p>
+                </div>
+                <h1
+                  className="font-black text-gray-950 tracking-[-0.04em] leading-[1.04]"
+                  style={{ fontSize: "clamp(2.8rem, 5.5vw, 5.4rem)" }}
                 >
-                  {HERO_WORDS[wordIdx]}
-                </motion.span>
-              </AnimatePresence>
-            </span>
-            <br />
-            Meets Vision.
-          </motion.h1>
+                  India's Finest{" "}
+                  <span className="relative inline-block">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={wordIdx}
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -14 }}
+                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        className="inline-block text-teal-500"
+                      >
+                        {HERO_WORDS[wordIdx]}
+                      </motion.span>
+                    </AnimatePresence>
+                  </span>
+                  <br />
+                  Marketplace.
+                </h1>
+              </div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-white/60 text-base sm:text-lg font-normal max-w-xl mx-auto leading-relaxed mb-10"
-          >
-            India's premier marketplace for marble, quartz, tiles, and luxury building materials.
-            Trusted by 10,000+ projects across the nation.
-          </motion.p>
+              <p className="text-gray-400 text-base sm:text-[17px] leading-relaxed max-w-[460px]">
+                500+ premium building materials — marble, quartz, tiles &amp; more. Trusted by homeowners, architects, and developers across India since 2003.
+              </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.55 }}
-            className="flex flex-col sm:flex-row gap-3 justify-center"
-          >
-            <Link
-              href="/discover"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-teal-500 text-white font-semibold text-sm hover:bg-teal-400 transition-all duration-200 shadow-lg shadow-teal-500/25"
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/discover"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-gray-950 text-white rounded-full font-semibold text-sm hover:bg-gray-800 transition-all duration-200 shadow-sm"
+                >
+                  Browse Collection <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 bg-teal-500 text-white rounded-full font-semibold text-sm hover:bg-teal-400 transition-all duration-200 shadow-sm shadow-teal-500/20"
+                >
+                  Get a Free Quote
+                </Link>
+              </div>
+
+              {/* Material pills */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {["Marble", "Quartz", "Tiles", "Sanitaryware", "Cement", "TMT Bars", "Stone"].map((mat) => (
+                  <Link
+                    key={mat}
+                    href={`/discover?search=${mat.toLowerCase()}`}
+                    className="px-3.5 py-1.5 rounded-full bg-gray-100 text-gray-600 text-[11px] font-semibold hover:bg-teal-50 hover:text-teal-700 transition-colors duration-200"
+                  >
+                    {mat}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Right: Image mosaic */}
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.9, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="relative order-1 lg:order-2"
             >
-              Explore the Collection <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border border-white/25 text-white font-semibold text-sm hover:bg-white/10 hover:border-white/40 transition-all duration-200"
-            >
-              Get a Free Quote
-            </Link>
-          </motion.div>
-
-          {/* Material pill strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.8 }}
-            className="flex flex-wrap items-center justify-center gap-2 mt-10"
-          >
-            {["Marble", "Quartz", "Tiles", "Sanitaryware", "Cement", "TMT Bars", "Stone"].map((mat) => (
-              <Link
-                key={mat}
-                href={`/discover?search=${mat.toLowerCase()}`}
-                className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 text-white/70 hover:text-white text-[11px] font-semibold tracking-wide transition-all duration-200"
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+                <div className="aspect-[3/4] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+                  <img
+                    src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80&auto=format&fit=crop"
+                    alt="Marble"
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                  />
+                </div>
+                <div className="grid gap-2.5 sm:gap-3">
+                  <div className="aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+                    <img
+                      src="https://images.unsplash.com/photo-1556911220-bff31c812dba?w=600&q=80&auto=format&fit=crop"
+                      alt="Quartz"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
+                  </div>
+                  <div className="aspect-square rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+                    <img
+                      src="https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&q=80&auto=format&fit=crop"
+                      alt="Sanitaryware"
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                    />
+                  </div>
+                </div>
+              </div>
+              {/* Floating stats card */}
+              <motion.div
+                initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.7 }}
+                className="absolute -bottom-5 -left-3 sm:-left-6 bg-white shadow-[0_8px_40px_rgba(0,0,0,0.12)] rounded-2xl px-5 py-3.5 border border-gray-100"
               >
-                {mat}
-              </Link>
-            ))}
-          </motion.div>
-        </motion.div>
-
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-        >
-          <div className="w-5 h-9 border border-white/30 rounded-full flex justify-center pt-1.5">
-            <div className="w-[3px] h-2 bg-white/50 rounded-full" />
+                <p className="text-2xl font-black text-gray-950 leading-none">10,000+</p>
+                <p className="text-xs text-gray-400 font-medium mt-0.5">Projects Delivered</p>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.85 }}
+                className="absolute -top-4 -right-2 sm:-right-4 bg-teal-500 shadow-lg shadow-teal-500/25 rounded-2xl px-4 py-3"
+              >
+                <p className="text-xl font-black text-white leading-none">20+</p>
+                <p className="text-[11px] text-teal-100 font-medium mt-0.5">Years of Trust</p>
+              </motion.div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ── STATS BAR ── */}
-      <section className="bg-gray-950 border-t border-white/5">
+      <section className="bg-gray-50 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
@@ -225,8 +226,8 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
               >
-                <p className="text-2xl sm:text-3xl font-black text-teal-400 tracking-tight">{stat.value}</p>
-                <p className="text-[11px] text-gray-500 font-medium tracking-wider uppercase mt-1">{stat.label}</p>
+                <p className="text-2xl sm:text-3xl font-black text-teal-500 tracking-tight">{stat.value}</p>
+                <p className="text-[11px] text-gray-400 font-medium tracking-wider uppercase mt-1">{stat.label}</p>
               </motion.div>
             ))}
           </div>

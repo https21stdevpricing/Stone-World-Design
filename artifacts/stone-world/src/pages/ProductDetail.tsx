@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { ProductImage } from "@/components/ProductImage";
 import { ImageLightbox } from "@/components/ImageLightbox";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 
 const MATERIAL_STORY: Record<string, { tagline: string; story: string; applications: string[]; care: string }> = {
   marble: {
@@ -83,6 +85,7 @@ export default function ProductDetail() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const { toast } = useToast();
+  const recentlyViewedIds = useRecentlyViewed(id);
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: {
@@ -440,6 +443,9 @@ export default function ProductDetail() {
             </div>
           </section>
         )}
+
+        {/* ── RECENTLY VIEWED ── */}
+        <RecentlyViewed ids={recentlyViewedIds} />
 
         {/* ── ENQUIRY CTA ── */}
         <section className="py-16">

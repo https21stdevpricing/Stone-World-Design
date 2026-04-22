@@ -8,6 +8,7 @@ import {
   Loader2, CheckCircle2, XCircle, ArrowRight, ChevronLeft,
   Package, MapPin, Layers, Truck, Phone, Star, Shield, ArrowUpRight
 } from "lucide-react";
+import { ProductImage } from "@/components/ProductImage";
 
 const MATERIAL_STORY: Record<string, { tagline: string; story: string; applications: string[]; care: string }> = {
   marble: {
@@ -151,15 +152,14 @@ export default function ProductDetail() {
               className="space-y-3"
             >
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 relative group">
-                {allImages.length > 0 ? (
-                  <img
-                    src={allImages[activeImage]}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-teal-400 to-slate-800 flex items-center justify-center">
-                    <span className="text-white/20 font-black text-7xl">SW</span>
+                <ProductImage
+                  src={allImages[activeImage]}
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                />
+                {product.available && (
+                  <div className="absolute top-4 left-4 bg-teal-500 text-white text-xs font-bold px-3 py-1.5 rounded-full">
+                    In Stock
                   </div>
                 )}
               </div>
@@ -172,7 +172,7 @@ export default function ProductDetail() {
                       onClick={() => setActiveImage(i)}
                       className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200 ${activeImage === i ? "border-teal-500 shadow-md" : "border-transparent opacity-55 hover:opacity-100"}`}
                     >
-                      <img src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
+                      <ProductImage src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>

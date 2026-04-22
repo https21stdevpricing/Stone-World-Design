@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Package, Grid3X3, BookOpen, ArrowRight } from "lucide-react";
 import { useListProducts, useListCategories, useListBlogPosts } from "@workspace/api-client-react";
+import { ProductImage } from "@/components/ProductImage";
 
 interface GlobalSearchProps {
   isOpen: boolean;
@@ -167,10 +168,8 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                             onClick={() => go(`/discover/${p.id}`)}
                             className="w-full flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-gray-50 transition-colors text-left group"
                           >
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-400 to-slate-700 flex items-center justify-center shrink-0 overflow-hidden">
-                              {p.imageUrl
-                                ? <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
-                                : <span className="text-white/50 text-xs font-bold">SW</span>}
+                            <div className="w-10 h-10 rounded-lg shrink-0 overflow-hidden">
+                              <ProductImage src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-semibold text-gray-900 truncate text-sm">{p.name}</p>

@@ -5,6 +5,7 @@ import { Link } from "wouter";
 import { ArrowRight, Shield, Truck, Star, Award, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
+import { ProductImage } from "@/components/ProductImage";
 
 const HERO_WORDS = ["Marble", "Quartz", "Stone", "Tiles", "Vision"];
 
@@ -382,17 +383,11 @@ export default function Home() {
                 >
                   <Link href={`/discover/${product.id}`} className="group block">
                     <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 mb-3 relative">
-                      {product.imageUrl ? (
-                        <img
-                          src={product.imageUrl}
-                          alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-teal-400 to-slate-700 flex items-center justify-center">
-                          <span className="text-white/20 font-black text-5xl tracking-tight">SW</span>
-                        </div>
-                      )}
+                      <ProductImage
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
                     </div>
                     <p className="text-[10px] text-teal-500 font-semibold tracking-wider uppercase mb-0.5">{product.categoryName}</p>
                     <h3 className="text-sm font-bold text-gray-900 group-hover:text-teal-600 transition-colors leading-snug">{product.name}</h3>

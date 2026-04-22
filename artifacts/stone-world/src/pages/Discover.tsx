@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Loader2, SlidersHorizontal, X, Gem } from "lucide-react";
 import { ListProductsOrigin } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ProductImage } from "@/components/ProductImage";
 
 export default function Discover() {
   const rawSearch = useSearch();
@@ -182,17 +183,11 @@ export default function Discover() {
                   >
                     <Link href={`/discover/${product.id}`} className="group block">
                       <div className="aspect-[4/5] bg-gray-100 mb-3.5 relative overflow-hidden rounded-xl">
-                        {product.imageUrl ? (
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-teal-400 to-slate-800 flex items-center justify-center">
-                            <span className="text-white/20 font-black text-4xl tracking-tight">SW</span>
-                          </div>
-                        )}
+                        <ProductImage
+                          src={product.imageUrl}
+                          alt={product.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
                         {!product.available && (
                           <div className="absolute top-3 right-3 bg-white/90 text-gray-600 text-[10px] tracking-wider font-bold uppercase px-2.5 py-1 rounded-full backdrop-blur-sm">
                             Out of Stock

@@ -22,6 +22,27 @@ function parseObjectPath(path: string): { bucketName: string; objectName: string
   return { bucketName: parts[1], objectName: parts.slice(2).join("/") };
 }
 
+router.get("/media/file/:filename", async (req, res): Promise<void> => {
+  const { filename } = req.params;
+  if (!filename) {
+    res.status(400).json({ error: "Missing filename" });
+    return;
+  }
+
+  const [match] = await db
+    .select()
+    .from(mediaTable)
+    .where(eq(mediaTable.filename, filename))
+    .limit(1);
+
+  if (match) {
+    res.redirect(302, match.url);
+    return;
+  }
+
+  res.status(404).json({ error: "Media file not found" });
+});
+
 router.get("/media", requireAdmin, async (_req, res): Promise<void> => {
   const items = await db.select().from(mediaTable).orderBy(mediaTable.createdAt);
   res.json(items);

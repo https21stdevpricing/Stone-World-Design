@@ -545,6 +545,19 @@ export const DeleteMediaResponse = zod.object({
 });
 
 /**
+ * @summary Get public site information (no auth required)
+ */
+export const GetPublicSettingsResponse = zod.object({
+  companyName: zod.string(),
+  address: zod.string().nullish(),
+  phone: zod.string().nullish(),
+  email: zod.string().nullish(),
+  whatsapp: zod.string().nullish(),
+  instagramUrl: zod.string().nullish(),
+  facebookUrl: zod.string().nullish(),
+});
+
+/**
  * @summary Get site settings
  */
 export const GetSettingsResponse = zod.object({

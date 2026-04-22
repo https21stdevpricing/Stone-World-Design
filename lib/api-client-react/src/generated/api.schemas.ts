@@ -224,6 +224,16 @@ export interface MediaItem {
   createdAt: string;
 }
 
+export interface PublicSettings {
+  companyName: string;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  whatsapp?: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+}
+
 export interface SiteSettings {
   id: number;
   companyName: string;

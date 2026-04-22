@@ -1,8 +1,8 @@
 import { Link } from "wouter";
-import { usePublicSettings } from "@/hooks/use-public-settings";
+import { useGetPublicSettings } from "@workspace/api-client-react";
 
 export function Footer() {
-  const { data: settings } = usePublicSettings();
+  const { data: settings } = useGetPublicSettings();
 
   return (
     <footer className="bg-foreground text-background py-16">

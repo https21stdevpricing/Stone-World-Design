@@ -1,10 +1,9 @@
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useCreateEnquiry } from "@workspace/api-client-react";
+import { useCreateEnquiry, useGetPublicSettings } from "@workspace/api-client-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +31,7 @@ export default function Contact() {
   const initialInterest = params.get("interest") || "";
 
   const createEnquiry = useCreateEnquiry();
+  const { data: siteSettings } = useGetPublicSettings();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -275,9 +275,38 @@ export default function Contact() {
               <div className="bg-muted p-8 rounded-2xl">
                 <h3 className="font-serif text-2xl mb-6">Head Office</h3>
                 <div className="space-y-4 text-muted-foreground">
-                  <p><strong>Address:</strong><br/>123 Luxury Avenue, Stone District<br/>Mumbai, Maharashtra 400001</p>
-                  <p><strong>Phone:</strong><br/>+91 98765 43210<br/>+91 98765 43211</p>
-                  <p><strong>Email:</strong><br/>hello@stoneworld.in</p>
+                  {siteSettings?.address && (
+                    <p><strong>Address:</strong><br/>{siteSettings.address}</p>
+                  )}
+                  {siteSettings?.phone && (
+                    <p>
+                      <strong>Phone:</strong><br/>
+                      <a href={`tel:${siteSettings.phone}`} className="hover:text-primary transition-colors">
+                        {siteSettings.phone}
+                      </a>
+                    </p>
+                  )}
+                  {siteSettings?.whatsapp && (
+                    <p>
+                      <strong>WhatsApp:</strong><br/>
+                      <a
+                        href={`https://wa.me/${siteSettings.whatsapp.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-primary transition-colors"
+                      >
+                        {siteSettings.whatsapp}
+                      </a>
+                    </p>
+                  )}
+                  {siteSettings?.email && (
+                    <p>
+                      <strong>Email:</strong><br/>
+                      <a href={`mailto:${siteSettings.email}`} className="hover:text-primary transition-colors">
+                        {siteSettings.email}
+                      </a>
+                    </p>
+                  )}
                   <p><strong>Working Hours:</strong><br/>Mon - Sat: 10:00 AM - 7:00 PM<br/>Sun: Closed</p>
                 </div>
               </div>

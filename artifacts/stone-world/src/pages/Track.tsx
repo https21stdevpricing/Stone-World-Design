@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Footer } from "@/components/Footer";
 import { useTrackEnquiry, useTrackEnquiryByPhone } from "@workspace/api-client-react";
+import type { PhoneTrackedEnquiryResponse } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle2, Clock, MessageSquare, FileText, XCircle,
-  ArrowRight, Phone, Hash, ChevronRight
+  ArrowRight, Phone, Hash
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { Link } from "wouter";
@@ -57,19 +58,6 @@ function getStepIndex(status: string) {
   return JOURNEY_STEPS.findIndex((s) => s.key === status);
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG["new"];
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cfg.bg} ${cfg.color}`}>
-      {status === "new" && <CheckCircle2 className="w-3 h-3" />}
-      {status === "in_discussion" && <MessageSquare className="w-3 h-3" />}
-      {status === "quoted" && <FileText className="w-3 h-3" />}
-      {status === "closed" && <XCircle className="w-3 h-3" />}
-      {cfg.label}
-    </span>
-  );
-}
-
 export default function Track() {
   const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const initialRef = searchParams.get("ref") ?? "";
@@ -80,17 +68,21 @@ export default function Track() {
   const [inputPhone, setInputPhone] = useState("");
   const [searchPhone, setSearchPhone] = useState("");
 
-  const { data: enquiry, isLoading: refLoading, isError: refError } = useTrackEnquiry(
+  const refQuery = useTrackEnquiry(
     { ref: searchRef },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { query: { enabled: !!searchRef, retry: false } } as any
+    { query: { enabled: !!searchRef, retry: false } }
   );
+  const enquiry = refQuery.data;
+  const refLoading = refQuery.isLoading;
+  const refError = refQuery.isError;
 
-  const { data: phoneResult, isLoading: phoneLoading, isError: phoneError } = useTrackEnquiryByPhone(
+  const phoneQuery = useTrackEnquiryByPhone(
     { phone: searchPhone },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { query: { enabled: !!searchPhone, retry: false } } as any
+    { query: { enabled: !!searchPhone, retry: false } }
   );
+  const phoneResult: PhoneTrackedEnquiryResponse | undefined = phoneQuery.data;
+  const phoneLoading = phoneQuery.isLoading;
+  const phoneError = phoneQuery.isError;
 
   const handleRefSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,7 +94,8 @@ export default function Track() {
     setSearchPhone(inputPhone.trim());
   };
 
-  const handleSelectRef = (ref: string) => {
+  const handleSelectRef = (ref: string | null) => {
+    if (!ref) return;
     setInputRef(ref);
     setSearchRef(ref);
     setMode("ref");
@@ -180,7 +173,7 @@ export default function Track() {
               exit={{ opacity: 0, x: -12 }}
               transition={{ duration: 0.18 }}
             >
-              <form onSubmit={handleRefSearch} className="flex gap-3 mb-10">
+              <form onSubmit={handleRefSearch} className="flex gap-3 mb-4">
                 <div className="flex-1">
                   <input
                     type="text"
@@ -199,7 +192,7 @@ export default function Track() {
                 </button>
               </form>
 
-              <p className="text-xs text-gray-400 -mt-6 mb-10">
+              <p className="text-xs text-gray-400 mb-10">
                 Lost your reference?{" "}
                 <button
                   onClick={() => switchMode("phone")}
@@ -349,13 +342,13 @@ export default function Track() {
                 </button>
               </form>
               <p className="text-xs text-gray-400 mb-10">
-                Enter the phone number you provided when submitting your enquiry.
+                Enter the 10-digit phone number you provided when submitting your enquiry.
               </p>
 
               {phoneLoading && searchPhone && (
                 <div className="flex items-center gap-3 text-gray-400 py-8">
                   <Clock className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">Searching for your enquiries...</span>
+                  <span className="text-sm">Searching for your enquiry...</span>
                 </div>
               )}
 
@@ -365,9 +358,9 @@ export default function Track() {
                   animate={{ opacity: 1, y: 0 }}
                   className="border border-red-100 bg-red-50 rounded-2xl p-6 space-y-2"
                 >
-                  <p className="font-bold text-red-600">No Enquiries Found</p>
+                  <p className="font-bold text-red-600">No Open Enquiry Found</p>
                   <p className="text-sm text-gray-500">
-                    We couldn't find any enquiries linked to this phone number. Please check the number or{" "}
+                    We couldn't find an open enquiry linked to this number. Please check the number or{" "}
                     <Link href="/contact" className="text-teal-500 font-semibold hover:text-teal-700 transition-colors underline underline-offset-2">
                       contact us directly
                     </Link>.
@@ -375,55 +368,54 @@ export default function Track() {
                 </motion.div>
               )}
 
-              {phoneResult && phoneResult.enquiries.length > 0 && (
+              {phoneResult && (
                 <motion.div
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
                   className="space-y-5"
                 >
-                  <div className="flex items-center justify-between">
-                    <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold">
-                      {phoneResult.enquiries.length} enquir{phoneResult.enquiries.length === 1 ? "y" : "ies"} found
-                    </p>
-                    <p className="text-xs text-gray-400">Click to see full details</p>
+                  <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold">
+                    Most recent open enquiry
+                  </p>
+
+                  <div className="border border-gray-100 bg-gray-50/50 rounded-2xl p-6 space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold mb-1">Reference Number</p>
+                        <p className="font-mono font-black text-xl tracking-widest text-teal-600">
+                          {phoneResult.referenceNumber ?? "—"}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold mb-1">Submitted</p>
+                        <p className="font-semibold text-gray-800">
+                          {format(new Date(phoneResult.createdAt), "d MMM yyyy")}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="border-t border-gray-100 pt-4">
+                      <p className="text-[11px] text-gray-400 tracking-[0.2em] uppercase font-semibold mb-1">Status</p>
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                        (STATUS_CONFIG[phoneResult.status] ?? STATUS_CONFIG["new"]).bg
+                      } ${(STATUS_CONFIG[phoneResult.status] ?? STATUS_CONFIG["new"]).color}`}>
+                        {(STATUS_CONFIG[phoneResult.status] ?? STATUS_CONFIG["new"]).icon}
+                        {(STATUS_CONFIG[phoneResult.status] ?? STATUS_CONFIG["new"]).label}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-3">
-                    {phoneResult.enquiries.map((item) => {
-                      const cfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG["new"];
-                      return (
-                        <button
-                          key={item.referenceNumber}
-                          onClick={() => handleSelectRef(item.referenceNumber ?? "")}
-                          className="w-full text-left p-5 rounded-2xl border border-gray-100 bg-gray-50/50 hover:border-teal-300 hover:bg-teal-50/30 transition-all duration-200 group"
-                        >
-                          <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                <span className="font-mono font-black text-teal-600 text-base tracking-wider">
-                                  {item.referenceNumber ?? "—"}
-                                </span>
-                                <StatusBadge status={item.status} />
-                              </div>
-                              {item.productInterest && (
-                                <p className="text-xs text-gray-500 truncate">{item.productInterest}</p>
-                              )}
-                              <p className="text-xs text-gray-400 mt-1">
-                                {format(new Date(item.createdAt), "d MMM yyyy")}
-                              </p>
-                            </div>
-                            <div className="shrink-0 flex items-center gap-1 text-xs font-semibold text-gray-400 group-hover:text-teal-600 transition-colors mt-1">
-                              View <ChevronRight className="w-4 h-4" />
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {phoneResult.referenceNumber && (
+                    <button
+                      onClick={() => handleSelectRef(phoneResult.referenceNumber)}
+                      className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-teal-500 text-white font-semibold text-sm hover:bg-teal-600 transition-colors"
+                    >
+                      View Full Details <ArrowRight className="w-4 h-4" />
+                    </button>
+                  )}
 
-                  <p className="text-xs text-gray-400 pt-2">
-                    Showing up to 5 most recent enquiries. Click any entry to see its full status and journey.
+                  <p className="text-xs text-gray-400">
+                    Shows your most recent open enquiry. Closed enquiries are not shown here.
                   </p>
                 </motion.div>
               )}

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, enquiriesTable } from "@workspace/db";
-import { eq, and, sql, desc, type SQL } from "drizzle-orm";
+import { eq, and, ne, sql, desc, type SQL } from "drizzle-orm";
 import {
   ListEnquiriesQueryParams,
   CreateEnquiryBody,
@@ -104,32 +104,33 @@ router.get("/enquiries/track-by-phone", async (req, res): Promise<void> => {
 
   const normalizedInput = query.data.phone.replace(/\D/g, "").slice(-10);
 
-  if (normalizedInput.length < 6) {
-    res.status(400).json({ error: "Please enter a valid phone number" });
+  if (normalizedInput.length < 10) {
+    res.status(400).json({ error: "Please enter a valid 10-digit phone number" });
     return;
   }
 
-  const likePattern = `%${normalizedInput}`;
   const rows = await db
     .select({
       referenceNumber: enquiriesTable.referenceNumber,
       status: enquiriesTable.status,
-      productInterest: enquiriesTable.productInterest,
       createdAt: enquiriesTable.createdAt,
     })
     .from(enquiriesTable)
     .where(
-      sql`regexp_replace(${enquiriesTable.phone}, '[^0-9]', '', 'g') LIKE ${likePattern}`
+      and(
+        sql`right(regexp_replace(${enquiriesTable.phone}, '[^0-9]', '', 'g'), 10) LIKE ${normalizedInput}`,
+        ne(enquiriesTable.status, "closed")
+      )
     )
     .orderBy(desc(enquiriesTable.createdAt))
-    .limit(5);
+    .limit(1);
 
   if (rows.length === 0) {
-    res.status(404).json({ error: "No enquiries found for this phone number. Please check the number or contact us directly." });
+    res.status(404).json({ error: "No open enquiries found for this phone number. Please check the number or contact us directly." });
     return;
   }
 
-  res.json({ enquiries: rows });
+  res.json(rows[0]);
 });
 
 router.post("/enquiries", async (req, res): Promise<void> => {

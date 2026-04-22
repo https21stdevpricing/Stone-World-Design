@@ -2231,11 +2231,11 @@ export const getTrackEnquiryQueryOptions = <
 >(
   params: TrackEnquiryParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof trackEnquiry>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
@@ -2269,11 +2269,11 @@ export function useTrackEnquiry<
 >(
   params: TrackEnquiryParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof trackEnquiry>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -2325,11 +2325,11 @@ export const getTrackEnquiryByPhoneQueryOptions = <
 >(
   params: TrackByPhoneParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof trackEnquiryByPhone>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
@@ -2359,11 +2359,11 @@ export function useTrackEnquiryByPhone<
 >(
   params: TrackByPhoneParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Partial<UseQueryOptions<
       Awaited<ReturnType<typeof trackEnquiryByPhone>>,
       TError,
       TData
-    >;
+    >>;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {

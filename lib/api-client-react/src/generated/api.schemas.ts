@@ -354,15 +354,10 @@ export type TrackEnquiryParams = {
   ref: string;
 };
 
-export interface PhoneTrackedEnquiryItem {
-  referenceNumber?: string | null;
-  status: EnquiryStatus;
-  productInterest?: string | null;
-  createdAt: string;
-}
-
 export interface PhoneTrackedEnquiryResponse {
-  enquiries: PhoneTrackedEnquiryItem[];
+  referenceNumber: string | null;
+  status: EnquiryStatus;
+  createdAt: string;
 }
 
 export type TrackByPhoneParams = {

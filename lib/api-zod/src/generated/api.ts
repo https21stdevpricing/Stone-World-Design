@@ -493,15 +493,10 @@ export const TrackByPhoneQueryParams = zod.object({
   phone: zod.string().min(6),
 });
 
-export const TrackByPhoneResponseItem = zod.object({
-  referenceNumber: zod.string().nullish(),
-  status: zod.enum(["new", "in_discussion", "quoted", "closed"]),
-  productInterest: zod.string().nullish(),
-  createdAt: zod.coerce.date(),
-});
-
 export const TrackByPhoneResponse = zod.object({
-  enquiries: zod.array(TrackByPhoneResponseItem),
+  referenceNumber: zod.string().nullable(),
+  status: zod.enum(["new", "in_discussion", "quoted", "closed"]),
+  createdAt: zod.coerce.date(),
 });
 
 export const TrackEnquiryResponse = zod.object({

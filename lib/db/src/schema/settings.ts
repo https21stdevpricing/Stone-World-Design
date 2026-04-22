@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -12,6 +12,12 @@ export const siteSettingsTable = pgTable("site_settings", {
   instagramUrl: text("instagram_url"),
   facebookUrl: text("facebook_url"),
   adminPasswordHash: text("admin_password_hash").notNull(),
+  notificationsEnabled: boolean("notifications_enabled").notNull().default(false),
+  smtpHost: text("smtp_host"),
+  smtpPort: text("smtp_port"),
+  smtpUser: text("smtp_user"),
+  smtpPass: text("smtp_pass"),
+  smtpFrom: text("smtp_from"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 

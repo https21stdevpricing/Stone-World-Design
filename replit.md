@@ -54,18 +54,30 @@ lib/
 - `/admin/blog` — Blog CRUD + AI generation
 - `/admin/enquiries` — Enquiry inbox + CSV export + status management (New → In Discussion → Quoted → Closed)
 - `/admin/media` — Media library with base64 upload (stored in Replit Object Storage)
-- `/admin/settings` — Company info + password change
+- `/admin/settings` — Company info, password change, and customer notification settings (SMTP config)
 
 ## Database Schema
 
-Tables: `categories`, `products`, `blog_posts`, `enquiries` (with `reference_number` and `status` columns), `media`, `site_settings`
+Tables: `categories`, `products`, `blog_posts`, `enquiries` (with `reference_number`, `email`, and `status` columns), `media`, `site_settings`
+
+`site_settings` includes: `notifications_enabled`, `smtp_host`, `smtp_port`, `smtp_user`, `smtp_pass` (never returned in GET), `smtp_from`
 
 ## Enquiry Tracking
 
 - Each new enquiry gets a unique reference number (format: SW + 6 alphanumeric chars, e.g., `SW7TQ8N5`)
 - Customers see the reference number on the contact form success screen and can track at `/track`
-- Admin can update enquiry status (new/in_discussion/quoted/closed) in the enquiries admin panel
+- `/track` supports both reference number search and phone number search (`GET /api/enquiries/track-by-phone?phone=...`)
+- Admin can update enquiry status (pending/reviewing/quoted/confirmed/completed/cancelled) in the admin panel
 - Public track endpoint: `GET /api/enquiries/track?ref=SWXXXXXX`
+
+## Customer Email Notifications
+
+When admin updates an enquiry status, if the enquiry has an email address and notifications are enabled, a branded HTML email is automatically sent to the customer.
+
+- Email service: `artifacts/api-server/src/lib/notify.ts` (Nodemailer)
+- SMTP config stored in `site_settings` — password is write-only (never returned in API responses)
+- Admin configures via Settings page toggle + SMTP config form
+- Tracking link in email: `{APP_BASE_URL}/track?ref={referenceNumber}` (configure `APP_BASE_URL` env var for production)
 
 ## Media Storage
 
@@ -108,5 +120,5 @@ Uploaded images are stored in Replit Object Storage (Google Cloud Storage) for p
 
 ## Admin Credentials
 
-- Password: `admin@stone2024`
+- Password is randomly generated on first run and logged to console. Change it immediately via Settings → Change Password.
 - Token stored in `localStorage` as `sw-admin-token`

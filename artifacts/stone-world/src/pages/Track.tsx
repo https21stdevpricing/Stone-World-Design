@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Footer } from "@/components/Footer";
-import { useTrackEnquiry, useTrackEnquiryByPhone } from "@workspace/api-client-react";
-import type { PhoneTrackedEnquiryResponse } from "@workspace/api-client-react";
+import { useTrackEnquiry, useTrackByPhone } from "@workspace/api-client-react";
+import type { TrackedEnquiry } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle2, Clock, MessageSquare, FileText, XCircle,
@@ -76,11 +76,11 @@ export default function Track() {
   const refLoading = refQuery.isLoading;
   const refError = refQuery.isError;
 
-  const phoneQuery = useTrackEnquiryByPhone(
+  const phoneQuery = useTrackByPhone(
     { phone: searchPhone },
     { query: { enabled: !!searchPhone, retry: false } }
   );
-  const phoneResult: PhoneTrackedEnquiryResponse | undefined = phoneQuery.data;
+  const phoneResult: TrackedEnquiry | undefined = phoneQuery.data?.[0];
   const phoneLoading = phoneQuery.isLoading;
   const phoneError = phoneQuery.isError;
 

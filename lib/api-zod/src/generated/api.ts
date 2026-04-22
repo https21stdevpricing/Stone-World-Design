@@ -480,23 +480,29 @@ export const CreateEnquiryBody = zod.object({
 });
 
 /**
+ * @summary Track enquiries by phone number (public)
+ */
+export const TrackByPhoneQueryParams = zod.object({
+  phone: zod.coerce.string(),
+});
+
+export const TrackByPhoneResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  phone: zod.string(),
+  referenceNumber: zod.string(),
+  status: zod.enum(["new", "in_discussion", "quoted", "closed"]),
+  message: zod.string(),
+  productInterest: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const TrackByPhoneResponse = zod.array(TrackByPhoneResponseItem);
+
+/**
  * @summary Track an enquiry by reference number (public)
  */
 export const TrackEnquiryQueryParams = zod.object({
   ref: zod.coerce.string(),
-});
-
-/**
- * @summary Look up enquiries by phone number (public)
- */
-export const TrackByPhoneQueryParams = zod.object({
-  phone: zod.string().min(6),
-});
-
-export const TrackByPhoneResponse = zod.object({
-  referenceNumber: zod.string().nullable(),
-  status: zod.enum(["new", "in_discussion", "quoted", "closed"]),
-  createdAt: zod.coerce.date(),
 });
 
 export const TrackEnquiryResponse = zod.object({
@@ -632,6 +638,12 @@ export const GetSettingsResponse = zod.object({
   whatsapp: zod.string().nullish(),
   instagramUrl: zod.string().nullish(),
   facebookUrl: zod.string().nullish(),
+  notificationsEnabled: zod.boolean(),
+  smtpHost: zod.string().nullish(),
+  smtpPort: zod.string().nullish(),
+  smtpUser: zod.string().nullish(),
+  smtpFrom: zod.string().nullish(),
+  smtpPassSet: zod.boolean(),
   updatedAt: zod.coerce.date(),
 });
 
@@ -648,6 +660,12 @@ export const UpdateSettingsBody = zod.object({
   facebookUrl: zod.string().nullish(),
   currentPassword: zod.string().nullish(),
   newPassword: zod.string().nullish(),
+  notificationsEnabled: zod.boolean().nullish(),
+  smtpHost: zod.string().nullish(),
+  smtpPort: zod.string().nullish(),
+  smtpUser: zod.string().nullish(),
+  smtpPass: zod.string().nullish(),
+  smtpFrom: zod.string().nullish(),
 });
 
 export const UpdateSettingsResponse = zod.object({
@@ -659,6 +677,12 @@ export const UpdateSettingsResponse = zod.object({
   whatsapp: zod.string().nullish(),
   instagramUrl: zod.string().nullish(),
   facebookUrl: zod.string().nullish(),
+  notificationsEnabled: zod.boolean(),
+  smtpHost: zod.string().nullish(),
+  smtpPort: zod.string().nullish(),
+  smtpUser: zod.string().nullish(),
+  smtpFrom: zod.string().nullish(),
+  smtpPassSet: zod.boolean(),
   updatedAt: zod.coerce.date(),
 });
 

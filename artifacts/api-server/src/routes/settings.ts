@@ -7,9 +7,12 @@ import { requireAdmin } from "./admin";
 
 const router: IRouter = Router();
 
-function stripHash(settings: SiteSettings) {
-  const { adminPasswordHash: _omit, ...safe } = settings;
-  return safe;
+function stripSensitive(settings: SiteSettings) {
+  const { adminPasswordHash: _hash, smtpPass, ...safe } = settings;
+  return {
+    ...safe,
+    smtpPassSet: !!smtpPass,
+  };
 }
 
 router.get("/settings/public", async (_req, res): Promise<void> => {
@@ -18,7 +21,7 @@ router.get("/settings/public", async (_req, res): Promise<void> => {
     res.status(404).json({ error: "Settings not found" });
     return;
   }
-  const { adminPasswordHash: _hash, id: _id, updatedAt: _updatedAt, ...publicFields } = settings;
+  const { adminPasswordHash: _hash, id: _id, updatedAt: _updatedAt, smtpHost: _sh, smtpPort: _sp, smtpUser: _su, smtpPass: _spass, smtpFrom: _sf, notificationsEnabled: _ne, ...publicFields } = settings;
   res.json(publicFields);
 });
 
@@ -28,7 +31,7 @@ router.get("/settings", requireAdmin, async (_req, res): Promise<void> => {
     res.status(404).json({ error: "Settings not found" });
     return;
   }
-  res.json(stripHash(settings));
+  res.json(stripSensitive(settings));
 });
 
 router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
@@ -44,7 +47,7 @@ router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
     return;
   }
 
-  const { currentPassword, newPassword, ...rest } = parsed.data;
+  const { currentPassword, newPassword, smtpPass, ...rest } = parsed.data;
 
   let adminPasswordHash = current.adminPasswordHash;
   if (newPassword) {
@@ -60,8 +63,13 @@ router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
     adminPasswordHash = await bcrypt.hash(newPassword, 10);
   }
 
+  const updatePayload: Record<string, unknown> = { ...rest, adminPasswordHash };
+  if (smtpPass !== undefined && smtpPass !== "") {
+    updatePayload.smtpPass = smtpPass;
+  }
+
   const updateData = Object.fromEntries(
-    Object.entries({ ...rest, adminPasswordHash }).filter(([, v]) => v !== undefined)
+    Object.entries(updatePayload).filter(([, v]) => v !== undefined)
   ) as Partial<typeof siteSettingsTable.$inferInsert>;
 
   const [updated] = await db
@@ -70,7 +78,7 @@ router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
     .where(eq(siteSettingsTable.id, current.id))
     .returning();
 
-  res.json(stripHash(updated));
+  res.json(stripSensitive(updated));
 });
 
 export default router;

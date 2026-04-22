@@ -547,6 +547,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/CreateEnquiryResponse"
 
+  /enquiries/track-by-phone:
+    get:
+      operationId: trackByPhone
+      tags: [enquiries]
+      summary: Track enquiries by phone number (public)
+      parameters:
+        - name: phone
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Enquiries found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TrackedEnquiry"
+        "400":
+          description: Invalid phone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /enquiries/track:
     get:
       operationId: trackEnquiry
@@ -1402,12 +1429,30 @@ components:
         facebookUrl:
           type: string
           nullable: true
+        notificationsEnabled:
+          type: boolean
+        smtpHost:
+          type: string
+          nullable: true
+        smtpPort:
+          type: string
+          nullable: true
+        smtpUser:
+          type: string
+          nullable: true
+        smtpFrom:
+          type: string
+          nullable: true
+        smtpPassSet:
+          type: boolean
         updatedAt:
           type: string
           format: date-time
       required:
         - id
         - companyName
+        - notificationsEnabled
+        - smtpPassSet
         - updatedAt
 
     UpdateSettingsBody:
@@ -1437,6 +1482,24 @@ components:
           type: string
           nullable: true
         newPassword:
+          type: string
+          nullable: true
+        notificationsEnabled:
+          type: boolean
+          nullable: true
+        smtpHost:
+          type: string
+          nullable: true
+        smtpPort:
+          type: string
+          nullable: true
+        smtpUser:
+          type: string
+          nullable: true
+        smtpPass:
+          type: string
+          nullable: true
+        smtpFrom:
           type: string
           nullable: true
 

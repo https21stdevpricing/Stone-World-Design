@@ -275,6 +275,12 @@ export interface SiteSettings {
   whatsapp?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
+  notificationsEnabled: boolean;
+  smtpHost?: string | null;
+  smtpPort?: string | null;
+  smtpUser?: string | null;
+  smtpFrom?: string | null;
+  smtpPassSet: boolean;
   updatedAt: string;
 }
 
@@ -288,6 +294,12 @@ export interface UpdateSettingsBody {
   facebookUrl?: string | null;
   currentPassword?: string | null;
   newPassword?: string | null;
+  notificationsEnabled?: boolean | null;
+  smtpHost?: string | null;
+  smtpPort?: string | null;
+  smtpUser?: string | null;
+  smtpPass?: string | null;
+  smtpFrom?: string | null;
 }
 
 export interface DashboardStats {
@@ -380,18 +392,12 @@ export const ListEnquiriesAudience = {
   all: "all",
 } as const;
 
-export type TrackEnquiryParams = {
-  ref: string;
-};
-
-export interface PhoneTrackedEnquiryResponse {
-  referenceNumber: string | null;
-  status: EnquiryStatus;
-  createdAt: string;
-}
-
 export type TrackByPhoneParams = {
   phone: string;
+};
+
+export type TrackEnquiryParams = {
+  ref: string;
 };
 
 export type ExportEnquiriesParams = {

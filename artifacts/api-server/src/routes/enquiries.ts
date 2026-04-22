@@ -13,6 +13,7 @@ import {
   UpdateEnquiryStatusBody,
 } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
+import { sendStatusNotification } from "../lib/notify";
 
 const router: IRouter = Router();
 
@@ -219,6 +220,20 @@ router.put("/enquiries/:id/status", requireAdmin, async (req, res): Promise<void
   }
 
   res.json(updated);
+
+  if (updated.email && updated.referenceNumber) {
+    const baseUrl = process.env.APP_BASE_URL ?? `http://localhost:${process.env.PORT ?? 3001}`;
+    const trackingUrl = `${baseUrl}/track?ref=${updated.referenceNumber}`;
+    sendStatusNotification({
+      customerName: updated.name,
+      customerEmail: updated.email,
+      referenceNumber: updated.referenceNumber,
+      newStatus: updated.status,
+      trackingUrl,
+    }).catch((err: unknown) => {
+      console.error("[notify] Failed to send status email:", err);
+    });
+  }
 });
 
 router.get("/enquiries/export", requireAdmin, async (req, res): Promise<void> => {

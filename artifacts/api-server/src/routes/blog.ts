@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, blogPostsTable } from "@workspace/db";
-import { eq, sql, desc, type SQL } from "drizzle-orm";
+import { eq, sql, desc, and, type SQL } from "drizzle-orm";
 import {
   ListBlogPostsQueryParams,
   CreateBlogPostBody,
@@ -10,7 +10,7 @@ import {
   UpdateBlogPostBody,
   DeleteBlogPostParams,
 } from "@workspace/api-zod";
-import { requireAdmin } from "./admin";
+import { requireAdmin, isAdminRequest } from "./admin";
 import OpenAI from "openai";
 
 const router: IRouter = Router();
@@ -35,19 +35,25 @@ router.get("/blog", async (req, res): Promise<void> => {
   const { published, limit = 10, offset = 0 } = query.data;
 
   const conditions: SQL<unknown>[] = [];
-  if (published != null) {
+  // Unauthenticated requests may only access published posts
+  const adminAccess = isAdminRequest(req);
+  if (adminAccess && published != null) {
     conditions.push(eq(blogPostsTable.published, published));
+  } else if (!adminAccess) {
+    conditions.push(eq(blogPostsTable.published, true));
   }
+
+  const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
 
   const [countResult] = await db
     .select({ count: sql<number>`cast(count(*) as int)` })
     .from(blogPostsTable)
-    .where(conditions.length > 0 ? conditions[0] : undefined);
+    .where(whereClause);
 
   const rows = await db
     .select()
     .from(blogPostsTable)
-    .where(conditions.length > 0 ? conditions[0] : undefined)
+    .where(whereClause)
     .orderBy(desc(blogPostsTable.createdAt))
     .limit(limit)
     .offset(offset);
@@ -172,6 +178,10 @@ router.get("/blog/:id", async (req, res): Promise<void> => {
 
   const [post] = await db.select().from(blogPostsTable).where(eq(blogPostsTable.id, id));
   if (!post) {
+    res.status(404).json({ error: "Blog post not found" });
+    return;
+  }
+  if (!post.published && !isAdminRequest(req)) {
     res.status(404).json({ error: "Blog post not found" });
     return;
   }

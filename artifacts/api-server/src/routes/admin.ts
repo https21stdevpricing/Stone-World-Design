@@ -90,4 +90,9 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
   next();
 }
 
+export function isAdminRequest(req: Request): boolean {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  return !!token && isTokenValid(token);
+}
+
 export default router;

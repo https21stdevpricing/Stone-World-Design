@@ -162,6 +162,7 @@ export const EnquiryAudience = {
 
 export interface Enquiry {
   id: number;
+  referenceNumber?: string | null;
   name: string;
   email?: string | null;
   phone: string;
@@ -172,8 +173,41 @@ export interface Enquiry {
   productInterest?: string | null;
   location?: string | null;
   isRead: boolean;
+  status: string;
   createdAt: string;
 }
+
+export interface TrackedEnquiry {
+  id: number;
+  referenceNumber: string;
+  name: string;
+  status: string;
+  productInterest?: string | null;
+  createdAt: string;
+}
+
+export type EnquiryStatus = (typeof EnquiryStatus)[keyof typeof EnquiryStatus];
+
+export const EnquiryStatus = {
+  new: "new",
+  in_discussion: "in_discussion",
+  quoted: "quoted",
+  closed: "closed",
+} as const;
+
+export interface UpdateEnquiryStatusBody {
+  status: EnquiryStatus;
+}
+
+export interface CreateEnquiryResponse {
+  success: boolean;
+  message: string;
+  referenceNumber: string;
+}
+
+export type TrackEnquiryParams = {
+  ref: string;
+};
 
 export type CreateEnquiryBodyAudience =
   (typeof CreateEnquiryBodyAudience)[keyof typeof CreateEnquiryBodyAudience];

@@ -7,10 +7,22 @@ import {
   MarkEnquiryReadParams,
   MarkEnquiryReadBody,
   ExportEnquiriesQueryParams,
+  TrackEnquiryQueryParams,
+  UpdateEnquiryStatusParams,
+  UpdateEnquiryStatusBody,
 } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
 
 const router: IRouter = Router();
+
+function generateReferenceNumber(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let result = "SW";
+  for (let i = 0; i < 6; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
 
 router.get("/enquiries", requireAdmin, async (req, res): Promise<void> => {
   const query = ListEnquiriesQueryParams.safeParse(req.query);
@@ -54,6 +66,34 @@ router.get("/enquiries", requireAdmin, async (req, res): Promise<void> => {
   });
 });
 
+router.get("/enquiries/track", async (req, res): Promise<void> => {
+  const query = TrackEnquiryQueryParams.safeParse(req.query);
+  if (!query.success) {
+    res.status(400).json({ error: "Reference number is required" });
+    return;
+  }
+
+  const [enquiry] = await db
+    .select({
+      id: enquiriesTable.id,
+      referenceNumber: enquiriesTable.referenceNumber,
+      name: enquiriesTable.name,
+      status: enquiriesTable.status,
+      productInterest: enquiriesTable.productInterest,
+      createdAt: enquiriesTable.createdAt,
+    })
+    .from(enquiriesTable)
+    .where(eq(enquiriesTable.referenceNumber, query.data.ref))
+    .limit(1);
+
+  if (!enquiry) {
+    res.status(404).json({ error: "Enquiry not found. Please check your reference number." });
+    return;
+  }
+
+  res.json(enquiry);
+});
+
 router.post("/enquiries", async (req, res): Promise<void> => {
   const parsed = CreateEnquiryBody.safeParse(req.body);
   if (!parsed.success) {
@@ -61,8 +101,33 @@ router.post("/enquiries", async (req, res): Promise<void> => {
     return;
   }
 
-  await db.insert(enquiriesTable).values(parsed.data);
-  res.status(201).json({ success: true, message: "Enquiry submitted successfully" });
+  let referenceNumber: string;
+  let attempts = 0;
+  while (true) {
+    referenceNumber = generateReferenceNumber();
+    const existing = await db
+      .select({ id: enquiriesTable.id })
+      .from(enquiriesTable)
+      .where(eq(enquiriesTable.referenceNumber, referenceNumber))
+      .limit(1);
+    if (existing.length === 0) break;
+    if (++attempts > 10) {
+      referenceNumber = generateReferenceNumber() + Date.now().toString(36).slice(-3);
+      break;
+    }
+  }
+
+  await db.insert(enquiriesTable).values({
+    ...parsed.data,
+    referenceNumber,
+    status: "new",
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Enquiry submitted successfully",
+    referenceNumber,
+  });
 });
 
 router.put("/enquiries/:id/read", requireAdmin, async (req, res): Promise<void> => {
@@ -91,6 +156,32 @@ router.put("/enquiries/:id/read", requireAdmin, async (req, res): Promise<void> 
   res.json(updated);
 });
 
+router.put("/enquiries/:id/status", requireAdmin, async (req, res): Promise<void> => {
+  const params = UpdateEnquiryStatusParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+  const parsed = UpdateEnquiryStatusBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const [updated] = await db
+    .update(enquiriesTable)
+    .set({ status: parsed.data.status })
+    .where(eq(enquiriesTable.id, params.data.id))
+    .returning();
+
+  if (!updated) {
+    res.status(404).json({ error: "Enquiry not found" });
+    return;
+  }
+
+  res.json(updated);
+});
+
 router.get("/enquiries/export", requireAdmin, async (req, res): Promise<void> => {
   const query = ExportEnquiriesQueryParams.safeParse(req.query);
 
@@ -105,9 +196,10 @@ router.get("/enquiries/export", requireAdmin, async (req, res): Promise<void> =>
     .where(conditions.length > 0 ? conditions[0] : undefined)
     .orderBy(desc(enquiriesTable.createdAt));
 
-  const headers = ["ID", "Name", "Phone", "Email", "Audience", "Project Type", "Budget", "Message", "Product Interest", "Location", "Read", "Date"];
+  const headers = ["ID", "Reference", "Name", "Phone", "Email", "Audience", "Project Type", "Budget", "Message", "Product Interest", "Location", "Status", "Read", "Date"];
   const csvRows = rows.map((r) => [
     r.id,
+    r.referenceNumber ?? "",
     `"${r.name.replace(/"/g, '""')}"`,
     r.phone,
     r.email ?? "",
@@ -117,6 +209,7 @@ router.get("/enquiries/export", requireAdmin, async (req, res): Promise<void> =>
     `"${r.message.replace(/"/g, '""')}"`,
     r.productInterest ?? "",
     r.location ?? "",
+    r.status,
     r.isRead ? "Yes" : "No",
     r.createdAt.toISOString(),
   ].join(","));

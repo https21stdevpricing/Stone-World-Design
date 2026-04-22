@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const enquiriesTable = pgTable("enquiries", {
   id: serial("id").primaryKey(),
+  referenceNumber: text("reference_number").unique(),
   name: text("name").notNull(),
   email: text("email"),
   phone: text("phone").notNull(),
@@ -14,9 +15,10 @@ export const enquiriesTable = pgTable("enquiries", {
   productInterest: text("product_interest"),
   location: text("location"),
   isRead: boolean("is_read").notNull().default(false),
+  status: text("status").notNull().default("new"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const insertEnquirySchema = createInsertSchema(enquiriesTable).omit({ id: true, createdAt: true });
+export const insertEnquirySchema = createInsertSchema(enquiriesTable).omit({ id: true, createdAt: true, referenceNumber: true, status: true });
 export type InsertEnquiry = z.infer<typeof insertEnquirySchema>;
 export type Enquiry = typeof enquiriesTable.$inferSelect;

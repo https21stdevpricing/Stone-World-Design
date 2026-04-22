@@ -13,6 +13,7 @@ import ProductDetail from "@/pages/ProductDetail";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import Contact from "@/pages/Contact";
+import Track from "@/pages/Track";
 
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
@@ -61,6 +62,7 @@ function Router() {
         <Route path="/blog" component={() => <PageTransition><Blog /></PageTransition>} />
         <Route path="/blog/:slug" component={() => <PageTransition><BlogPost /></PageTransition>} />
         <Route path="/contact" component={() => <PageTransition><Contact /></PageTransition>} />
+        <Route path="/track" component={() => <PageTransition><Track /></PageTransition>} />
         
         {/* Admin Routes */}
         <Route path="/admin/login" component={AdminLogin} />

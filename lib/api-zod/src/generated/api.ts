@@ -443,6 +443,7 @@ export const ListEnquiriesResponse = zod.object({
   enquiries: zod.array(
     zod.object({
       id: zod.number(),
+      referenceNumber: zod.string().nullish(),
       name: zod.string(),
       email: zod.string().nullish(),
       phone: zod.string(),
@@ -453,6 +454,7 @@ export const ListEnquiriesResponse = zod.object({
       productInterest: zod.string().nullish(),
       location: zod.string().nullish(),
       isRead: zod.boolean(),
+      status: zod.string(),
       createdAt: zod.coerce.date(),
     }),
   ),
@@ -477,6 +479,39 @@ export const CreateEnquiryBody = zod.object({
   location: zod.string().nullish(),
 });
 
+export const CreateEnquiryResponse = zod.object({
+  success: zod.boolean(),
+  message: zod.string(),
+  referenceNumber: zod.string(),
+});
+
+/**
+ * @summary Track an enquiry by reference number (public)
+ */
+export const TrackEnquiryQueryParams = zod.object({
+  ref: zod.string(),
+});
+
+export const TrackEnquiryResponse = zod.object({
+  id: zod.number(),
+  referenceNumber: zod.string(),
+  name: zod.string(),
+  status: zod.string(),
+  productInterest: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update enquiry status (admin)
+ */
+export const UpdateEnquiryStatusParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateEnquiryStatusBody = zod.object({
+  status: zod.enum(["new", "in_discussion", "quoted", "closed"]),
+});
+
 /**
  * @summary Mark enquiry as read/unread (admin)
  */
@@ -490,6 +525,7 @@ export const MarkEnquiryReadBody = zod.object({
 
 export const MarkEnquiryReadResponse = zod.object({
   id: zod.number(),
+  referenceNumber: zod.string().nullish(),
   name: zod.string(),
   email: zod.string().nullish(),
   phone: zod.string(),
@@ -500,6 +536,7 @@ export const MarkEnquiryReadResponse = zod.object({
   productInterest: zod.string().nullish(),
   location: zod.string().nullish(),
   isRead: zod.boolean(),
+  status: zod.string(),
   createdAt: zod.coerce.date(),
 });
 

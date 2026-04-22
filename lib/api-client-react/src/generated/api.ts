@@ -29,6 +29,7 @@ import type {
   CreateBlogPostBody,
   CreateCategoryBody,
   CreateEnquiryBody,
+  CreateEnquiryResponse,
   CreateProductBody,
   DashboardStats,
   Enquiry,
@@ -47,6 +48,9 @@ import type {
   PublicSettings,
   SiteSettings,
   SuccessResponse,
+  TrackedEnquiry,
+  TrackEnquiryParams,
+  UpdateEnquiryStatusBody,
   UpdateSettingsBody,
   UploadMediaBody,
 } from "./api.schemas";
@@ -2110,8 +2114,8 @@ export const getCreateEnquiryUrl = () => {
 export const createEnquiry = async (
   createEnquiryBody: CreateEnquiryBody,
   options?: RequestInit,
-): Promise<SuccessResponse> => {
-  return customFetch<SuccessResponse>(getCreateEnquiryUrl(), {
+): Promise<CreateEnquiryResponse> => {
+  return customFetch<CreateEnquiryResponse>(getCreateEnquiryUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
@@ -2271,6 +2275,146 @@ export const useMarkEnquiryRead = <
   TContext
 > => {
   return useMutation(getMarkEnquiryReadMutationOptions(options));
+};
+
+/**
+ * @summary Track an enquiry by reference number (public)
+ */
+export const getTrackEnquiryUrl = (params: TrackEnquiryParams) => {
+  return `/api/enquiries/track?ref=${encodeURIComponent(params.ref)}`;
+};
+
+export const trackEnquiry = async (
+  params: TrackEnquiryParams,
+  options?: RequestInit,
+): Promise<TrackedEnquiry> => {
+  return customFetch<TrackedEnquiry>(getTrackEnquiryUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getTrackEnquiryQueryKey = (params: TrackEnquiryParams) => {
+  return [`/api/enquiries/track`, params] as const;
+};
+
+export const getTrackEnquiryQueryOptions = <
+  TData = Awaited<ReturnType<typeof trackEnquiry>>,
+  TError = ErrorType<unknown>,
+>(
+  params: TrackEnquiryParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof trackEnquiry>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+  const queryKey = queryOptions?.queryKey ?? getTrackEnquiryQueryKey(params);
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof trackEnquiry>>> = ({
+    signal,
+  }) => trackEnquiry(params, { signal, ...requestOptions });
+  return { queryKey, queryFn, enabled: !!params.ref, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof trackEnquiry>>,
+    TError,
+    TData
+  >;
+};
+
+export function useTrackEnquiry<
+  TData = Awaited<ReturnType<typeof trackEnquiry>>,
+  TError = ErrorType<unknown>,
+>(
+  params: TrackEnquiryParams,
+  options?: {
+    query?: UseQueryOptions<Awaited<ReturnType<typeof trackEnquiry>>, TError, TData>;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getTrackEnquiryQueryOptions(params, options);
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  query.queryKey = queryOptions.queryKey;
+  return query;
+}
+
+/**
+ * @summary Update enquiry status (admin)
+ */
+export const getUpdateEnquiryStatusUrl = (id: number) => {
+  return `/api/enquiries/${id}/status`;
+};
+
+export const updateEnquiryStatus = async (
+  id: number,
+  updateEnquiryStatusBody: UpdateEnquiryStatusBody,
+  options?: RequestInit,
+): Promise<Enquiry> => {
+  return customFetch<Enquiry>(getUpdateEnquiryStatusUrl(id), {
+    ...options,
+    method: "PUT",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateEnquiryStatusBody),
+  });
+};
+
+export const getUpdateEnquiryStatusMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateEnquiryStatus>>,
+    TError,
+    { id: number; data: BodyType<UpdateEnquiryStatusBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateEnquiryStatus>>,
+  TError,
+  { id: number; data: BodyType<UpdateEnquiryStatusBody> },
+  TContext
+> => {
+  const mutationKey = ["updateEnquiryStatus"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateEnquiryStatus>>,
+    { id: number; data: BodyType<UpdateEnquiryStatusBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+    return updateEnquiryStatus(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateEnquiryStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateEnquiryStatus>>>;
+export type UpdateEnquiryStatusMutationBody = BodyType<UpdateEnquiryStatusBody>;
+export type UpdateEnquiryStatusMutationError = ErrorType<unknown>;
+
+export const useUpdateEnquiryStatus = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateEnquiryStatus>>,
+    TError,
+    { id: number; data: BodyType<UpdateEnquiryStatusBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateEnquiryStatus>>,
+  TError,
+  { id: number; data: BodyType<UpdateEnquiryStatusBody> },
+  TContext
+> => {
+  return useMutation(getUpdateEnquiryStatusMutationOptions(options));
 };
 
 /**

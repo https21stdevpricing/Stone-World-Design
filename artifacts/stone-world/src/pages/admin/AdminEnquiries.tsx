@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import {
-  useListEnquiries, useMarkEnquiryRead, getListEnquiriesQueryKey, exportEnquiries,
-  type Enquiry, type ListEnquiriesAudience,
+  useListEnquiries, useMarkEnquiryRead, useUpdateEnquiryStatus, getListEnquiriesQueryKey, exportEnquiries,
+  type Enquiry, type ListEnquiriesAudience, type EnquiryStatus, EnquiryStatus as EnquiryStatusEnum,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,20 @@ import { format, isAfter, isBefore, startOfDay, endOfDay, parseISO } from "date-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Download, Mail, MailOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+
+const STATUS_LABELS: Record<string, string> = {
+  new: "New",
+  in_discussion: "In Discussion",
+  quoted: "Quoted",
+  closed: "Closed",
+};
+
+const STATUS_BADGE_VARIANTS: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  new: "default",
+  in_discussion: "secondary",
+  quoted: "outline",
+  closed: "destructive",
+};
 
 type ReadFilter = "all" | "read" | "unread";
 
@@ -31,6 +45,7 @@ export default function AdminEnquiries() {
   });
 
   const markRead = useMarkEnquiryRead();
+  const updateStatus = useUpdateEnquiryStatus();
 
   const handleRowClick = (enq: Enquiry) => {
     setSelectedEnquiry(enq);
@@ -43,6 +58,17 @@ export default function AdminEnquiries() {
         queryClient.invalidateQueries({ queryKey: getListEnquiriesQueryKey() });
         if (selectedEnquiry?.id === enq.id) {
           setSelectedEnquiry({ ...selectedEnquiry, isRead: !enq.isRead });
+        }
+      }
+    });
+  };
+
+  const handleStatusChange = (enq: Enquiry, newStatus: string) => {
+    updateStatus.mutate({ id: enq.id, data: { status: newStatus as EnquiryStatus } }, {
+      onSuccess: (updated) => {
+        queryClient.invalidateQueries({ queryKey: getListEnquiriesQueryKey() });
+        if (selectedEnquiry?.id === enq.id) {
+          setSelectedEnquiry({ ...selectedEnquiry, status: updated.status });
         }
       }
     });
@@ -159,14 +185,15 @@ export default function AdminEnquiries() {
               <TableHead>Profile</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Interest</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Read</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={7} className="text-center">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center">Loading...</TableCell></TableRow>
             ) : filteredEnquiries.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No enquiries match the current filters.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No enquiries match the current filters.</TableCell></TableRow>
             ) : filteredEnquiries.map((enq) => (
               <TableRow
                 key={enq.id}
@@ -183,7 +210,12 @@ export default function AdminEnquiries() {
                   <Badge variant="outline" className="capitalize">{enq.audience}</Badge>
                 </TableCell>
                 <TableCell>{enq.phone}</TableCell>
-                <TableCell className="truncate max-w-[200px] text-muted-foreground text-sm">{enq.productInterest || "-"}</TableCell>
+                <TableCell className="truncate max-w-[150px] text-muted-foreground text-sm">{enq.productInterest || "-"}</TableCell>
+                <TableCell>
+                  <Badge variant={STATUS_BADGE_VARIANTS[enq.status] ?? "outline"} className="whitespace-nowrap">
+                    {STATUS_LABELS[enq.status] ?? enq.status}
+                  </Badge>
+                </TableCell>
                 <TableCell className="text-right">
                   <Button
                     variant="ghost"
@@ -208,7 +240,7 @@ export default function AdminEnquiries() {
           </DialogHeader>
           {selectedEnquiry && (
             <div className="space-y-6">
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start gap-4">
                 <div className="grid grid-cols-2 gap-4 flex-1">
                   <div>
                     <p className="text-sm text-muted-foreground">Name / Company</p>
@@ -234,16 +266,42 @@ export default function AdminEnquiries() {
                     <p className="text-sm text-muted-foreground">Date</p>
                     <p className="font-medium">{format(parseISO(selectedEnquiry.createdAt), "PPpp")}</p>
                   </div>
+                  {selectedEnquiry.referenceNumber && (
+                    <div className="col-span-2">
+                      <p className="text-sm text-muted-foreground">Reference Number</p>
+                      <p className="font-mono font-medium">{selectedEnquiry.referenceNumber}</p>
+                    </div>
+                  )}
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={(e) => toggleReadStatus(selectedEnquiry, e)}
-                  className="ml-4 shrink-0"
+                  className="shrink-0"
                   data-testid="button-detail-toggle-read"
                 >
                   {selectedEnquiry.isRead ? <><MailOpen className="mr-2 h-4 w-4" /> Mark Unread</> : <><Mail className="mr-2 h-4 w-4" /> Mark Read</>}
                 </Button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <p className="text-sm font-medium text-muted-foreground whitespace-nowrap">Update Status:</p>
+                <Select
+                  value={selectedEnquiry.status}
+                  onValueChange={(val) => handleStatusChange(selectedEnquiry, val)}
+                >
+                  <SelectTrigger className="w-48" data-testid="select-enquiry-status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Badge variant={STATUS_BADGE_VARIANTS[selectedEnquiry.status] ?? "outline"}>
+                  {STATUS_LABELS[selectedEnquiry.status] ?? selectedEnquiry.status}
+                </Badge>
               </div>
 
               <div className="bg-muted p-4 rounded-lg space-y-4">

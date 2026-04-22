@@ -11,6 +11,7 @@ import { EnquiryAudience } from "@workspace/api-client-react";
 
 export default function Contact() {
   const [step, setStep] = useState(1);
+  const [referenceNumber, setReferenceNumber] = useState("");
   const [formData, setFormData] = useState({
     audience: "" as EnquiryAudience,
     productInterest: [] as string[],
@@ -52,7 +53,10 @@ export default function Contact() {
         productInterest: formData.productInterest.join(", ") || null
       }
     }, {
-      onSuccess: () => setStep(4)
+      onSuccess: (data) => {
+        setReferenceNumber(data.referenceNumber ?? "");
+        setStep(4);
+      }
     });
   };
 
@@ -222,16 +226,30 @@ export default function Contact() {
                   key="step4"
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex flex-col items-center justify-center h-full text-center space-y-6 pt-24"
+                  className="flex flex-col items-center justify-center h-full text-center space-y-6 pt-16"
                 >
                   <CheckCircle2 className="w-20 h-20 text-primary mb-4" />
                   <h1 className="text-4xl font-bold tracking-tight text-foreground">Enquiry Received</h1>
                   <p className="text-muted-foreground text-lg font-medium max-w-md">
                     Thank you for reaching out to AB Stone World. One of our experts will contact you shortly to discuss your project.
                   </p>
-                  <Button variant="outline" className="rounded-full mt-8 font-bold" onClick={() => window.location.reload()}>
-                    Send Another Message
-                  </Button>
+                  {referenceNumber && (
+                    <div className="border border-border/50 bg-muted/20 px-8 py-6 space-y-2 max-w-sm w-full">
+                      <p className="text-sm text-muted-foreground uppercase tracking-widest">Your Reference Number</p>
+                      <p className="text-2xl font-mono font-bold tracking-widest text-primary">{referenceNumber}</p>
+                      <p className="text-xs text-muted-foreground">Save this number to track your enquiry status</p>
+                    </div>
+                  )}
+                  <div className="flex gap-3 flex-wrap justify-center mt-4">
+                    {referenceNumber && (
+                      <Button className="rounded-full px-6 font-bold" onClick={() => window.location.href = `/track?ref=${referenceNumber}`}>
+                        Track Enquiry
+                      </Button>
+                    )}
+                    <Button variant="outline" className="rounded-full mt-2 font-bold" onClick={() => window.location.reload()}>
+                      Send Another Message
+                    </Button>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

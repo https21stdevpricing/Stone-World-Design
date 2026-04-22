@@ -42,7 +42,8 @@ lib/
 - `/discover/:id` — Product detail page
 - `/blog` — Blog listing (Journal)
 - `/blog/:id` — Full blog article
-- `/contact` — Smart enquiry form (audience-type-based)
+- `/contact` — Smart enquiry form (audience-type-based, returns reference number on success)
+- `/track` — Enquiry tracking page (lookup by reference number SW + 6 alphanumeric chars)
 
 ## Admin CMS Pages (at /admin)
 
@@ -51,13 +52,20 @@ lib/
 - `/admin/products` — Product CRUD, bulk operations
 - `/admin/categories` — Category CRUD
 - `/admin/blog` — Blog CRUD + AI generation
-- `/admin/enquiries` — Enquiry inbox + CSV export
+- `/admin/enquiries` — Enquiry inbox + CSV export + status management (New → In Discussion → Quoted → Closed)
 - `/admin/media` — Media library with base64 upload
 - `/admin/settings` — Company info + password change
 
 ## Database Schema
 
-Tables: `categories`, `products`, `blog_posts`, `enquiries`, `media`, `site_settings`
+Tables: `categories`, `products`, `blog_posts`, `enquiries` (with `reference_number` and `status` columns), `media`, `site_settings`
+
+## Enquiry Tracking
+
+- Each new enquiry gets a unique reference number (format: SW + 6 alphanumeric chars, e.g., `SW7TQ8N5`)
+- Customers see the reference number on the contact form success screen and can track at `/track`
+- Admin can update enquiry status (new/in_discussion/quoted/closed) in the enquiries admin panel
+- Public track endpoint: `GET /api/enquiries/track?ref=SWXXXXXX`
 
 ## Key Commands
 

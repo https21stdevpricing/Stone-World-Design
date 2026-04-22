@@ -21,6 +21,7 @@ export function Navbar() {
     { href: "/about", label: "ABOUT" },
     { href: "/blog", label: "JOURNAL" },
     { href: "/contact", label: "CONTACT" },
+    { href: "/track", label: "TRACK" },
   ];
 
   const wordmark = "Stone World";

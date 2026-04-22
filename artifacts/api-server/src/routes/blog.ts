@@ -91,24 +91,48 @@ router.post("/blog/generate", requireAdmin, async (req, res): Promise<void> => {
 
   const { topic, keywords = [], publish = false } = parsed.data;
 
-  const prompt = `Write a detailed, engaging blog article for Stone World, a premium building materials company established in 2003. 
+  const UNSPLASH_COVERS: Record<string, string> = {
+    marble: "https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1200&q=85&auto=format&fit=crop",
+    quartz: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=1200&q=85&auto=format&fit=crop",
+    tiles: "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200&q=85&auto=format&fit=crop",
+    sanitaryware: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=1200&q=85&auto=format&fit=crop",
+    cement: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=1200&q=85&auto=format&fit=crop",
+    tmt: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=85&auto=format&fit=crop",
+    interior: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=85&auto=format&fit=crop",
+    renovation: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=85&auto=format&fit=crop",
+    stone: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=1200&q=85&auto=format&fit=crop",
+  };
+
+  const topicLower = topic.toLowerCase();
+  let coverImageUrl = UNSPLASH_COVERS.interior;
+  for (const [key, url] of Object.entries(UNSPLASH_COVERS)) {
+    if (topicLower.includes(key)) { coverImageUrl = url; break; }
+  }
+
+  const prompt = `You are a senior content writer for Stone World (AB Stone World Pvt. Ltd.), India's premier premium building materials company established in 2003 in Pitampura, New Delhi.
+
+Write a cinematic, editorial-quality blog article for the Stone World Journal.
+
 Topic: "${topic}"
-Keywords to include: ${keywords.length > 0 ? keywords.join(", ") : "none specified"}
+Keywords to weave in: ${keywords.length > 0 ? keywords.join(", ") : "building materials, luxury, quality"}
 
-The article should:
-- Be 600-900 words
-- Be informative, helpful, and showcase expertise in building materials (marble, stone, quartz, tiles, sanitary ware, ceramic, cement, TMT bars, etc.)
-- Include practical tips or insights for homeowners and contractors
-- Have a compelling introduction and a clear structure
-- Be professional but accessible
-- End with a subtle call-to-action encouraging readers to visit Stone World
+Requirements:
+- Write 800-1100 words of compelling, expert-level content
+- Use proper Markdown formatting: ## for section headings, **bold** for emphasis, *italic* for material names
+- Include 4-5 clear sections with descriptive headings
+- Open with a vivid, scene-setting paragraph (no generic "In today's world..." opener)
+- Include specific, actionable tips or insights for Indian homeowners, architects, and contractors
+- Reference specific materials where relevant (marble veining, quartz durability, tile porosity, etc.)
+- Use authentic Indian context: climate zones, monsoon considerations, vastu, urban spaces
+- End with an inspiring call-to-action mentioning Stone World's 20-year expertise
+- Tone: authoritative yet accessible, like an experienced material specialist speaking to a design-conscious audience
 
-Return ONLY a JSON object with this exact structure:
+Return ONLY a valid JSON object:
 {
-  "title": "The article title",
-  "excerpt": "A 1-2 sentence summary of the article",
-  "content": "The full article content (plain text with paragraph breaks using \\n\\n)",
-  "tags": ["tag1", "tag2", "tag3"]
+  "title": "A compelling, specific article title (not generic)",
+  "excerpt": "A vivid 2-sentence preview that makes readers want to read on",
+  "content": "Full article in Markdown format with ## headings, **bold**, *italic*, and proper paragraph breaks",
+  "tags": ["specific-tag1", "specific-tag2", "specific-tag3", "specific-tag4"]
 }`;
 
   let generatedContent: { title: string; excerpt: string; content: string; tags: string[] };
@@ -145,6 +169,7 @@ Return ONLY a JSON object with this exact structure:
       slug,
       excerpt: generatedContent.excerpt,
       content: generatedContent.content,
+      coverImageUrl,
       tags: generatedContent.tags,
       published: publish,
       aiGenerated: true,

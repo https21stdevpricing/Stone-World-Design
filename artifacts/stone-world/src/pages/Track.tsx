@@ -63,6 +63,144 @@ function getStepIndex(status: string) {
   return JOURNEY_STEPS.findIndex((s) => s.key === status);
 }
 
+function DottedSpinner({ size = 40 }: { size?: number }) {
+  const dots = 8;
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40">
+      {Array.from({ length: dots }).map((_, i) => {
+        const angle = (i / dots) * 2 * Math.PI - Math.PI / 2;
+        const x = 20 + 14 * Math.cos(angle);
+        const y = 20 + 14 * Math.sin(angle);
+        return (
+          <motion.circle
+            key={i}
+            cx={x}
+            cy={y}
+            r={2.2}
+            fill="#00B4B4"
+            initial={{ opacity: 0.15 }}
+            animate={{ opacity: [0.15, 1, 0.15] }}
+            transition={{
+              duration: 1.2,
+              repeat: Infinity,
+              delay: (i / dots) * 1.2,
+              ease: "easeInOut",
+            }}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function TrackIllustration() {
+  const stages = [
+    { label: "Received", color: "#00B4B4" },
+    { label: "Review", color: "#00B4B4" },
+    { label: "Quoted", color: "#00B4B4" },
+    { label: "Done", color: "#00B4B4" },
+  ];
+
+  return (
+    <svg width="260" height="110" viewBox="0 0 260 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Connecting line */}
+      <motion.line
+        x1="30" y1="44" x2="230" y2="44"
+        stroke="#E5E7EB"
+        strokeWidth="2"
+        strokeDasharray="4 4"
+      />
+      <motion.line
+        x1="30" y1="44" x2="230" y2="44"
+        stroke="#00B4B4"
+        strokeWidth="2"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.8, ease: "easeInOut", delay: 0.3 }}
+        strokeLinecap="round"
+      />
+
+      {stages.map((stage, i) => {
+        const x = 30 + i * 66.7;
+        return (
+          <g key={i}>
+            {/* Outer ring pulse */}
+            <motion.circle
+              cx={x}
+              cy={44}
+              r={18}
+              fill="#00B4B4"
+              fillOpacity={0.08}
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: [1, 1.25, 1], opacity: [0.08, 0.18, 0.08] }}
+              transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
+            />
+            {/* Main circle */}
+            <motion.circle
+              cx={x}
+              cy={44}
+              r={12}
+              fill={i === 0 ? "#00B4B4" : "white"}
+              stroke="#00B4B4"
+              strokeWidth="2"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 + i * 0.25, type: "spring" }}
+            />
+            {/* Inner dot */}
+            <motion.circle
+              cx={x}
+              cy={44}
+              r={4}
+              fill={i === 0 ? "white" : "#00B4B4"}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.5 + i * 0.25 }}
+            />
+            {/* Label */}
+            <motion.text
+              x={x}
+              y={72}
+              textAnchor="middle"
+              fontSize="9"
+              fontFamily="system-ui, -apple-system, sans-serif"
+              fontWeight="600"
+              fill="#9CA3AF"
+              initial={{ opacity: 0, y: 76 }}
+              animate={{ opacity: 1, y: 72 }}
+              transition={{ duration: 0.4, delay: 0.6 + i * 0.2 }}
+            >
+              {stage.label}
+            </motion.text>
+          </g>
+        );
+      })}
+
+      {/* Document icon */}
+      <motion.g
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.4 }}
+      >
+        <rect x="108" y="4" width="44" height="32" rx="5" fill="#F0FAFA" stroke="#00B4B4" strokeWidth="1.5"/>
+        <line x1="116" y1="14" x2="144" y2="14" stroke="#00B4B4" strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="116" y1="20" x2="138" y2="20" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="116" y1="26" x2="134" y2="26" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round"/>
+      </motion.g>
+
+      {/* Verified checkmark above last circle */}
+      <motion.g
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, delay: 1.6, type: "spring" }}
+      >
+        <circle cx="230" cy="18" r="9" fill="#00B4B4"/>
+        <path d="M225 18 L228.5 21.5 L235 15" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      </motion.g>
+    </svg>
+  );
+}
+
 export default function Track() {
   const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const initialRef = searchParams.get("ref") ?? "";
@@ -119,27 +257,55 @@ export default function Track() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
 
-      {/* Page header */}
-      <div className="pt-16 border-b border-gray-100 bg-white sticky top-16 z-30">
-        <div className="max-w-2xl mx-auto px-6 py-3.5 flex items-center gap-2">
-          <Search className="w-4 h-4 text-teal-500" />
-          <span className="text-sm font-semibold text-gray-600">Track Enquiry</span>
+      {/* Apple Stories-style hero header — white, clean */}
+      <div className="pt-16 bg-white border-b border-gray-100/80">
+        <div className="max-w-2xl mx-auto px-6 py-10 sm:py-14">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
+                  <Search className="w-3.5 h-3.5 text-white" />
+                </div>
+                <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Enquiry Status</p>
+              </div>
+              <h1
+                className="font-black tracking-tight text-gray-950 leading-[1.02]"
+                style={{ fontSize: "clamp(2rem, 5vw, 3.25rem)" }}
+              >
+                Track Your<br />Enquiry.
+              </h1>
+              <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
+                Look up by reference number or the phone number you used when submitting.
+              </p>
+            </motion.div>
+
+            {/* Animated illustration */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="hidden sm:block shrink-0"
+            >
+              <TrackIllustration />
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      <main className="flex-1 max-w-2xl mx-auto px-6 py-16 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="space-y-4 mb-10"
-        >
-          <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold">Enquiry Status</p>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-gray-950">Track Your Enquiry</h1>
-          <p className="text-gray-400 text-base leading-relaxed">
-            Look up your enquiry by reference number, or by the phone number you used when submitting.
-          </p>
-        </motion.div>
+      {/* Sticky breadcrumb bar — no extra padding */}
+      <div className="border-b border-gray-100 bg-white/95 backdrop-blur-xl sticky top-16 z-30">
+        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center gap-2">
+          <Search className="w-3.5 h-3.5 text-teal-500" />
+          <span className="text-xs font-bold text-gray-600 tracking-wide">Track Enquiry</span>
+        </div>
+      </div>
+
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-10 w-full">
 
         {/* Mode toggle */}
         <div className="flex gap-1 p-1 bg-gray-100 rounded-xl mb-8 w-fit">
@@ -208,9 +374,9 @@ export default function Track() {
               </p>
 
               {refLoading && searchRef && (
-                <div className="flex items-center gap-3 text-gray-400 py-8">
-                  <Clock className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">Looking up your enquiry...</span>
+                <div className="flex items-center gap-4 py-8">
+                  <DottedSpinner size={36} />
+                  <span className="text-sm text-gray-400 font-medium">Looking up your enquiry...</span>
                 </div>
               )}
 
@@ -351,9 +517,9 @@ export default function Track() {
               </p>
 
               {phoneLoading && searchPhone && (
-                <div className="flex items-center gap-3 text-gray-400 py-8">
-                  <Clock className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">Searching for your enquiry...</span>
+                <div className="flex items-center gap-4 py-8">
+                  <DottedSpinner size={36} />
+                  <span className="text-sm text-gray-400 font-medium">Searching for your enquiry...</span>
                 </div>
               )}
 

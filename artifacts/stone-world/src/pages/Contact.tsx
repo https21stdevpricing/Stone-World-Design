@@ -2,7 +2,10 @@ import { useState } from "react";
 import { Footer } from "@/components/Footer";
 import { useCreateEnquiry, useGetPublicSettings } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, ArrowRight, MapPin, Phone, Mail, MessageCircle, ArrowLeft, AlertCircle } from "lucide-react";
+import {
+  CheckCircle2, ArrowRight, MapPin, Phone, Mail,
+  MessageCircle, ArrowLeft, AlertCircle, MessageSquare
+} from "lucide-react";
 import { EnquiryAudience } from "@workspace/api-client-react";
 import { Link } from "wouter";
 
@@ -21,6 +24,106 @@ const SLIDE = {
   exit: { opacity: 0, x: -28, y: 0 },
   transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
 };
+
+function ContactIllustration() {
+  return (
+    <svg width="220" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Phone outline */}
+      <motion.rect
+        x="70" y="20" width="80" height="120" rx="12"
+        stroke="#E5E7EB" strokeWidth="2.5" fill="white"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      />
+      {/* Screen */}
+      <motion.rect
+        x="78" y="34" width="64" height="82" rx="4"
+        fill="#F8FFFE"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+      />
+      {/* Message bubbles on screen */}
+      <motion.rect
+        x="84" y="42" width="38" height="10" rx="5"
+        fill="#00B4B4"
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.6 }}
+      />
+      <motion.rect
+        x="84" y="57" width="52" height="10" rx="5"
+        fill="#E5E7EB"
+        initial={{ opacity: 0, x: 10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.8 }}
+      />
+      <motion.rect
+        x="84" y="72" width="44" height="10" rx="5"
+        fill="#00B4B4"
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 1.0 }}
+      />
+      <motion.rect
+        x="84" y="87" width="30" height="10" rx="5"
+        fill="#E5E7EB"
+        initial={{ opacity: 0, x: 10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 1.2 }}
+      />
+      {/* Typing indicator */}
+      {[0, 1, 2].map((i) => (
+        <motion.circle
+          key={i}
+          cx={89 + i * 8}
+          cy={107}
+          r={2.5}
+          fill="#9CA3AF"
+          animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
+          transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.2 }}
+        />
+      ))}
+      {/* Home button */}
+      <motion.circle
+        cx="110" cy="128" r="5"
+        stroke="#E5E7EB" strokeWidth="1.5" fill="white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      />
+
+      {/* Floating notification badge */}
+      <motion.g
+        initial={{ opacity: 0, scale: 0, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 1.5, type: "spring" }}
+      >
+        <rect x="128" y="12" width="72" height="30" rx="8" fill="#00B4B4"/>
+        <text x="164" y="22" textAnchor="middle" fontSize="7.5" fontWeight="700" fill="white" fontFamily="system-ui">We'll reply</text>
+        <text x="164" y="33" textAnchor="middle" fontSize="7.5" fontWeight="700" fill="rgba(255,255,255,0.8)" fontFamily="system-ui">within 24hrs</text>
+      </motion.g>
+
+      {/* Map pin */}
+      <motion.g
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4, type: "spring", stiffness: 200 }}
+      >
+        <ellipse cx="28" cy="140" rx="10" ry="4" fill="#E5E7EB"/>
+        <path d="M28 90 C20 90 14 96 14 104 C14 116 28 130 28 130 C28 130 42 116 42 104 C42 96 36 90 28 90Z" fill="#1A1A1A"/>
+        <circle cx="28" cy="104" r="5" fill="white"/>
+        <motion.circle
+          cx="28" cy="104" r="9"
+          stroke="#00B4B4" strokeWidth="1.5" fill="none"
+          animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0, 0.8] }}
+          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+        />
+      </motion.g>
+    </svg>
+  );
+}
 
 export default function Contact() {
   const [step, setStep] = useState(1);
@@ -77,15 +180,53 @@ export default function Contact() {
     );
   };
 
-  const stepLabel = ["", "Who are you?", "Interests", "Your details", "Your project", "Done!"][step] || "";
   const progress = ((step - 1) / 4) * 100;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
+
+      {/* ── APPLE STORIES HERO ── */}
+      <div className="pt-16 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-10 sm:py-14">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-3"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
+                  <MessageSquare className="w-3.5 h-3.5 text-white" />
+                </div>
+                <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Get in Touch</p>
+              </div>
+              <h1
+                className="font-black tracking-tight text-gray-950 leading-[1.02]"
+                style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+              >
+                Start Your<br />Project Today.
+              </h1>
+              <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
+                Tell us about your project and our material specialists will craft a personalised recommendation within 24 hours.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="hidden sm:block shrink-0"
+            >
+              <ContactIllustration />
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
       <div className="flex-1 flex flex-col lg:flex-row">
 
         {/* ── LEFT: FORM ── */}
-        <div className="flex-1 flex flex-col pt-16 min-h-screen">
+        <div className="flex-1 flex flex-col">
 
           {/* Progress header */}
           <div className="border-b border-gray-100/80 bg-white/85 backdrop-blur-xl sticky top-16 z-30">
@@ -120,9 +261,9 @@ export default function Contact() {
                 <motion.div key="s1" {...SLIDE} className="space-y-10">
                   <div>
                     <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 1 of 4</p>
-                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                    <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
                       Who are you?
-                    </h1>
+                    </h2>
                     <p className="text-gray-400 text-base">Help us tailor the experience to your needs.</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -145,9 +286,9 @@ export default function Contact() {
                 <motion.div key="s2" {...SLIDE} className="space-y-10">
                   <div>
                     <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 2 of 4</p>
-                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                    <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
                       What are you looking for?
-                    </h1>
+                    </h2>
                     <p className="text-gray-400 text-base">Select all that apply to your project.</p>
                   </div>
                   <div className="flex flex-wrap gap-3">
@@ -177,14 +318,14 @@ export default function Contact() {
                 </motion.div>
               )}
 
-              {/* STEP 3: Details (fill-in style) */}
+              {/* STEP 3: Details */}
               {step === 3 && (
                 <motion.div key="s3" {...SLIDE} className="space-y-10">
                   <div>
                     <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 3 of 4</p>
-                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                    <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
                       A little about you.
-                    </h1>
+                    </h2>
                     <p className="text-gray-400 text-base">We need just your name and number to get started.</p>
                   </div>
 
@@ -248,9 +389,9 @@ export default function Contact() {
                 <motion.div key="s4" {...SLIDE} className="space-y-10">
                   <div>
                     <p className="text-[11px] text-teal-500 tracking-[0.3em] uppercase font-semibold mb-3">Step 4 of 4</p>
-                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
+                    <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-gray-950 mb-2">
                       Tell us your vision.
-                    </h1>
+                    </h2>
                     <p className="text-gray-400 text-base">Describe your project, requirements, or any questions you have.</p>
                   </div>
                   <div>
@@ -289,13 +430,18 @@ export default function Contact() {
                   transition={{ duration: 0.35 }}
                   className="flex flex-col items-center text-center py-12 space-y-6"
                 >
-                  <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
+                    className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center"
+                  >
                     <CheckCircle2 className="w-8 h-8 text-teal-500" />
-                  </div>
+                  </motion.div>
                   <div>
-                    <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950 mb-3">
+                    <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-gray-950 mb-3">
                       Enquiry Received!
-                    </h1>
+                    </h2>
                     <p className="text-gray-500 leading-relaxed max-w-md">
                       Thank you, <strong className="text-gray-800">{formData.name}</strong>. Our material specialists will reach out to you at <strong className="text-gray-800">{formData.phone}</strong> within 24 hours.
                     </p>
@@ -333,7 +479,7 @@ export default function Contact() {
         </div>
 
         {/* ── RIGHT: SIDEBAR ── */}
-        <div className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-gray-100 bg-gray-50/50 pt-16">
+        <div className="hidden lg:flex flex-col w-80 xl:w-96 border-l border-gray-100 bg-gray-50/50">
           <div className="sticky top-16 p-10 space-y-10">
             <div>
               <h3 className="font-black text-xl text-gray-950 tracking-tight mb-2">Connect Directly</h3>
@@ -343,32 +489,22 @@ export default function Contact() {
             </div>
 
             <div className="space-y-5">
-              {settings?.address && (
-                <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
-                    <MapPin className="w-4 h-4 text-teal-500" />
-                  </div>
-                  <div className="text-sm text-gray-600 leading-relaxed">{settings.address}</div>
+              <div className="flex gap-3 items-start">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                  <MapPin className="w-4 h-4 text-teal-500" />
                 </div>
-              )}
-              {!settings?.address && (
-                <div className="flex gap-3 items-start">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
-                    <MapPin className="w-4 h-4 text-teal-500" />
-                  </div>
-                  <div className="text-sm text-gray-600">Pitampura, New Delhi, India</div>
+                <div className="text-sm text-gray-600 leading-relaxed">
+                  {settings?.address || "Pitampura, New Delhi, India"}
                 </div>
-              )}
-              {(settings?.phone || true) && (
-                <div className="flex gap-3 items-center">
-                  <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
-                    <Phone className="w-4 h-4 text-teal-500" />
-                  </div>
-                  <a href={`tel:${settings?.phone || "+919999999999"}`} className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors">
-                    {settings?.phone || "+91 99999 99999"}
-                  </a>
+              </div>
+              <div className="flex gap-3 items-center">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                  <Phone className="w-4 h-4 text-teal-500" />
                 </div>
-              )}
+                <a href={`tel:${settings?.phone || "+919999999999"}`} className="text-sm font-semibold text-gray-700 hover:text-teal-600 transition-colors">
+                  {settings?.phone || "+91 99999 99999"}
+                </a>
+              </div>
               {settings?.whatsapp && (
                 <div className="flex gap-3 items-center">
                   <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">

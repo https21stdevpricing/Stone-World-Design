@@ -18,29 +18,36 @@ export default function Blog() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
 
-      {/* Dark hero header — Apple Stories style */}
-      <div className="pt-16 bg-gray-950">
-        <div className="max-w-5xl mx-auto px-6 py-16 sm:py-20 space-y-4">
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-              <BookOpen className="w-3.5 h-3.5 text-white" />
-            </div>
-            <p className="text-teal-400 text-[10px] tracking-[0.3em] font-black uppercase">Insights &amp; Ideas</p>
-          </div>
-          <h1
-            className="font-black tracking-tight text-white leading-[1.03]"
-            style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}
+      {/* Apple Stories-style hero — white */}
+      <div className="pt-16 bg-white border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-6 py-14 sm:py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-4"
           >
-            The Journal.
-          </h1>
-          <p className="text-gray-400 max-w-xl leading-relaxed text-sm">
-            Design perspectives, material deep-dives, and architectural inspiration curated by our team.
-          </p>
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
+                <BookOpen className="w-3.5 h-3.5 text-white" />
+              </div>
+              <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Insights &amp; Ideas</p>
+            </div>
+            <h1
+              className="font-black tracking-tight text-gray-950 leading-[1.03]"
+              style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}
+            >
+              The Journal.
+            </h1>
+            <p className="text-gray-400 max-w-xl leading-relaxed text-sm">
+              Design perspectives, material deep-dives, and architectural inspiration curated by our team.
+            </p>
+          </motion.div>
         </div>
       </div>
 
-      {/* Sticky label — glassmorphic */}
-      <div className="sticky top-16 z-30 bg-white/85 backdrop-blur-xl border-b border-gray-100/80">
+      {/* Sticky label */}
+      <div className="sticky top-16 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100/80">
         <div className="max-w-5xl mx-auto px-6 py-2.5 flex items-center gap-2">
           <BookOpen className="w-3.5 h-3.5 text-teal-500" />
           <span className="text-xs font-bold text-gray-600 tracking-wide">Journal</span>

@@ -30,42 +30,60 @@ export default function About() {
   return (
     <div className="bg-white">
 
-      {/* ── HERO ── */}
-      <section className="relative min-h-[70vh] flex items-end pb-16 overflow-hidden bg-gray-950 pt-16">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-          <div className="absolute inset-0 opacity-20" style={{
-            backgroundImage: `radial-gradient(ellipse at 30% 70%, rgba(0,180,180,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 30%, rgba(0,180,180,0.08) 0%, transparent 50%)`,
-          }} />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-        <div className="relative z-10 max-w-6xl mx-auto px-6 w-full">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-5"
-          >
-            <div className="flex items-center gap-2.5 mb-1">
-              <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                <Award className="w-3.5 h-3.5 text-white" />
-              </div>
-              <p className="text-teal-400 text-[10px] tracking-[0.3em] font-black uppercase">Our Story</p>
-            </div>
-            <h1
-              className="font-black tracking-tight text-white leading-[1.0]"
-              style={{ fontSize: "clamp(2.5rem, 7vw, 5.5rem)" }}
+      {/* ── HERO — Apple-style white ── */}
+      <section className="pt-16 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6 py-14 sm:py-20">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-5"
             >
-              A Legacy<br />Carved in Stone.
-            </h1>
-            <p className="text-white/50 text-base sm:text-lg max-w-xl leading-relaxed">
-              Twenty years of curating India's finest building materials. One city. One vision. A nation transformed.
-            </p>
-            <div className="flex items-center gap-2 text-white/40 text-sm">
-              <MapPin className="w-4 h-4 text-teal-400" />
-              <span>Pitampura, New Delhi · Est. 2003</span>
-            </div>
-          </motion.div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
+                  <Award className="w-3.5 h-3.5 text-white" />
+                </div>
+                <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Our Story</p>
+              </div>
+              <h1
+                className="font-black tracking-tight text-gray-950 leading-[1.0]"
+                style={{ fontSize: "clamp(2.5rem, 6vw, 5rem)" }}
+              >
+                A Legacy<br />Carved in Stone.
+              </h1>
+              <p className="text-gray-400 text-base sm:text-lg max-w-xl leading-relaxed">
+                Twenty years of curating India's finest building materials. One city. One vision. A nation transformed.
+              </p>
+              <div className="flex items-center gap-2 text-gray-400 text-sm">
+                <MapPin className="w-4 h-4 text-teal-500" />
+                <span>Pitampura, New Delhi · Est. 2003</span>
+              </div>
+            </motion.div>
+
+            {/* Right: marble hero image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-gray-100 shadow-xl shadow-gray-200/60"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=900&q=85&auto=format&fit=crop"
+                alt="Premium marble interior"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+              <div className="absolute bottom-5 left-5 right-5 flex gap-4">
+                {STATS.slice(0, 2).map((s, i) => (
+                  <div key={i} className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-3">
+                    <p className="text-base font-black text-gray-950 leading-none">{s.value}</p>
+                    <p className="text-[10px] text-gray-500 font-medium mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 

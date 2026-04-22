@@ -566,7 +566,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TrackedEnquiry"
+                  $ref: "#/components/schemas/PhoneEnquirySummary"
         "400":
           description: Invalid phone
           content:
@@ -1236,6 +1236,21 @@ components:
       required:
         - success
         - referenceNumber
+
+    PhoneEnquirySummary:
+      type: object
+      properties:
+        referenceNumber:
+          type: string
+          nullable: true
+        status:
+          $ref: "#/components/schemas/EnquiryStatus"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - status
+        - createdAt
 
     TrackedEnquiry:
       type: object

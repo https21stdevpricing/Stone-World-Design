@@ -44,6 +44,7 @@ import type {
   ListProductsParams,
   MarkReadBody,
   MediaItem,
+  PhoneEnquirySummary,
   Product,
   ProductListResponse,
   PublicSettings,
@@ -2214,8 +2215,8 @@ export const getTrackByPhoneUrl = (params: TrackByPhoneParams) => {
 export const trackByPhone = async (
   params: TrackByPhoneParams,
   options?: RequestInit,
-): Promise<TrackedEnquiry[]> => {
-  return customFetch<TrackedEnquiry[]>(getTrackByPhoneUrl(params), {
+): Promise<PhoneEnquirySummary[]> => {
+  return customFetch<PhoneEnquirySummary[]>(getTrackByPhoneUrl(params), {
     ...options,
     method: "GET",
   });

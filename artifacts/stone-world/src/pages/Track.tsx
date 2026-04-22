@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Footer } from "@/components/Footer";
-import { useTrackEnquiry, useTrackByPhone } from "@workspace/api-client-react";
-import type { TrackedEnquiry } from "@workspace/api-client-react";
+import {
+  useTrackEnquiry,
+  useTrackByPhone,
+  getTrackEnquiryQueryKey,
+  getTrackByPhoneQueryKey,
+} from "@workspace/api-client-react";
+import type { TrackedEnquiry, PhoneEnquirySummary } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, CheckCircle2, Clock, MessageSquare, FileText, XCircle,
@@ -70,7 +75,7 @@ export default function Track() {
 
   const refQuery = useTrackEnquiry(
     { ref: searchRef },
-    { query: { enabled: !!searchRef, retry: false } }
+    { query: { queryKey: getTrackEnquiryQueryKey({ ref: searchRef }), enabled: !!searchRef, retry: false } }
   );
   const enquiry = refQuery.data;
   const refLoading = refQuery.isLoading;
@@ -78,9 +83,9 @@ export default function Track() {
 
   const phoneQuery = useTrackByPhone(
     { phone: searchPhone },
-    { query: { enabled: !!searchPhone, retry: false } }
+    { query: { queryKey: getTrackByPhoneQueryKey({ phone: searchPhone }), enabled: !!searchPhone, retry: false } }
   );
-  const phoneResult: TrackedEnquiry | undefined = phoneQuery.data?.[0];
+  const phoneResult: PhoneEnquirySummary | undefined = phoneQuery.data?.[0];
   const phoneLoading = phoneQuery.isLoading;
   const phoneError = phoneQuery.isError;
 
@@ -407,7 +412,7 @@ export default function Track() {
 
                   {phoneResult.referenceNumber && (
                     <button
-                      onClick={() => handleSelectRef(phoneResult.referenceNumber)}
+                      onClick={() => handleSelectRef(phoneResult.referenceNumber ?? null)}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-teal-500 text-white font-semibold text-sm hover:bg-teal-600 transition-colors"
                     >
                       View Full Details <ArrowRight className="w-4 h-4" />

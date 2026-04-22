@@ -192,6 +192,12 @@ export interface CreateEnquiryResponse {
   referenceNumber: string;
 }
 
+export interface PhoneEnquirySummary {
+  referenceNumber?: string | null;
+  status: EnquiryStatus;
+  createdAt: string;
+}
+
 export interface TrackedEnquiry {
   id: number;
   name: string;

@@ -487,13 +487,8 @@ export const TrackByPhoneQueryParams = zod.object({
 });
 
 export const TrackByPhoneResponseItem = zod.object({
-  id: zod.number(),
-  name: zod.string(),
-  phone: zod.string(),
-  referenceNumber: zod.string(),
+  referenceNumber: zod.string().nullish(),
   status: zod.enum(["new", "in_discussion", "quoted", "closed"]),
-  message: zod.string(),
-  productInterest: zod.string().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const TrackByPhoneResponse = zod.array(TrackByPhoneResponseItem);

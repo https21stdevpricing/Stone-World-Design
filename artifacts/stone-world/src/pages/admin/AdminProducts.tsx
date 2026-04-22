@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useListCategories, getListProductsQueryKey } from "@workspace/api-client-react";
+import {
+  useListProducts, useCreateProduct, useUpdateProduct, useDeleteProduct,
+  useListCategories, getListProductsQueryKey, useBulkDeleteProducts, useBulkToggleProductAvailability,
+  type Product,
+} from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,7 +18,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 
 const productSchema = z.object({
@@ -33,6 +38,7 @@ export default function AdminProducts() {
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -41,6 +47,11 @@ export default function AdminProducts() {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
+  const bulkDelete = useBulkDeleteProducts();
+  const bulkToggle = useBulkToggleProductAvailability();
+
+  const products = data?.products ?? [];
+  const allSelected = products.length > 0 && selectedIds.size === products.length;
 
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
@@ -58,7 +69,23 @@ export default function AdminProducts() {
     }
   });
 
-  const openEdit = (product: any) => {
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(products.map(p => p.id)));
+    }
+  };
+
+  const toggleSelectOne = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const openEdit = (product: Product) => {
     setEditingId(product.id);
     form.reset({
       name: product.name,
@@ -120,16 +147,40 @@ export default function AdminProducts() {
     }
   };
 
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return;
+    if (confirm(`Delete ${selectedIds.size} selected product(s)?`)) {
+      bulkDelete.mutate({ data: { ids: Array.from(selectedIds) } }, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+          setSelectedIds(new Set());
+          toast({ title: `${selectedIds.size} product(s) deleted` });
+        }
+      });
+    }
+  };
+
+  const handleBulkToggle = (available: boolean) => {
+    if (selectedIds.size === 0) return;
+    bulkToggle.mutate({ data: { ids: Array.from(selectedIds), available } }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListProductsQueryKey() });
+        setSelectedIds(new Set());
+        toast({ title: `${selectedIds.size} product(s) marked ${available ? "available" : "unavailable"}` });
+      }
+    });
+  };
+
   return (
     <AdminLayout>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-serif">Products</h1>
+          <h1 className="text-3xl font-serif" data-testid="admin-products-title">Products</h1>
           <p className="text-muted-foreground">Manage your catalog.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 h-4 w-4" /> Add Product</Button>
+            <Button data-testid="button-add-product"><Plus className="mr-2 h-4 w-4" /> Add Product</Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -138,7 +189,7 @@ export default function AdminProducts() {
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField control={form.control} name="name" render={({ field }) => (
-                  <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} data-testid="input-product-name" /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
@@ -196,15 +247,54 @@ export default function AdminProducts() {
       </div>
 
       <div className="bg-card rounded-lg border">
-        <div className="p-4 border-b flex gap-4">
+        <div className="p-4 border-b flex items-center gap-4 flex-wrap">
           <div className="relative w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-8" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <Input className="pl-8" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} data-testid="input-search-products" />
           </div>
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="text-sm text-muted-foreground">{selectedIds.size} selected</span>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleBulkToggle(true)}
+                disabled={bulkToggle.isPending}
+                data-testid="button-bulk-enable"
+              >
+                <ToggleRight className="mr-2 h-4 w-4" /> Mark Available
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleBulkToggle(false)}
+                disabled={bulkToggle.isPending}
+                data-testid="button-bulk-disable"
+              >
+                <ToggleLeft className="mr-2 h-4 w-4" /> Mark Unavailable
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={handleBulkDelete}
+                disabled={bulkDelete.isPending}
+                data-testid="button-bulk-delete"
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete Selected
+              </Button>
+            </div>
+          )}
         </div>
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={toggleSelectAll}
+                  data-testid="checkbox-select-all"
+                />
+              </TableHead>
               <TableHead>Image</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Category</TableHead>
@@ -216,11 +306,18 @@ export default function AdminProducts() {
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={7} className="text-center">Loading...</TableCell></TableRow>
-            ) : data?.products.map((product) => (
-              <TableRow key={product.id}>
+              <TableRow><TableCell colSpan={8} className="text-center">Loading...</TableCell></TableRow>
+            ) : products.map((product) => (
+              <TableRow key={product.id} data-testid={`row-product-${product.id}`}>
                 <TableCell>
-                  {product.imageUrl ? <img src={product.imageUrl} className="h-10 w-10 rounded object-cover" /> : <div className="h-10 w-10 bg-muted rounded" />}
+                  <Checkbox
+                    checked={selectedIds.has(product.id)}
+                    onCheckedChange={() => toggleSelectOne(product.id)}
+                    data-testid={`checkbox-product-${product.id}`}
+                  />
+                </TableCell>
+                <TableCell>
+                  {product.imageUrl ? <img src={product.imageUrl} className="h-10 w-10 rounded object-cover" alt={product.name} /> : <div className="h-10 w-10 bg-muted rounded" />}
                 </TableCell>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{product.categoryName}</TableCell>
@@ -230,8 +327,8 @@ export default function AdminProducts() {
                   {product.available ? <span className="text-green-600 text-xs font-medium">In Stock</span> : <span className="text-red-600 text-xs font-medium">Out of Stock</span>}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(product)}><Pencil className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(product.id)}><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(product)} data-testid={`button-edit-product-${product.id}`}><Pencil className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDelete(product.id)} data-testid={`button-delete-product-${product.id}`}><Trash2 className="h-4 w-4" /></Button>
                 </TableCell>
               </TableRow>
             ))}

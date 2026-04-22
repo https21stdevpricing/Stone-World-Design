@@ -1,46 +1,62 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useListEnquiries, useMarkEnquiryRead, getListEnquiriesQueryKey, exportEnquiries } from "@workspace/api-client-react";
+import {
+  useListEnquiries, useMarkEnquiryRead, getListEnquiriesQueryKey, exportEnquiries,
+  type Enquiry, type ListEnquiriesAudience,
+} from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isAfter, isBefore, startOfDay, endOfDay, parseISO } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Download } from "lucide-react";
-import { ListEnquiriesAudience } from "@workspace/api-client-react";
+import { Download, Mail, MailOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
+type ReadFilter = "all" | "read" | "unread";
 
 export default function AdminEnquiries() {
   const [audience, setAudience] = useState<ListEnquiriesAudience>("all");
-  const [selectedEnquiry, setSelectedEnquiry] = useState<any | null>(null);
-  
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useListEnquiries({ 
-    audience: audience === "all" ? undefined : audience,
-    limit: 100 
-  });
-  
+  const [readFilter, setReadFilter] = useState<ReadFilter>("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [selectedEnquiry, setSelectedEnquiry] = useState<Enquiry | null>(null);
   const [exporting, setExporting] = useState(false);
+
+  const queryClient = useQueryClient();
+  const { data, isLoading } = useListEnquiries({
+    audience: audience === "all" ? undefined : audience,
+    limit: 200
+  });
+
   const markRead = useMarkEnquiryRead();
 
-  const handleRowClick = (enq: any) => {
+  const handleRowClick = (enq: Enquiry) => {
     setSelectedEnquiry(enq);
-    if (!enq.isRead) {
-      markRead.mutate({ id: enq.id, data: { isRead: true } }, {
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: getListEnquiriesQueryKey() })
-      });
-    }
+  };
+
+  const toggleReadStatus = (enq: Enquiry, e: React.MouseEvent) => {
+    e.stopPropagation();
+    markRead.mutate({ id: enq.id, data: { isRead: !enq.isRead } }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getListEnquiriesQueryKey() });
+        if (selectedEnquiry?.id === enq.id) {
+          setSelectedEnquiry({ ...selectedEnquiry, isRead: !enq.isRead });
+        }
+      }
+    });
   };
 
   const handleExport = async () => {
     try {
       setExporting(true);
       const csvData = await exportEnquiries(audience === "all" ? undefined : { audience });
-      const blob = new Blob([csvData as unknown as BlobPart], { type: 'text/csv' });
+      const blob = new Blob([csvData as unknown as BlobPart], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `enquiries-${format(new Date(), 'yyyy-MM-dd')}.csv`;
+      a.download = `enquiries-${format(new Date(), "yyyy-MM-dd")}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -52,59 +68,133 @@ export default function AdminEnquiries() {
     }
   };
 
+  const filteredEnquiries = (data?.enquiries ?? []).filter((enq) => {
+    if (readFilter === "read" && !enq.isRead) return false;
+    if (readFilter === "unread" && enq.isRead) return false;
+    if (dateFrom) {
+      try {
+        if (isBefore(parseISO(enq.createdAt), startOfDay(parseISO(dateFrom)))) return false;
+      } catch { /* ignore parse errors */ }
+    }
+    if (dateTo) {
+      try {
+        if (isAfter(parseISO(enq.createdAt), endOfDay(parseISO(dateTo)))) return false;
+      } catch { /* ignore parse errors */ }
+    }
+    return true;
+  });
+
+  const unreadCount = data?.unread ?? 0;
+
   return (
     <AdminLayout>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-serif">Enquiries</h1>
-          <p className="text-muted-foreground">Manage customer messages.</p>
+          <h1 className="text-3xl font-serif" data-testid="admin-enquiries-title">Enquiries</h1>
+          <p className="text-muted-foreground">
+            {unreadCount > 0 && <span className="text-primary font-medium">{unreadCount} unread &middot; </span>}
+            {data?.total ?? 0} total
+          </p>
         </div>
-        <div className="flex gap-4">
-          <Select value={audience} onValueChange={(v) => setAudience(v as ListEnquiriesAudience)}>
-            <SelectTrigger className="w-48"><SelectValue placeholder="All Profiles" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Profiles</SelectItem>
-              <SelectItem value="homeowner">Homeowner</SelectItem>
-              <SelectItem value="contractor">Contractor</SelectItem>
-              <SelectItem value="architect">Architect</SelectItem>
-              <SelectItem value="developer">Developer</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" onClick={handleExport} disabled={exporting}>
-            <Download className="mr-2 h-4 w-4" /> Export CSV
+        <Button variant="outline" onClick={handleExport} disabled={exporting} data-testid="button-export-csv">
+          <Download className="mr-2 h-4 w-4" /> Export CSV
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-6">
+        <Select value={audience} onValueChange={(v) => setAudience(v as ListEnquiriesAudience)}>
+          <SelectTrigger className="w-44" data-testid="select-audience-filter"><SelectValue placeholder="All Profiles" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Profiles</SelectItem>
+            <SelectItem value="homeowner">Homeowner</SelectItem>
+            <SelectItem value="contractor">Contractor</SelectItem>
+            <SelectItem value="architect">Architect</SelectItem>
+            <SelectItem value="developer">Developer</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={readFilter} onValueChange={(v) => setReadFilter(v as ReadFilter)}>
+          <SelectTrigger className="w-40" data-testid="select-read-filter"><SelectValue placeholder="All Status" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="unread">Unread Only</SelectItem>
+            <SelectItem value="read">Read Only</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">From</span>
+          <Input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-40"
+            data-testid="input-date-from"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">To</span>
+          <Input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-40"
+            data-testid="input-date-to"
+          />
+        </div>
+        {(dateFrom || dateTo || readFilter !== "all" || audience !== "all") && (
+          <Button variant="ghost" size="sm" onClick={() => { setDateFrom(""); setDateTo(""); setReadFilter("all"); setAudience("all"); }}>
+            Clear Filters
           </Button>
-        </div>
+        )}
       </div>
 
       <div className="bg-card rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Status</TableHead>
+              <TableHead className="w-8"></TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Profile</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Interest</TableHead>
+              <TableHead className="text-right">Read</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={6} className="text-center">Loading...</TableCell></TableRow>
-            ) : data?.enquiries.map((enq) => (
-              <TableRow 
-                key={enq.id} 
-                className={`cursor-pointer hover:bg-muted/50 ${!enq.isRead ? 'bg-primary/5 font-medium' : ''}`}
+              <TableRow><TableCell colSpan={7} className="text-center">Loading...</TableCell></TableRow>
+            ) : filteredEnquiries.length === 0 ? (
+              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No enquiries match the current filters.</TableCell></TableRow>
+            ) : filteredEnquiries.map((enq) => (
+              <TableRow
+                key={enq.id}
+                className={`cursor-pointer hover:bg-muted/50 ${!enq.isRead ? "bg-primary/5" : ""}`}
                 onClick={() => handleRowClick(enq)}
+                data-testid={`row-enquiry-${enq.id}`}
               >
                 <TableCell>
-                  {!enq.isRead ? <span className="flex h-2 w-2 rounded-full bg-primary" /> : <span className="flex h-2 w-2 rounded-full bg-muted-foreground" />}
+                  <span className={`flex h-2 w-2 rounded-full ${!enq.isRead ? "bg-primary" : "bg-muted-foreground/30"}`} />
                 </TableCell>
-                <TableCell>{format(new Date(enq.createdAt), "MMM d, yyyy")}</TableCell>
-                <TableCell>{enq.name}</TableCell>
-                <TableCell className="capitalize">{enq.audience}</TableCell>
+                <TableCell className={!enq.isRead ? "font-medium" : ""}>{format(parseISO(enq.createdAt), "MMM d, yyyy")}</TableCell>
+                <TableCell className={!enq.isRead ? "font-medium" : ""}>{enq.name}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="capitalize">{enq.audience}</Badge>
+                </TableCell>
                 <TableCell>{enq.phone}</TableCell>
-                <TableCell className="truncate max-w-[200px]">{enq.productInterest || '-'}</TableCell>
+                <TableCell className="truncate max-w-[200px] text-muted-foreground text-sm">{enq.productInterest || "-"}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => toggleReadStatus(enq, e)}
+                    title={enq.isRead ? "Mark as Unread" : "Mark as Read"}
+                    data-testid={`button-toggle-read-${enq.id}`}
+                  >
+                    {enq.isRead ? <MailOpen className="h-4 w-4 text-muted-foreground" /> : <Mail className="h-4 w-4 text-primary" />}
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -118,47 +208,58 @@ export default function AdminEnquiries() {
           </DialogHeader>
           {selectedEnquiry && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Name / Company</p>
-                  <p className="font-medium">{selectedEnquiry.name}</p>
+              <div className="flex justify-between items-start">
+                <div className="grid grid-cols-2 gap-4 flex-1">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Name / Company</p>
+                    <p className="font-medium">{selectedEnquiry.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Profile</p>
+                    <Badge variant="outline" className="capitalize">{selectedEnquiry.audience}</Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Phone</p>
+                    <p className="font-medium">{selectedEnquiry.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="font-medium">{selectedEnquiry.email || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Location</p>
+                    <p className="font-medium">{selectedEnquiry.location || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Date</p>
+                    <p className="font-medium">{format(parseISO(selectedEnquiry.createdAt), "PPpp")}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Profile</p>
-                  <p className="font-medium capitalize">{selectedEnquiry.audience}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{selectedEnquiry.phone}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{selectedEnquiry.email || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Location</p>
-                  <p className="font-medium">{selectedEnquiry.location || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
-                  <p className="font-medium">{format(new Date(selectedEnquiry.createdAt), "PPpp")}</p>
-                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => toggleReadStatus(selectedEnquiry, e)}
+                  className="ml-4 shrink-0"
+                  data-testid="button-detail-toggle-read"
+                >
+                  {selectedEnquiry.isRead ? <><MailOpen className="mr-2 h-4 w-4" /> Mark Unread</> : <><Mail className="mr-2 h-4 w-4" /> Mark Read</>}
+                </Button>
               </div>
 
               <div className="bg-muted p-4 rounded-lg space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Project Type / Scale</p>
-                    <p className="font-medium">{selectedEnquiry.projectType || '-'}</p>
+                    <p className="font-medium">{selectedEnquiry.projectType || "-"}</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Budget</p>
-                    <p className="font-medium">{selectedEnquiry.budget || '-'}</p>
+                    <p className="font-medium">{selectedEnquiry.budget || "-"}</p>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Product Interest</p>
-                  <p className="font-medium">{selectedEnquiry.productInterest || '-'}</p>
+                  <p className="font-medium">{selectedEnquiry.productInterest || "-"}</p>
                 </div>
               </div>
 

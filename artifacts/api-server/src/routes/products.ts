@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, productsTable, categoriesTable } from "@workspace/db";
+import { db, productsTable, categoriesTable, type Product as DbProduct } from "@workspace/db";
 import { eq, sql, ilike, and, inArray, asc, desc } from "drizzle-orm";
 import {
   ListProductsQueryParams,
@@ -15,7 +15,7 @@ import { requireAdmin } from "./admin";
 
 const router: IRouter = Router();
 
-function buildProductResult(p: any, catName?: string | null) {
+function buildProductResult(p: DbProduct, catName?: string | null) {
   return {
     id: p.id,
     name: p.name,

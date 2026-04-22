@@ -10,8 +10,6 @@ import { format } from "date-fns";
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
   
-  // We don't have a getBlogPostBySlug endpoint, so we fetch all and filter locally for simplicity in this demo.
-  // In a real app, there should be a `useGetBlogPostBySlug`.
   const { data, isLoading } = useListBlogPosts({ published: true, limit: 100 });
   const post = data?.posts.find(p => p.slug === params?.slug);
 

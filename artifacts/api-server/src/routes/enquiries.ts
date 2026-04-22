@@ -118,7 +118,7 @@ router.get("/enquiries/track-by-phone", async (req, res): Promise<void> => {
     .from(enquiriesTable)
     .where(
       and(
-        sql`right(regexp_replace(${enquiriesTable.phone}, '[^0-9]', '', 'g'), 10) LIKE ${normalizedInput}`,
+        sql`right(regexp_replace(${enquiriesTable.phone}, '[^0-9]', '', 'g'), 10) = ${normalizedInput}`,
         ne(enquiriesTable.status, "closed")
       )
     )

@@ -100,41 +100,46 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
               {/* Search input */}
               <div className="flex items-center gap-3 px-4 py-3.5 border-b border-gray-100">
-                <Search className="w-4.5 h-4.5 text-teal-500 shrink-0" strokeWidth={2.5} style={{ width: 18, height: 18 }} />
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={phIdx + "-ph"}
-                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-                    transition={{ duration: 0.22 }}
-                    className="absolute pointer-events-none text-sm text-gray-400 left-[3.75rem]"
-                    style={{ display: query ? "none" : undefined }}
+                <Search className="shrink-0 text-teal-500" strokeWidth={2.5} style={{ width: 18, height: 18 }} />
+                <div className="relative flex-1 flex items-center min-w-0">
+                  <AnimatePresence mode="wait">
+                    {!query && (
+                      <motion.span
+                        key={phIdx + "-ph"}
+                        initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.22 }}
+                        className="absolute pointer-events-none text-sm text-gray-400 truncate w-full"
+                      >
+                        {PLACEHOLDERS[phIdx]}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  <input
+                    ref={inputRef}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && query.trim()) go(`/discover?search=${encodeURIComponent(query.trim())}`);
+                    }}
+                    className="w-full text-sm text-gray-900 font-medium bg-transparent outline-none placeholder-transparent"
+                    placeholder={PLACEHOLDERS[phIdx]}
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                {query ? (
+                  <button onClick={() => setQuery("")} className="text-gray-400 hover:text-gray-700 shrink-0 transition-colors p-1">
+                    <X className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={onClose}
+                    className="shrink-0 p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400"
+                    aria-label="Close search"
                   >
-                    {PLACEHOLDERS[phIdx]}
-                  </motion.span>
-                </AnimatePresence>
-                <input
-                  ref={inputRef}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && query.trim()) go(`/discover?search=${encodeURIComponent(query.trim())}`);
-                  }}
-                  className="flex-1 text-sm text-gray-900 font-medium bg-transparent outline-none placeholder-transparent"
-                  placeholder={PLACEHOLDERS[phIdx]}
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                {query && (
-                  <button onClick={() => setQuery("")} className="text-gray-400 hover:text-gray-700 shrink-0 transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 )}
-                <button
-                  onClick={onClose}
-                  className="text-[11px] font-semibold text-gray-400 border border-gray-200 rounded-lg px-2 py-1 hover:bg-gray-50 transition-colors shrink-0"
-                >
-                  esc
-                </button>
               </div>
 
               {/* Results */}
@@ -237,10 +242,14 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                 )}
               </div>
 
-              {/* Footer */}
-              <div className="px-4 py-2.5 border-t border-gray-100 flex items-center justify-between">
-                <p className="text-[10px] text-gray-400">Press <kbd className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">↵</kbd> to search all</p>
-                <p className="text-[10px] text-gray-400">⌘K to open</p>
+              {/* Footer — keyboard hints only on desktop */}
+              <div className="hidden md:flex px-4 py-2 border-t border-gray-100 items-center justify-between">
+                <p className="text-[10px] text-gray-400">
+                  Press <kbd className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px] text-gray-600">↵</kbd> to search
+                </p>
+                <p className="text-[10px] text-gray-400">
+                  <kbd className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-[10px] text-gray-600">⌘K</kbd> to open
+                </p>
               </div>
             </div>
           </motion.div>

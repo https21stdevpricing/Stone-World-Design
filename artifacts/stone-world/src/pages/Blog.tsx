@@ -20,7 +20,7 @@ export default function Blog() {
 
       {/* Hero */}
       <div className="pt-16 bg-white">
-        <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16">
+        <div className="max-w-5xl mx-auto px-6 py-8 sm:py-11">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

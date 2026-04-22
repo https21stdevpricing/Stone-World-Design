@@ -41,12 +41,18 @@ export default function BlogPost() {
     <div className="min-h-screen flex flex-col bg-white">
       <main className="flex-1 pt-16 pb-32">
 
-        {/* Breadcrumb */}
-        <div className="border-b border-gray-100 sticky top-16 z-30 bg-white/95 backdrop-blur-md">
-          <div className="max-w-4xl mx-auto px-6 py-3">
-            <Link href="/blog" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors font-medium">
-              <ArrowLeft className="w-4 h-4" /> Journal
+        {/* Breadcrumb bar */}
+        <div className="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Journal
             </Link>
+            <span className="text-gray-200 text-sm select-none">/</span>
+            <span className="text-sm font-medium text-gray-800 truncate max-w-[200px] sm:max-w-md">{post.title}</span>
           </div>
         </div>
 

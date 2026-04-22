@@ -254,7 +254,7 @@ export default function Contact() {
 
       {/* ── HERO ── */}
       <div className="pt-16 bg-white">
-        <div className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
+        <div className="max-w-6xl mx-auto px-6 py-9 sm:py-12">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

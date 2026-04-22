@@ -1,237 +1,254 @@
+import { useState, useCallback, useEffect } from "react";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { ArrowRight, Home } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Home, ArrowRight } from "lucide-react";
 
-function BrokenBrickIllustration() {
-  const bricks = [
-    { x: 0, y: 0, w: 80, h: 30, delay: 0, fall: 0 },
-    { x: 88, y: 0, w: 100, h: 30, delay: 0.06, fall: 0 },
-    { x: 196, y: 0, w: 80, h: 30, delay: 0.12, fall: 0 },
-    { x: 0, y: 38, w: 60, h: 30, delay: 0.18, fall: 0 },
-    { x: 68, y: 38, w: 96, h: 30, delay: 0.24, fall: 0 },
-    { x: 172, y: 38, w: 104, h: 30, delay: 0.3, fall: 0 },
-    { x: 0, y: 76, w: 90, h: 30, delay: 0.36, fall: 0 },
-    { x: 98, y: 76, w: 80, h: 30, delay: 0.42, fall: 0 },
-    { x: 186, y: 76, w: 90, h: 30, delay: 0.48, fall: 0 },
-    // cracked/falling center bricks
-    { x: 80, y: 110, w: 60, h: 30, delay: 0.1, fall: 120 },
-    { x: 148, y: 110, w: 90, h: 30, delay: 0.05, fall: 160 },
-    { x: 30, y: 110, w: 40, h: 30, delay: 0.18, fall: 80 },
-    { x: 250, y: 110, w: 50, h: 30, delay: 0.22, fall: 100 },
-    { x: 0, y: 110, w: 20, h: 30, delay: 0.3, fall: 60 },
-  ];
+const COLS = 9;
+const ROWS = 4;
 
+const CRACK_PATH =
+  "M 195 0 L 182 28 L 198 52 L 178 80 L 196 108 L 175 136 L 192 160";
+
+function brickShade(row: number, col: number): string {
+  const v = (row * 13 + col * 7 + row * col) % 6;
+  return ["#111113", "#161618", "#131315", "#1A1A1C", "#111113", "#181819"][v];
+}
+
+function CrackPath({ animate: run }: { animate: boolean }) {
   return (
     <svg
-      viewBox="0 0 276 220"
-      width="276"
-      height="220"
-      xmlns="http://www.w3.org/2000/svg"
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      viewBox="0 0 390 160"
+      preserveAspectRatio="none"
     >
-      {/* Solid upper bricks */}
-      {bricks.slice(0, 9).map((b, i) => (
-        <motion.g
-          key={i}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: b.delay, type: "spring", stiffness: 200 }}
-        >
-          <rect
-            x={b.x}
-            y={b.y}
-            width={b.w}
-            height={b.h}
-            rx="3"
-            fill={i % 2 === 0 ? "#1A1A1A" : "#2A2A2A"}
-            stroke="#000"
-            strokeWidth="1"
-          />
-          {/* Texture lines */}
-          <line
-            x1={b.x + 8}
-            y1={b.y + 10}
-            x2={b.x + b.w - 8}
-            y2={b.y + 10}
-            stroke="#333"
-            strokeWidth="0.6"
-          />
-          <line
-            x1={b.x + 8}
-            y1={b.y + 20}
-            x2={b.x + b.w - 8}
-            y2={b.y + 20}
-            stroke="#333"
-            strokeWidth="0.6"
-          />
-        </motion.g>
-      ))}
-
-      {/* Middle row with teal accent */}
-      {[
-        { x: 0, y: 38, w: 60 },
-        { x: 68, y: 38, w: 96 },
-        { x: 172, y: 38, w: 104 },
-      ].map((b, i) => (
-        <motion.rect
-          key={`accent-${i}`}
-          x={b.x + 2}
-          y={b.y + 13}
-          width={b.w - 4}
-          height={4}
-          rx="1"
-          fill="#00B4B4"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 + i * 0.15 }}
-          style={{ transformOrigin: `${b.x + 2}px ${b.y + 15}px` }}
-        />
-      ))}
-
-      {/* "404" cutout area — dark gap */}
-      <motion.rect
-        x={0}
-        y={108}
-        width={276}
-        height={34}
-        fill="white"
-        initial={{ scaleX: 0 }}
-        animate={{ scaleX: 1 }}
-        transition={{ duration: 0.6, delay: 0.8 }}
-        style={{ originX: "138px", originY: "125px" }}
+      <motion.path
+        d={CRACK_PATH}
+        stroke="#00B4B4"
+        strokeWidth="2.2"
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={run ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+        transition={{ duration: 0.75, delay: 0.55, ease: [0.2, 0.8, 0.4, 1] }}
       />
-
-      {/* Falling / cracked bricks at bottom */}
-      {bricks.slice(9).map((b, i) => (
-        <motion.g
-          key={`fall-${i}`}
-          initial={{ opacity: 1, y: 0, rotate: 0 }}
-          animate={{
-            opacity: [1, 1, 0],
-            y: [0, b.fall * 0.3, b.fall],
-            rotate: [(i % 2 === 0 ? -5 : 5), (i % 2 === 0 ? -15 : 12)],
-          }}
-          transition={{
-            duration: 1.2,
-            delay: 1 + b.delay,
-            ease: "easeIn",
-            repeat: Infinity,
-            repeatDelay: 2.5,
-          }}
-          style={{ transformOrigin: `${b.x + b.w / 2}px ${b.y + b.h / 2}px` }}
-        >
-          <rect
-            x={b.x}
-            y={b.y}
-            width={b.w}
-            height={b.h}
-            rx="3"
-            fill={i % 2 === 0 ? "#1A1A1A" : "#2A2A2A"}
-            stroke="#000"
-            strokeWidth="1"
-          />
-          {/* Crack SVG path */}
-          <path
-            d={`M ${b.x + b.w * 0.4} ${b.y} L ${b.x + b.w * 0.45} ${b.y + 12} L ${b.x + b.w * 0.38} ${b.y + 18} L ${b.x + b.w * 0.5} ${b.y + b.h}`}
-            stroke="#00B4B4"
-            strokeWidth="1.2"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </motion.g>
-      ))}
-
-      {/* Dust particles */}
-      {[...Array(8)].map((_, i) => (
-        <motion.circle
-          key={`dust-${i}`}
-          cx={60 + i * 25}
-          cy={115}
-          r={i % 2 === 0 ? 2 : 1.4}
-          fill="#9CA3AF"
-          initial={{ opacity: 0 }}
-          animate={{
-            opacity: [0, 0.8, 0],
-            cy: [115, 115 + 20 + i * 5],
-            cx: [60 + i * 25, 60 + i * 25 + (i % 2 === 0 ? 8 : -6)],
-          }}
-          transition={{
-            duration: 1.4,
-            delay: 1.2 + i * 0.08,
-            repeat: Infinity,
-            repeatDelay: 2.3,
-            ease: "easeOut",
-          }}
-        />
-      ))}
+      <motion.path
+        d="M 182 52 L 168 62 L 174 75"
+        stroke="#00B4B4"
+        strokeWidth="1.2"
+        fill="none"
+        strokeLinecap="round"
+        strokeOpacity="0.6"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={run ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+        transition={{ duration: 0.4, delay: 0.95, ease: "easeOut" }}
+      />
+      <motion.path
+        d="M 196 108 L 212 118 L 208 132"
+        stroke="#00B4B4"
+        strokeWidth="1.2"
+        fill="none"
+        strokeLinecap="round"
+        strokeOpacity="0.6"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={run ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
+        transition={{ duration: 0.35, delay: 1.1, ease: "easeOut" }}
+      />
     </svg>
   );
 }
 
+type DustParticle = { id: string; x: number; delay: number };
+
 export default function NotFound() {
+  const [fallen, setFallen] = useState<Set<string>>(new Set());
+  const [dust, setDust] = useState<DustParticle[]>([]);
+  const [crackVisible, setCrackVisible] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setCrackVisible(true), 300);
+    const initialFalls = ["1-3", "1-4", "1-5", "2-3", "2-4", "2-5", "2-6"];
+    initialFalls.forEach((id, i) => {
+      setTimeout(() => {
+        setFallen((prev) => new Set([...prev, id]));
+        const col = parseInt(id.split("-")[1]);
+        const particle: DustParticle = {
+          id: `init-${id}-${i}`,
+          x: (col / COLS) * 100,
+          delay: 0,
+        };
+        setDust((prev) => [...prev, particle]);
+      }, 900 + i * 70);
+    });
+    return () => clearTimeout(t1);
+  }, []);
+
+  const handleBrick = useCallback(
+    (id: string) => {
+      if (fallen.has(id)) return;
+      setFallen((prev) => new Set([...prev, id]));
+      const col = parseInt(id.split("-")[1]);
+      setDust((prev) => [
+        ...prev,
+        { id: `click-${id}-${Date.now()}`, x: (col / COLS) * 100, delay: 0 },
+      ]);
+    },
+    [fallen]
+  );
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 select-none">
       <motion.div
-        initial={{ opacity: 0, y: 32 }}
+        initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="flex flex-col items-center text-center max-w-lg"
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-xl flex flex-col items-center"
       >
-        {/* Illustration */}
-        <div className="mb-6">
-          <BrokenBrickIllustration />
+        {/* Hint */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.6 }}
+          className="mb-3 text-[10px] font-bold tracking-[0.28em] uppercase text-gray-300"
+        >
+          tap the bricks
+        </motion.p>
+
+        {/* Brick wall */}
+        <div className="relative w-full">
+          <div
+            className="grid gap-[3px]"
+            style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}
+          >
+            {Array.from({ length: ROWS }, (_, row) =>
+              Array.from({ length: COLS }, (_, col) => {
+                const id = `${row}-${col}`;
+                const isFallen = fallen.has(id);
+                const staggerDelay = (row * COLS + col) * 0.012;
+                return (
+                  <motion.div
+                    key={id}
+                    initial={{ opacity: 0, y: -18 }}
+                    animate={
+                      isFallen
+                        ? {
+                            opacity: 0,
+                            y: 56,
+                            rotate: col % 2 === 0 ? -18 : 14,
+                            scale: 0.85,
+                          }
+                        : { opacity: 1, y: 0 }
+                    }
+                    transition={
+                      isFallen
+                        ? { duration: 0.5, ease: [0.4, 0, 1, 1] }
+                        : {
+                            duration: 0.38,
+                            delay: staggerDelay,
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 26,
+                          }
+                    }
+                    onClick={() => handleBrick(id)}
+                    whileHover={!isFallen ? { scale: 1.05, filter: "brightness(1.5)" } : {}}
+                    whileTap={!isFallen ? { scale: 0.95 } : {}}
+                    className="h-9 sm:h-11 rounded-[3px] cursor-pointer"
+                    style={{ background: brickShade(row, col) }}
+                  />
+                );
+              })
+            )}
+          </div>
+
+          <CrackPath animate={crackVisible} />
+
+          {/* Dust particles */}
+          <AnimatePresence>
+            {dust.map((p) => (
+              <motion.div
+                key={p.id}
+                className="absolute pointer-events-none"
+                style={{ left: `${p.x}%`, bottom: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                onAnimationComplete={() => {
+                  setDust((prev) => prev.filter((d) => d.id !== p.id));
+                }}
+              >
+                {[...Array(5)].map((_, i) => (
+                  <motion.span
+                    key={i}
+                    className="absolute block w-1 h-1 rounded-full bg-gray-400"
+                    style={{ left: `${(i - 2) * 6}px`, bottom: 0 }}
+                    initial={{ opacity: 0.7, y: 0, x: 0 }}
+                    animate={{
+                      opacity: 0,
+                      y: -(12 + i * 6),
+                      x: (i - 2) * 5,
+                    }}
+                    transition={{ duration: 0.7, ease: "easeOut", delay: p.delay + i * 0.04 }}
+                  />
+                ))}
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
 
-        {/* 404 number */}
+        {/* 404 */}
         <motion.p
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="text-[96px] sm:text-[120px] font-black leading-none tracking-tighter text-gray-950 select-none"
-          style={{ fontVariantNumeric: "tabular-nums" }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-7 font-black leading-none tracking-tighter text-gray-950"
+          style={{ fontSize: "clamp(5rem, 18vw, 9rem)" }}
         >
           404
         </motion.p>
 
+        {/* Copy */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.55 }}
-          className="space-y-3 mt-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.75 }}
+          className="text-center mt-3 space-y-1.5"
         >
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-gray-950">
+          <h1 className="text-lg sm:text-xl font-black tracking-tight text-gray-950">
             Even the finest marble cracks sometimes.
           </h1>
-          <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
-            This page went the way of the quarry — empty. But we have 500+ premium materials waiting for you that are very much real.
+          <p className="text-gray-400 text-sm max-w-xs mx-auto leading-relaxed">
+            This page doesn't exist — but 500+ premium materials do.
           </p>
         </motion.div>
 
+        {/* CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.7 }}
+          transition={{ delay: 0.92 }}
           className="flex flex-col sm:flex-row gap-3 mt-8"
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full bg-gray-950 text-white font-semibold text-sm hover:bg-gray-800 transition-colors"
           >
             <Home className="w-4 h-4" /> Go Home
           </Link>
           <Link
             href="/discover"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full border border-gray-200 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors"
           >
             Browse Materials <ArrowRight className="w-4 h-4" />
           </Link>
         </motion.div>
 
-        {/* Teal accent line */}
+        {/* Teal accent */}
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-          className="mt-12 h-0.5 w-16 bg-teal-500 rounded-full"
+          transition={{ duration: 0.5, delay: 1.1 }}
+          className="mt-10 h-0.5 w-12 bg-teal-500 rounded-full"
         />
       </motion.div>
     </div>

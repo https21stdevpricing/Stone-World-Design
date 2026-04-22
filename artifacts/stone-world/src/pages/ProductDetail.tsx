@@ -120,20 +120,20 @@ export default function ProductDetail() {
   return (
     <div className="min-h-screen flex flex-col bg-white pt-16">
 
-      {/* Slim sticky breadcrumb — no extra padding */}
-      <div className="sticky top-16 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100/80">
-        <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center gap-2 text-sm">
-          <Link href="/discover" className="flex items-center gap-1 text-gray-400 hover:text-teal-600 transition-colors font-medium text-xs">
+      {/* Sticky breadcrumb */}
+      <div className="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-2">
+          <Link href="/discover" className="flex items-center gap-1 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors shrink-0">
             <ChevronLeft className="w-3.5 h-3.5" /> Collection
           </Link>
-          <span className="text-gray-200 text-xs">/</span>
-          <Link href={`/discover?categoryId=${product.categoryId}`} className="text-gray-400 hover:text-teal-600 transition-colors font-medium text-xs hidden sm:inline">
+          <span className="text-gray-300 text-sm hidden sm:inline">/</span>
+          <Link href={`/discover?categoryId=${product.categoryId}`} className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:inline truncate max-w-[120px]">
             {product.categoryName}
           </Link>
-          <span className="text-gray-200 text-xs hidden sm:inline">/</span>
-          <span className="font-semibold text-gray-800 text-xs truncate max-w-[180px] sm:max-w-xs">{product.name}</span>
+          <span className="text-gray-300 text-sm hidden sm:inline">/</span>
+          <span className="text-sm font-semibold text-gray-900 truncate max-w-[180px] sm:max-w-xs">{product.name}</span>
           {product.available && (
-            <span className="ml-auto shrink-0 text-[10px] font-bold text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full">In Stock</span>
+            <span className="ml-auto shrink-0 text-[10px] font-black text-teal-600 bg-teal-50 px-2.5 py-1 rounded-full tracking-wide">In Stock</span>
           )}
         </div>
       </div>

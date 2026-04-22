@@ -73,12 +73,22 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-teal-500 flex items-center justify-center">
-              <span className="text-white font-black text-[13px] tracking-tighter select-none">SW</span>
-            </div>
-            <span className="font-black tracking-[-0.045em] text-[20px] leading-none text-gray-950 select-none">
+            <motion.img
+              src={`${import.meta.env.BASE_URL}sw-logo.png`}
+              alt="Stone World"
+              className="h-8 w-auto object-contain"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            />
+            <motion.span
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.45, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="font-black tracking-[-0.045em] text-[20px] leading-none text-gray-950 select-none"
+            >
               Stone World
-            </span>
+            </motion.span>
           </Link>
 
           {/* Center nav — desktop */}
@@ -217,9 +227,11 @@ export function Navbar() {
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-teal-500 flex items-center justify-center">
-                    <span className="text-white font-black text-[13px] tracking-tighter">SW</span>
-                  </div>
+                  <img
+                    src={`${import.meta.env.BASE_URL}sw-logo.png`}
+                    alt="Stone World"
+                    className="h-8 w-auto object-contain"
+                  />
                   <span className="font-black tracking-[-0.04em] text-[17px] text-gray-950">Stone World</span>
                 </div>
                 <button

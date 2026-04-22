@@ -111,11 +111,11 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={placeholderIdx}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute left-0 top-0 text-lg font-medium text-gray-400 pointer-events-none whitespace-nowrap overflow-hidden"
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      className="absolute left-0 top-0 right-0 text-lg font-medium text-gray-400 pointer-events-none truncate"
                     >
                       {PLACEHOLDER_CYCLE[placeholderIdx]}
                     </motion.span>

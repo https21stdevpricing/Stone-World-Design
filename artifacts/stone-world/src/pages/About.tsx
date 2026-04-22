@@ -46,7 +46,14 @@ export default function About() {
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="space-y-5"
           >
-            <p className="text-teal-400 text-[11px] tracking-[0.35em] font-semibold uppercase">Our Story</p>
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
+                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                  <polygon points="8,1 15,5.5 15,10.5 8,15 1,10.5 1,5.5" fill="white" fillOpacity="0.9"/>
+                </svg>
+              </div>
+              <p className="text-teal-400 text-[10px] tracking-[0.3em] font-black uppercase">Our Story</p>
+            </div>
             <h1
               className="font-black tracking-tight text-white leading-[1.0]"
               style={{ fontSize: "clamp(2.5rem, 7vw, 5.5rem)" }}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
 import { Footer } from "@/components/Footer";
-import { useGetProduct, getGetProductQueryKey } from "@workspace/api-client-react";
+import { useGetProduct, getGetProductQueryKey, useListProducts } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
@@ -85,6 +85,14 @@ export default function ProductDetail() {
       queryKey: getGetProductQueryKey(id)
     }
   });
+
+  const { data: relatedData } = useListProducts(
+    { categoryId: product?.categoryId ?? undefined, limit: 12 },
+    { query: { enabled: !!product?.categoryId } }
+  );
+  const relatedProducts = (relatedData?.products ?? [])
+    .filter(p => p.id !== id)
+    .slice(0, 6);
 
   if (isLoading) {
     return (
@@ -344,6 +352,51 @@ export default function ProductDetail() {
             </div>
           </div>
         </section>
+
+        {/* ── RELATED PRODUCTS ── */}
+        {relatedProducts.length > 0 && (
+          <section className="py-16">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="mb-8">
+                <p className="text-teal-500 text-[11px] tracking-[0.35em] font-semibold uppercase mb-3">You May Also Like</p>
+                <h2 className="text-2xl font-black text-gray-950">More from {product.categoryName}</h2>
+              </div>
+              <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+                {relatedProducts.map((p, i) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: i * 0.07 }}
+                    className="shrink-0 w-56 sm:w-64 snap-start"
+                  >
+                    <Link href={`/discover/${p.id}`} className="group block rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                      <div className="aspect-[4/3] overflow-hidden bg-gray-100 relative">
+                        <ProductImage
+                          src={p.imageUrl ?? ""}
+                          alt={p.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+                        />
+                        {p.available && (
+                          <div className="absolute top-2.5 left-2.5 bg-teal-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">
+                            In Stock
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4 space-y-1.5">
+                        <p className="text-xs font-semibold text-teal-600">{p.categoryName}</p>
+                        <p className="font-bold text-gray-900 text-sm leading-snug line-clamp-2">{p.name}</p>
+                        {p.price && (
+                          <p className="text-xs text-gray-500 font-medium">₹{p.price} / {p.priceUnit || 'sq.ft'}</p>
+                        )}
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* ── ENQUIRY CTA ── */}
         <section className="py-16">

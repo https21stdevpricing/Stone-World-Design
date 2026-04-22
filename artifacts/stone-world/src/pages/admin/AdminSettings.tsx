@@ -68,8 +68,9 @@ export default function AdminSettings() {
         form.setValue("currentPassword", "");
         form.setValue("newPassword", "");
       },
-      onError: (e: any) => {
-        toast({ title: "Update failed", description: e.message || "An error occurred", variant: "destructive" });
+      onError: (e: unknown) => {
+        const message = e instanceof Error ? e.message : "An error occurred";
+        toast({ title: "Update failed", description: message, variant: "destructive" });
       }
     });
   };

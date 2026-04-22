@@ -86,7 +86,7 @@ export default function Discover() {
 
             <div>
               <Label className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-3 block">Origin</Label>
-              <Select value={origin || "all"} onValueChange={(val) => { setOrigin(val as any); setPage(1); }}>
+              <Select value={origin || "all"} onValueChange={(val) => { setOrigin(val === "all" ? undefined : val as ListProductsOrigin); setPage(1); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Origin" />
                 </SelectTrigger>

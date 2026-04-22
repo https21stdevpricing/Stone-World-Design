@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, enquiriesTable } from "@workspace/db";
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, type SQL } from "drizzle-orm";
 import {
   ListEnquiriesQueryParams,
   CreateEnquiryBody,
@@ -21,7 +21,7 @@ router.get("/enquiries", requireAdmin, async (req, res): Promise<void> => {
 
   const { audience, read, limit = 20, offset = 0 } = query.data;
 
-  const conditions: any[] = [];
+  const conditions: SQL<unknown>[] = [];
   if (audience && audience !== "all") conditions.push(eq(enquiriesTable.audience, audience));
   if (read != null) conditions.push(eq(enquiriesTable.isRead, read));
 
@@ -94,7 +94,7 @@ router.put("/enquiries/:id/read", requireAdmin, async (req, res): Promise<void> 
 router.get("/enquiries/export", requireAdmin, async (req, res): Promise<void> => {
   const query = ExportEnquiriesQueryParams.safeParse(req.query);
 
-  const conditions: any[] = [];
+  const conditions: SQL<unknown>[] = [];
   if (query.success && query.data.audience && query.data.audience !== "all") {
     conditions.push(eq(enquiriesTable.audience, query.data.audience));
   }

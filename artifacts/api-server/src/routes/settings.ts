@@ -1,12 +1,12 @@
 import { Router, type IRouter } from "express";
-import { db, siteSettingsTable } from "@workspace/db";
+import { db, siteSettingsTable, type SiteSettings } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import { UpdateSettingsBody } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
 
 const router: IRouter = Router();
 
-function stripHash(settings: Record<string, any>) {
+function stripHash(settings: SiteSettings) {
   const { adminPasswordHash: _omit, ...safe } = settings;
   return safe;
 }
@@ -49,10 +49,9 @@ router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
     adminPasswordHash = await bcrypt.hash(newPassword, 10);
   }
 
-  const updateData: Record<string, any> = { ...rest, adminPasswordHash };
-  Object.keys(updateData).forEach((key) => {
-    if (updateData[key] === undefined) delete updateData[key];
-  });
+  const updateData = Object.fromEntries(
+    Object.entries({ ...rest, adminPasswordHash }).filter(([, v]) => v !== undefined)
+  ) as Partial<typeof siteSettingsTable.$inferInsert>;
 
   const [updated] = await db
     .update(siteSettingsTable)

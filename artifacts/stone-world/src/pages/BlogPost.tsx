@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
+import { marked } from "marked";
 
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
@@ -78,12 +79,10 @@ export default function BlogPost() {
             </div>
           )}
 
-          <div className="prose prose-lg md:prose-xl max-w-none prose-headings:font-serif prose-a:text-primary hover:prose-a:text-primary/80">
-            {/* Very simple markdown/newline rendering since we only have raw text */}
-            {post.content.split('\n\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
-          </div>
+          <div
+            className="prose prose-lg md:prose-xl max-w-none prose-headings:font-serif prose-a:text-primary hover:prose-a:text-primary/80"
+            dangerouslySetInnerHTML={{ __html: marked(post.content) as string }}
+          />
         </article>
       </main>
 

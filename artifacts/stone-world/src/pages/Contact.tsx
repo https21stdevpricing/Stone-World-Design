@@ -27,100 +27,167 @@ const SLIDE = {
 
 function ContactIllustration() {
   return (
-    <svg width="220" height="160" viewBox="0 0 220 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Phone outline */}
+    <svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+      {/* Specialist card (left) */}
       <motion.rect
-        x="70" y="20" width="80" height="120" rx="12"
-        stroke="#E5E7EB" strokeWidth="2.5" fill="white"
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
+        x="0" y="20" width="130" height="160" rx="16"
+        fill="white" stroke="#E5E7EB" strokeWidth="1.5"
+        initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       />
-      {/* Screen */}
-      <motion.rect
-        x="78" y="34" width="64" height="82" rx="4"
-        fill="#F8FFFE"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-      />
-      {/* Message bubbles on screen */}
-      <motion.rect
-        x="84" y="42" width="38" height="10" rx="5"
+      {/* Avatar circle */}
+      <motion.circle
+        cx="65" cy="66" r="24"
         fill="#00B4B4"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, delay: 0.6 }}
+        initial={{ scale: 0 }} animate={{ scale: 1 }}
+        transition={{ duration: 0.4, delay: 0.4, type: "spring" }}
       />
-      <motion.rect
-        x="84" y="57" width="52" height="10" rx="5"
-        fill="#E5E7EB"
-        initial={{ opacity: 0, x: 10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, delay: 0.8 }}
+      <motion.text
+        x="65" y="71" textAnchor="middle" fontSize="13" fontWeight="900" fill="white"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
+      >SW</motion.text>
+
+      {/* Online indicator */}
+      <motion.circle
+        cx="85" cy="46" r="6" fill="white"
+        initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.8 }}
       />
+      <motion.circle
+        cx="85" cy="46" r="4" fill="#22C55E"
+        animate={{ r: [4, 5, 4], opacity: [1, 0.7, 1] }}
+        transition={{ duration: 1.8, repeat: Infinity }}
+      />
+
+      <motion.text
+        x="65" y="105" textAnchor="middle" fontSize="9.5" fontWeight="800" fill="#111827"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+      >Material Expert</motion.text>
+      <motion.text
+        x="65" y="120" textAnchor="middle" fontSize="8" fontWeight="500" fill="#9CA3AF"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+      >AB Stone World</motion.text>
+
+      {/* Response time pill */}
       <motion.rect
-        x="84" y="72" width="44" height="10" rx="5"
+        x="18" y="137" width="94" height="24" rx="12"
+        fill="#F0FAFA" stroke="#00B4B4" strokeWidth="1"
+        initial={{ opacity: 0, y: 145 }} animate={{ opacity: 1, y: 137 }}
+        transition={{ delay: 1.0 }}
+      />
+      <motion.circle
+        cx="32" cy="149" r="3" fill="#00B4B4"
+        animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.4, repeat: Infinity }}
+      />
+      <motion.text
+        x="52" y="153" fontSize="7.5" fontWeight="700" fill="#00B4B4"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}
+      >Replies in 2 hrs</motion.text>
+
+      {/* Divider */}
+      <motion.line
+        x1="140" y1="30" x2="140" y2="170"
+        stroke="#F3F4F6" strokeWidth="1"
+        initial={{ scaleY: 0, originY: 0 }} animate={{ scaleY: 1 }}
+        style={{ transformOrigin: "140px 30px" }}
+        transition={{ delay: 0.5, duration: 0.4 }}
+      />
+
+      {/* Chat thread (right side) */}
+      {/* Customer message (right aligned) */}
+      <motion.rect
+        x="175" y="28" width="110" height="28" rx="12" rx-bottom-right="4"
         fill="#00B4B4"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, delay: 1.0 }}
+        initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.7, duration: 0.4 }}
+      />
+      <motion.text
+        x="230" y="40" textAnchor="middle" fontSize="7.5" fontWeight="600" fill="white"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+      >Looking for marble</motion.text>
+      <motion.text
+        x="230" y="51" textAnchor="middle" fontSize="7.5" fontWeight="600" fill="rgba(255,255,255,0.8)"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+      >for my kitchen...</motion.text>
+
+      {/* Expert reply (left aligned) */}
+      <motion.rect
+        x="148" y="72" width="128" height="40" rx="12"
+        fill="#F9FAFB" stroke="#E5E7EB" strokeWidth="1"
+        initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 1.1, duration: 0.4 }}
+      />
+      <motion.text
+        x="212" y="88" textAnchor="middle" fontSize="7.5" fontWeight="600" fill="#374151"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }}
+      >We have 50+ marble</motion.text>
+      <motion.text
+        x="212" y="99" textAnchor="middle" fontSize="7.5" fontWeight="600" fill="#374151"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }}
+      >options from ₹120/sq.ft</motion.text>
+      <motion.text
+        x="212" y="104" textAnchor="middle" fontSize="6.5" fill="#9CA3AF"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
+      >              ✓✓ Seen</motion.text>
+
+      {/* Material swatch card */}
+      <motion.rect
+        x="148" y="124" width="130" height="50" rx="10"
+        fill="white" stroke="#E5E7EB" strokeWidth="1.5"
+        initial={{ opacity: 0, y: 134 }} animate={{ opacity: 1, y: 124 }}
+        transition={{ delay: 1.5 }}
       />
       <motion.rect
-        x="84" y="87" width="30" height="10" rx="5"
-        fill="#E5E7EB"
-        initial={{ opacity: 0, x: 10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, delay: 1.2 }}
+        x="156" y="132" width="34" height="34" rx="6"
+        fill="#D1C4A8"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.7 }}
       />
-      {/* Typing indicator */}
+      {/* Marble veins */}
+      <motion.path
+        d="M158 140 Q168 148 175 138 Q180 144 188 143" stroke="white" strokeWidth="0.8" fill="none" strokeOpacity="0.6"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }}
+      />
+      <motion.text
+        x="200" y="144" fontSize="8.5" fontWeight="800" fill="#111827"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}
+      >Bianco Carrara</motion.text>
+      <motion.text
+        x="200" y="156" fontSize="7.5" fontWeight="600" fill="#00B4B4"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.9 }}
+      >₹280/sq.ft</motion.text>
+      <motion.text
+        x="200" y="166" fontSize="7" fill="#9CA3AF"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.0 }}
+      >Italian Import · In Stock</motion.text>
+
+      {/* Typing dots */}
+      <motion.rect
+        x="148" y="182" width="60" height="16" rx="8"
+        fill="#F3F4F6"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.6 }}
+      />
       {[0, 1, 2].map((i) => (
         <motion.circle
           key={i}
-          cx={89 + i * 8}
-          cy={107}
-          r={2.5}
+          cx={162 + i * 10} cy={190} r={2.5}
           fill="#9CA3AF"
-          animate={{ opacity: [0.3, 1, 0.3], y: [0, -3, 0] }}
-          transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.2 }}
+          animate={{ opacity: [0.3, 1, 0.3], y: [0, -2, 0] }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 + 1.6 }}
         />
       ))}
-      {/* Home button */}
-      <motion.circle
-        cx="110" cy="128" r="5"
-        stroke="#E5E7EB" strokeWidth="1.5" fill="white"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-      />
 
-      {/* Floating notification badge */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.5, type: "spring" }}
-      >
-        <rect x="128" y="12" width="72" height="30" rx="8" fill="#00B4B4"/>
-        <text x="164" y="22" textAnchor="middle" fontSize="7.5" fontWeight="700" fill="white" fontFamily="system-ui">We'll reply</text>
-        <text x="164" y="33" textAnchor="middle" fontSize="7.5" fontWeight="700" fill="rgba(255,255,255,0.8)" fontFamily="system-ui">within 24hrs</text>
-      </motion.g>
-
-      {/* Map pin */}
-      <motion.g
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4, type: "spring", stiffness: 200 }}
-      >
-        <ellipse cx="28" cy="140" rx="10" ry="4" fill="#E5E7EB"/>
-        <path d="M28 90 C20 90 14 96 14 104 C14 116 28 130 28 130 C28 130 42 116 42 104 C42 96 36 90 28 90Z" fill="#1A1A1A"/>
-        <circle cx="28" cy="104" r="5" fill="white"/>
-        <motion.circle
-          cx="28" cy="104" r="9"
-          stroke="#00B4B4" strokeWidth="1.5" fill="none"
-          animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0, 0.8] }}
-          transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-        />
-      </motion.g>
     </svg>
   );
 }
@@ -185,9 +252,9 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-white flex flex-col">
 
-      {/* ── APPLE STORIES HERO ── */}
-      <div className="pt-16 bg-white border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 py-10 sm:py-14">
+      {/* ── HERO ── */}
+      <div className="pt-16 bg-white">
+        <div className="max-w-6xl mx-auto px-6 py-12 sm:py-16">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -196,8 +263,8 @@ export default function Contact() {
               className="space-y-3"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                  <MessageSquare className="w-3.5 h-3.5 text-white" />
+                <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-500/30">
+                  <MessageSquare className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
                 </div>
                 <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Get in Touch</p>
               </div>

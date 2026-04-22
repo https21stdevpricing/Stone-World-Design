@@ -18,9 +18,9 @@ export default function Blog() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
 
-      {/* Apple Stories-style hero — white */}
-      <div className="pt-16 bg-white border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 py-14 sm:py-20">
+      {/* Hero */}
+      <div className="pt-16 bg-white">
+        <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -28,8 +28,8 @@ export default function Blog() {
             className="space-y-4"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                <BookOpen className="w-3.5 h-3.5 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-500/30">
+                <BookOpen className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
               </div>
               <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Insights &amp; Ideas</p>
             </div>

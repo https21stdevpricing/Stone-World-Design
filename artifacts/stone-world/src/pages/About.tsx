@@ -30,8 +30,8 @@ export default function About() {
   return (
     <div className="bg-white">
 
-      {/* ── HERO — Apple-style white ── */}
-      <section className="pt-16 bg-white border-b border-gray-100">
+      {/* ── HERO ── */}
+      <section className="pt-16 bg-white">
         <div className="max-w-6xl mx-auto px-6 py-14 sm:py-20">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -41,8 +41,8 @@ export default function About() {
               className="space-y-5"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                  <Award className="w-3.5 h-3.5 text-white" />
+                <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-500/30">
+                  <Award className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
                 </div>
                 <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Our Story</p>
               </div>

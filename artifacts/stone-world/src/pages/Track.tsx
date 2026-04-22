@@ -94,109 +94,144 @@ function DottedSpinner({ size = 40 }: { size?: number }) {
 }
 
 function TrackIllustration() {
-  const stages = [
-    { label: "Received", color: "#00B4B4" },
-    { label: "Review", color: "#00B4B4" },
-    { label: "Quoted", color: "#00B4B4" },
-    { label: "Done", color: "#00B4B4" },
+  const STAGES = [
+    { label: "Received",   done: true,  current: false },
+    { label: "In Review",  done: true,  current: false },
+    { label: "Quoted",     done: false, current: true  },
+    { label: "Complete",   done: false, current: false },
   ];
 
   return (
-    <svg width="260" height="110" viewBox="0 0 260 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Connecting line */}
-      <motion.line
-        x1="30" y1="44" x2="230" y2="44"
-        stroke="#E5E7EB"
-        strokeWidth="2"
-        strokeDasharray="4 4"
-      />
-      <motion.line
-        x1="30" y1="44" x2="230" y2="44"
-        stroke="#00B4B4"
-        strokeWidth="2"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: 1 }}
-        transition={{ duration: 1.8, ease: "easeInOut", delay: 0.3 }}
-        strokeLinecap="round"
+    <svg width="310" height="210" viewBox="0 0 310 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Card background */}
+      <motion.rect
+        x="0" y="0" width="310" height="210" rx="20"
+        fill="#F8FFFE" stroke="#00B4B4" strokeWidth="1" strokeOpacity="0.25"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}
       />
 
-      {stages.map((stage, i) => {
-        const x = 30 + i * 66.7;
+      {/* Top: ref number + badge */}
+      <motion.text
+        x="20" y="30" fontSize="7.5" fontWeight="800" fill="#9CA3AF"
+        fontFamily="system-ui" letterSpacing="0.18em"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+      >ENQUIRY REFERENCE</motion.text>
+
+      <motion.text
+        x="20" y="55" fontSize="22" fontWeight="900" fill="#111827"
+        fontFamily="system-ui" letterSpacing="-0.04em"
+        initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.5, duration: 0.5 }}
+      >SWA1B2C3</motion.text>
+
+      {/* Status badge */}
+      <motion.rect
+        x="196" y="34" width="94" height="28" rx="10"
+        fill="#00B4B4"
+        initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.8, type: "spring" }}
+      />
+      {/* Pulsing dot in badge */}
+      <motion.circle
+        cx="209" cy="48" r="3" fill="white"
+        animate={{ opacity: [1, 0.4, 1] }} transition={{ duration: 1.4, repeat: Infinity }}
+      />
+      <motion.text
+        x="247" y="52" textAnchor="middle" fontSize="9" fontWeight="700" fill="white"
+        fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+      >QUOTED</motion.text>
+
+      {/* Divider */}
+      <motion.line
+        x1="20" y1="76" x2="290" y2="76"
+        stroke="#E5E7EB" strokeWidth="1"
+        initial={{ scaleX: 0, originX: 0 }} animate={{ scaleX: 1 }}
+        style={{ transformOrigin: "20px 76px" }}
+        transition={{ delay: 0.9, duration: 0.5 }}
+      />
+
+      {/* Stage journey */}
+      {STAGES.map((stage, i) => {
+        const x = 38 + i * 78;
+        const cy = 130;
         return (
-          <g key={i}>
-            {/* Outer ring pulse */}
+          <g key={stage.label}>
+            {/* Connector line */}
+            {i < 3 && (
+              <>
+                <line x1={x + 16} y1={cy} x2={x + 62} y2={cy} stroke="#E5E7EB" strokeWidth="2" />
+                {(stage.done || stage.current) && (
+                  <motion.line
+                    x1={x + 16} y1={cy} x2={x + 62} y2={cy}
+                    stroke="#00B4B4" strokeWidth="2"
+                    initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                    transition={{ delay: 1.1 + i * 0.28, duration: 0.4 }}
+                    strokeLinecap="round"
+                  />
+                )}
+              </>
+            )}
+
+            {/* Outer pulse for current */}
+            {stage.current && (
+              <motion.circle cx={x} cy={cy} r={22} stroke="#00B4B4" strokeWidth="1.5" fill="none"
+                animate={{ r: [16, 24, 16], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2.2, repeat: Infinity }}
+              />
+            )}
+
+            {/* Main node */}
             <motion.circle
-              cx={x}
-              cy={44}
-              r={18}
-              fill="#00B4B4"
-              fillOpacity={0.08}
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: [1, 1.25, 1], opacity: [0.08, 0.18, 0.08] }}
-              transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-            />
-            {/* Main circle */}
-            <motion.circle
-              cx={x}
-              cy={44}
-              r={12}
-              fill={i === 0 ? "#00B4B4" : "white"}
-              stroke="#00B4B4"
+              cx={x} cy={cy} r={16}
+              fill={stage.done ? "#00B4B4" : stage.current ? "#F0FAFA" : "#F9FAFB"}
+              stroke={stage.done || stage.current ? "#00B4B4" : "#D1D5DB"}
               strokeWidth="2"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 + i * 0.25, type: "spring" }}
+              initial={{ scale: 0 }} animate={{ scale: 1 }}
+              transition={{ delay: 0.9 + i * 0.2, type: "spring", stiffness: 300 }}
             />
-            {/* Inner dot */}
-            <motion.circle
-              cx={x}
-              cy={44}
-              r={4}
-              fill={i === 0 ? "white" : "#00B4B4"}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.5 + i * 0.25 }}
-            />
+
+            {/* Check for done */}
+            {stage.done && (
+              <motion.path
+                d={`M${x - 6} ${cy} L${x - 2} ${cy + 4} L${x + 6} ${cy - 5}`}
+                stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"
+                initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
+                transition={{ delay: 1.0 + i * 0.2, duration: 0.3 }}
+              />
+            )}
+
+            {/* Diamond for current */}
+            {stage.current && (
+              <motion.circle cx={x} cy={cy} r={5} fill="#00B4B4"
+                initial={{ scale: 0 }} animate={{ scale: 1 }}
+                transition={{ delay: 1.2 + i * 0.2, type: "spring" }}
+              />
+            )}
+
             {/* Label */}
             <motion.text
-              x={x}
-              y={72}
-              textAnchor="middle"
-              fontSize="9"
-              fontFamily="system-ui, -apple-system, sans-serif"
-              fontWeight="600"
-              fill="#9CA3AF"
-              initial={{ opacity: 0, y: 76 }}
-              animate={{ opacity: 1, y: 72 }}
-              transition={{ duration: 0.4, delay: 0.6 + i * 0.2 }}
-            >
-              {stage.label}
-            </motion.text>
+              x={x} y={cy + 28} textAnchor="middle"
+              fontSize="8.5" fontWeight="700"
+              fill={stage.done || stage.current ? "#00B4B4" : "#9CA3AF"}
+              fontFamily="system-ui"
+              initial={{ opacity: 0, y: cy + 34 }} animate={{ opacity: 1, y: cy + 28 }}
+              transition={{ delay: 1.1 + i * 0.2 }}
+            >{stage.label}</motion.text>
           </g>
         );
       })}
 
-      {/* Document icon */}
-      <motion.g
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 1.4 }}
-      >
-        <rect x="108" y="4" width="44" height="32" rx="5" fill="#F0FAFA" stroke="#00B4B4" strokeWidth="1.5"/>
-        <line x1="116" y1="14" x2="144" y2="14" stroke="#00B4B4" strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="116" y1="20" x2="138" y2="20" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round"/>
-        <line x1="116" y1="26" x2="134" y2="26" stroke="#D1D5DB" strokeWidth="1.5" strokeLinecap="round"/>
-      </motion.g>
+      {/* Bottom footer line */}
+      <motion.text
+        x="20" y="196" fontSize="7.5" fill="#9CA3AF" fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
+      >Updated 2 hrs ago · AB Stone World</motion.text>
 
-      {/* Verified checkmark above last circle */}
-      <motion.g
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, delay: 1.6, type: "spring" }}
-      >
-        <circle cx="230" cy="18" r="9" fill="#00B4B4"/>
-        <path d="M225 18 L228.5 21.5 L235 15" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-      </motion.g>
+      <motion.text
+        x="290" y="196" textAnchor="end" fontSize="7.5" fontWeight="700" fill="#00B4B4" fontFamily="system-ui"
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}
+      >View Details →</motion.text>
     </svg>
   );
 }
@@ -257,25 +292,25 @@ export default function Track() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
 
-      {/* Apple Stories-style hero header — white, clean */}
-      <div className="pt-16 bg-white border-b border-gray-100/80">
-        <div className="max-w-2xl mx-auto px-6 py-10 sm:py-14">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      {/* Hero header */}
+      <div className="pt-16 bg-white">
+        <div className="max-w-5xl mx-auto px-6 py-12 sm:py-16">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-3"
+              className="space-y-4"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-md bg-teal-500 flex items-center justify-center">
-                  <Search className="w-3.5 h-3.5 text-white" />
+                <div className="w-7 h-7 rounded-lg bg-teal-500 flex items-center justify-center shadow-sm shadow-teal-500/30">
+                  <Search className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
                 </div>
                 <p className="text-teal-600 text-[10px] tracking-[0.3em] font-black uppercase">Enquiry Status</p>
               </div>
               <h1
                 className="font-black tracking-tight text-gray-950 leading-[1.02]"
-                style={{ fontSize: "clamp(2rem, 5vw, 3.25rem)" }}
+                style={{ fontSize: "clamp(2.2rem, 5vw, 3.5rem)" }}
               >
                 Track Your<br />Enquiry.
               </h1>

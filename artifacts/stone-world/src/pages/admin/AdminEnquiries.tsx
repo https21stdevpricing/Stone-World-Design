@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
-import { useListEnquiries, useMarkEnquiryRead, getListEnquiriesQueryKey, useExportEnquiries } from "@workspace/api-client-react";
+import { useListEnquiries, useMarkEnquiryRead, getListEnquiriesQueryKey, exportEnquiries } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Download, Mail } from "lucide-react";
+import { Download } from "lucide-react";
 import { ListEnquiriesAudience } from "@workspace/api-client-react";
 
 export default function AdminEnquiries() {
@@ -20,8 +20,8 @@ export default function AdminEnquiries() {
     limit: 100 
   });
   
+  const [exporting, setExporting] = useState(false);
   const markRead = useMarkEnquiryRead();
-  const exportEnq = useExportEnquiries();
 
   const handleRowClick = (enq: any) => {
     setSelectedEnquiry(enq);
@@ -34,7 +34,8 @@ export default function AdminEnquiries() {
 
   const handleExport = async () => {
     try {
-      const csvData = await exportEnq.mutateAsync({ audience: audience === "all" ? undefined : audience } as any);
+      setExporting(true);
+      const csvData = await exportEnquiries(audience === "all" ? undefined : { audience });
       const blob = new Blob([csvData as unknown as BlobPart], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -46,6 +47,8 @@ export default function AdminEnquiries() {
       document.body.removeChild(a);
     } catch (e) {
       console.error("Export failed", e);
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -67,7 +70,7 @@ export default function AdminEnquiries() {
               <SelectItem value="developer">Developer</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" onClick={handleExport} disabled={exportEnq.isPending}>
+          <Button variant="outline" onClick={handleExport} disabled={exporting}>
             <Download className="mr-2 h-4 w-4" /> Export CSV
           </Button>
         </div>

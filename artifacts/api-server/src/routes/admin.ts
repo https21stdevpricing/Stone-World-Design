@@ -1,12 +1,16 @@
 import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import { db, siteSettingsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
 import { AdminLoginBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
-const ADMIN_TOKEN = "sw-admin-authenticated";
+const validTokens = new Set<string>();
+
+function generateToken(): string {
+  return randomBytes(32).toString("hex");
+}
 
 router.post("/admin/login", async (req, res): Promise<void> => {
   const parsed = AdminLoginBody.safeParse(req.body);
@@ -27,16 +31,21 @@ router.post("/admin/login", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json({ success: true, token: ADMIN_TOKEN });
+  const token = generateToken();
+  validTokens.add(token);
+
+  res.json({ success: true, token });
 });
 
-router.post("/admin/logout", async (_req, res): Promise<void> => {
+router.post("/admin/logout", (req, res): void => {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+  if (token) validTokens.delete(token);
   res.json({ success: true, message: "Logged out" });
 });
 
-router.get("/admin/session", async (req, res): Promise<void> => {
+router.get("/admin/session", (req, res): void => {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  if (token === ADMIN_TOKEN) {
+  if (token && validTokens.has(token)) {
     res.json({ authenticated: true });
   } else {
     res.json({ authenticated: false });
@@ -45,7 +54,7 @@ router.get("/admin/session", async (req, res): Promise<void> => {
 
 export function requireAdmin(req: any, res: any, next: any) {
   const token = req.headers.authorization?.replace("Bearer ", "");
-  if (token !== ADMIN_TOKEN) {
+  if (!token || !validTokens.has(token)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }

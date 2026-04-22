@@ -6,13 +6,18 @@ import { requireAdmin } from "./admin";
 
 const router: IRouter = Router();
 
-router.get("/settings", async (_req, res): Promise<void> => {
+function stripHash(settings: Record<string, any>) {
+  const { adminPasswordHash: _omit, ...safe } = settings;
+  return safe;
+}
+
+router.get("/settings", requireAdmin, async (_req, res): Promise<void> => {
   const [settings] = await db.select().from(siteSettingsTable).limit(1);
   if (!settings) {
     res.status(404).json({ error: "Settings not found" });
     return;
   }
-  res.json(settings);
+  res.json(stripHash(settings));
 });
 
 router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
@@ -54,7 +59,7 @@ router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
     .set(updateData)
     .returning();
 
-  res.json(updated);
+  res.json(stripHash(updated));
 });
 
 export default router;

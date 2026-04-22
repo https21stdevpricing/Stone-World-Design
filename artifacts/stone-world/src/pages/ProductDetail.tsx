@@ -3,12 +3,13 @@ import { useRoute, Link } from "wouter";
 import { Footer } from "@/components/Footer";
 import { useGetProduct, getGetProductQueryKey, useListProducts } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Loader2, CheckCircle2, XCircle, ArrowRight, ChevronLeft,
-  Package, MapPin, Layers, Truck, Phone, Star, Shield, ArrowUpRight
+  Package, MapPin, Layers, Truck, Phone, Star, Shield, ArrowUpRight, Maximize2
 } from "lucide-react";
 import { ProductImage } from "@/components/ProductImage";
+import { ImageLightbox } from "@/components/ImageLightbox";
 
 const MATERIAL_STORY: Record<string, { tagline: string; story: string; applications: string[]; care: string }> = {
   marble: {
@@ -78,6 +79,7 @@ export default function ProductDetail() {
   const [, params] = useRoute("/discover/:id");
   const id = params?.id ? parseInt(params.id) : 0;
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: {
@@ -159,7 +161,10 @@ export default function ProductDetail() {
               transition={{ duration: 0.6 }}
               className="space-y-3"
             >
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 relative group">
+              <div
+                className="aspect-[4/5] overflow-hidden rounded-2xl bg-gray-100 relative group cursor-zoom-in"
+                onClick={() => setLightboxOpen(true)}
+              >
                 <ProductImage
                   src={allImages[activeImage]}
                   alt={product.name}
@@ -170,6 +175,9 @@ export default function ProductDetail() {
                     In Stock
                   </div>
                 )}
+                <div className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                  <Maximize2 className="w-3.5 h-3.5 text-white" />
+                </div>
               </div>
 
               {allImages.length > 1 && (
@@ -425,6 +433,17 @@ export default function ProductDetail() {
       </main>
 
       <Footer />
+
+      <AnimatePresence>
+        {lightboxOpen && (
+          <ImageLightbox
+            images={allImages}
+            initialIndex={activeImage}
+            onClose={() => setLightboxOpen(false)}
+            onIndexChange={(i) => setActiveImage(i)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

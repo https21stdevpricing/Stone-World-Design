@@ -406,6 +406,31 @@ paths:
               schema:
                 $ref: "#/components/schemas/BlogPost"
 
+  /blog/by-slug/{slug}:
+    get:
+      operationId: getBlogPostBySlug
+      tags: [blog]
+      summary: Get a published blog post by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /blog/{id}:
     get:
       operationId: getBlogPost
@@ -1193,15 +1218,12 @@ components:
         facebookUrl:
           type: string
           nullable: true
-        adminPasswordHash:
-          type: string
         updatedAt:
           type: string
           format: date-time
       required:
         - id
         - companyName
-        - adminPasswordHash
         - updatedAt
 
     UpdateSettingsBody:

@@ -1,7 +1,7 @@
 import { useRoute } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useListBlogPosts } from "@workspace/api-client-react";
+import { useGetBlogPostBySlug } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { Link } from "wouter";
@@ -11,9 +11,9 @@ import DOMPurify from "dompurify";
 
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
-  
-  const { data, isLoading } = useListBlogPosts({ published: true, limit: 100 });
-  const post = data?.posts.find(p => p.slug === params?.slug);
+  const slug = params?.slug ?? "";
+
+  const { data: post, isLoading, isError } = useGetBlogPostBySlug(slug);
 
   if (isLoading) {
     return (
@@ -27,7 +27,7 @@ export default function BlogPost() {
     );
   }
 
-  if (!post) {
+  if (!post || isError) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />

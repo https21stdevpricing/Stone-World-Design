@@ -233,7 +233,6 @@ export interface SiteSettings {
   whatsapp?: string | null;
   instagramUrl?: string | null;
   facebookUrl?: string | null;
-  adminPasswordHash: string;
   updatedAt: string;
 }
 

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, productsTable, categoriesTable, type Product as DbProduct } from "@workspace/db";
-import { eq, sql, ilike, and, inArray, asc, desc } from "drizzle-orm";
+import { eq, sql, ilike, and, inArray, asc, desc, type SQL } from "drizzle-orm";
 import {
   ListProductsQueryParams,
   CreateProductBody,
@@ -69,7 +69,7 @@ router.get("/products", async (req, res): Promise<void> => {
 
   const { categoryId, search, available, origin, limit = 20, offset = 0 } = query.data;
 
-  const conditions: any[] = [];
+  const conditions: SQL<unknown>[] = [];
   if (categoryId != null) conditions.push(eq(productsTable.categoryId, categoryId));
   if (search) conditions.push(ilike(productsTable.name, `%${search}%`));
   if (available != null) conditions.push(eq(productsTable.available, available));

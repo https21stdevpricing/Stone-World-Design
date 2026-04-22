@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, blogPostsTable } from "@workspace/db";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, type SQL } from "drizzle-orm";
 import {
   ListBlogPostsQueryParams,
   CreateBlogPostBody,
@@ -34,7 +34,7 @@ router.get("/blog", async (req, res): Promise<void> => {
 
   const { published, limit = 10, offset = 0 } = query.data;
 
-  const conditions: any[] = [];
+  const conditions: SQL<unknown>[] = [];
   if (published != null) {
     conditions.push(eq(blogPostsTable.published, published));
   }
@@ -147,6 +147,19 @@ Return ONLY a JSON object with this exact structure:
     .returning();
 
   res.status(201).json(post);
+});
+
+router.get("/blog/by-slug/:slug", async (req, res): Promise<void> => {
+  const { slug } = req.params;
+  const [post] = await db
+    .select()
+    .from(blogPostsTable)
+    .where(eq(blogPostsTable.slug, slug));
+  if (!post || !post.published) {
+    res.status(404).json({ error: "Blog post not found" });
+    return;
+  }
+  res.json(post);
 });
 
 router.get("/blog/:id", async (req, res): Promise<void> => {

@@ -341,6 +341,28 @@ export const GenerateBlogPostBody = zod.object({
 });
 
 /**
+ * @summary Get a published blog post by slug
+ */
+export const GetBlogPostBySlugParams = zod.object({
+  slug: zod.coerce.string(),
+});
+
+export const GetBlogPostBySlugResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  slug: zod.string(),
+  excerpt: zod.string().nullish(),
+  content: zod.string(),
+  coverImageUrl: zod.string().nullish(),
+  published: zod.boolean(),
+  aiGenerated: zod.boolean(),
+  tags: zod.array(zod.string()),
+  readTimeMinutes: zod.number(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
  * @summary Get a blog post by ID
  */
 export const GetBlogPostParams = zod.object({
@@ -534,7 +556,6 @@ export const GetSettingsResponse = zod.object({
   whatsapp: zod.string().nullish(),
   instagramUrl: zod.string().nullish(),
   facebookUrl: zod.string().nullish(),
-  adminPasswordHash: zod.string(),
   updatedAt: zod.coerce.date(),
 });
 
@@ -562,7 +583,6 @@ export const UpdateSettingsResponse = zod.object({
   whatsapp: zod.string().nullish(),
   instagramUrl: zod.string().nullish(),
   facebookUrl: zod.string().nullish(),
-  adminPasswordHash: zod.string(),
   updatedAt: zod.coerce.date(),
 });
 

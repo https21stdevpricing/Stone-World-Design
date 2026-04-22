@@ -1661,6 +1661,93 @@ export const useGenerateBlogPost = <
 };
 
 /**
+ * @summary Get a published blog post by slug
+ */
+export const getGetBlogPostBySlugUrl = (slug: string) => {
+  return `/api/blog/by-slug/${slug}`;
+};
+
+export const getBlogPostBySlug = async (
+  slug: string,
+  options?: RequestInit,
+): Promise<BlogPost> => {
+  return customFetch<BlogPost>(getGetBlogPostBySlugUrl(slug), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetBlogPostBySlugQueryKey = (slug: string) => {
+  return [`/api/blog/by-slug/${slug}`] as const;
+};
+
+export const getGetBlogPostBySlugQueryOptions = <
+  TData = Awaited<ReturnType<typeof getBlogPostBySlug>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBlogPostBySlug>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetBlogPostBySlugQueryKey(slug);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getBlogPostBySlug>>
+  > = ({ signal }) => getBlogPostBySlug(slug, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!slug,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getBlogPostBySlug>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetBlogPostBySlugQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getBlogPostBySlug>>
+>;
+export type GetBlogPostBySlugQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get a published blog post by slug
+ */
+
+export function useGetBlogPostBySlug<
+  TData = Awaited<ReturnType<typeof getBlogPostBySlug>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  slug: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getBlogPostBySlug>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetBlogPostBySlugQueryOptions(slug, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
  * @summary Get a blog post by ID
  */
 export const getGetBlogPostUrl = (id: number) => {

@@ -3,20 +3,36 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Stone World API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: categories
+    description: Product categories
+  - name: products
+    description: Product management
+  - name: blog
+    description: Blog articles
+  - name: enquiries
+    description: Customer enquiries
+  - name: admin
+    description: Admin authentication
+  - name: media
+    description: Media library
+  - name: settings
+    description: Site settings
+  - name: stats
+    description: Dashboard statistics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +40,641 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Admin Auth ──────────────────────────────────────────────────────────────
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminLoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminLoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admin/logout:
+    post:
+      operationId: adminLogout
+      tags: [admin]
+      summary: Admin logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /admin/session:
+    get:
+      operationId: getAdminSession
+      tags: [admin]
+      summary: Check admin session
+      responses:
+        "200":
+          description: Session valid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminSessionResponse"
+
+  # ─── Categories ──────────────────────────────────────────────────────────────
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List all categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      operationId: createCategory
+      tags: [categories]
+      summary: Create a category (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "201":
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /categories/{id}:
+    put:
+      operationId: updateCategory
+      tags: [categories]
+      summary: Update a category (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryBody"
+      responses:
+        "200":
+          description: Category updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      operationId: deleteCategory
+      tags: [categories]
+      summary: Delete a category (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Category deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── Products ────────────────────────────────────────────────────────────────
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List products
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: available
+          in: query
+          schema:
+            type: boolean
+        - name: origin
+          in: query
+          schema:
+            type: string
+            enum: [imported, national, all]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Products list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/featured:
+    get:
+      operationId: listFeaturedProducts
+      tags: [products]
+      summary: Get featured products for homepage
+      responses:
+        "200":
+          description: Featured products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "200":
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /products/bulk-delete:
+    post:
+      operationId: bulkDeleteProducts
+      tags: [products]
+      summary: Bulk delete products (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkDeleteBody"
+      responses:
+        "200":
+          description: Products deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /products/bulk-toggle:
+    post:
+      operationId: bulkToggleProductAvailability
+      tags: [products]
+      summary: Bulk toggle product availability (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkToggleBody"
+      responses:
+        "200":
+          description: Products updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── Blog ────────────────────────────────────────────────────────────────────
+  /blog:
+    get:
+      operationId: listBlogPosts
+      tags: [blog]
+      summary: List blog articles
+      parameters:
+        - name: published
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blog posts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogListResponse"
+    post:
+      operationId: createBlogPost
+      tags: [blog]
+      summary: Create a blog post manually (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBlogPostBody"
+      responses:
+        "201":
+          description: Blog post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  /blog/generate:
+    post:
+      operationId: generateBlogPost
+      tags: [blog]
+      summary: AI-generate a blog article (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateBlogPostBody"
+      responses:
+        "201":
+          description: Generated blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+
+  /blog/{id}:
+    get:
+      operationId: getBlogPost
+      tags: [blog]
+      summary: Get a blog post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blog post
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateBlogPost
+      tags: [blog]
+      summary: Update a blog post (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBlogPostBody"
+      responses:
+        "200":
+          description: Blog post updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPost"
+    delete:
+      operationId: deleteBlogPost
+      tags: [blog]
+      summary: Delete a blog post (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Blog post deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── Enquiries ───────────────────────────────────────────────────────────────
+  /enquiries:
+    get:
+      operationId: listEnquiries
+      tags: [enquiries]
+      summary: List all enquiries (admin)
+      parameters:
+        - name: audience
+          in: query
+          schema:
+            type: string
+            enum: [homeowner, contractor, architect, developer, all]
+        - name: read
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Enquiries list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnquiryListResponse"
+    post:
+      operationId: createEnquiry
+      tags: [enquiries]
+      summary: Submit an enquiry (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEnquiryBody"
+      responses:
+        "201":
+          description: Enquiry submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /enquiries/{id}/read:
+    put:
+      operationId: markEnquiryRead
+      tags: [enquiries]
+      summary: Mark enquiry as read/unread (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkReadBody"
+      responses:
+        "200":
+          description: Enquiry updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Enquiry"
+
+  /enquiries/export:
+    get:
+      operationId: exportEnquiries
+      tags: [enquiries]
+      summary: Export enquiries as CSV (admin)
+      parameters:
+        - name: audience
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  # ─── Media ───────────────────────────────────────────────────────────────────
+  /media:
+    get:
+      operationId: listMedia
+      tags: [media]
+      summary: List all media files (admin)
+      responses:
+        "200":
+          description: Media list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaItem"
+    post:
+      operationId: uploadMedia
+      tags: [media]
+      summary: Upload a media file via base64 data URL (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadMediaBody"
+      responses:
+        "201":
+          description: Media uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaItem"
+
+  /media/{id}:
+    delete:
+      operationId: deleteMedia
+      tags: [media]
+      summary: Delete a media file (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Media deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  # ─── Settings ────────────────────────────────────────────────────────────────
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get site settings
+      responses:
+        "200":
+          description: Settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update site settings (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsBody"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettings"
+
+  # ─── Stats ───────────────────────────────────────────────────────────────────
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get admin dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/products-by-category:
+    get:
+      operationId: getProductsByCategory
+      tags: [stats]
+      summary: Get product counts grouped by category
+      responses:
+        "200":
+          description: Products by category
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryStat"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +685,600 @@ components:
       required:
         - status
 
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    # ─── Admin ─────────────────────────────────────────────────────────────────
+    AdminLoginBody:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
+        - password
+
+    AdminLoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+      required:
+        - success
+        - token
+
+    AdminSessionResponse:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+      required:
+        - authenticated
+
+    # ─── Categories ────────────────────────────────────────────────────────────
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        productCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - sortOrder
+        - productCount
+        - createdAt
+
+    CreateCategoryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required:
+        - name
+
+    # ─── Products ──────────────────────────────────────────────────────────────
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        categoryId:
+          type: integer
+          nullable: true
+        categoryName:
+          type: string
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        priceUnit:
+          type: string
+          nullable: true
+        origin:
+          type: string
+          enum: [imported, national]
+        available:
+          type: boolean
+        featured:
+          type: boolean
+        imageUrl:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        deliveryAvailable:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - origin
+        - available
+        - featured
+        - deliveryAvailable
+        - images
+        - tags
+        - createdAt
+        - updatedAt
+
+    CreateProductBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        categoryId:
+          type: integer
+          nullable: true
+        price:
+          type: number
+          nullable: true
+        priceUnit:
+          type: string
+          nullable: true
+        origin:
+          type: string
+          enum: [imported, national]
+        available:
+          type: boolean
+        featured:
+          type: boolean
+        imageUrl:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        deliveryAvailable:
+          type: boolean
+      required:
+        - name
+        - origin
+
+    ProductListResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - products
+        - total
+        - limit
+        - offset
+
+    BulkDeleteBody:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+      required:
+        - ids
+
+    BulkToggleBody:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: integer
+        available:
+          type: boolean
+      required:
+        - ids
+        - available
+
+    # ─── Blog ──────────────────────────────────────────────────────────────────
+    BlogPost:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        excerpt:
+          type: string
+          nullable: true
+        content:
+          type: string
+        coverImageUrl:
+          type: string
+          nullable: true
+        published:
+          type: boolean
+        aiGenerated:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        readTimeMinutes:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - slug
+        - content
+        - published
+        - aiGenerated
+        - tags
+        - readTimeMinutes
+        - createdAt
+        - updatedAt
+
+    CreateBlogPostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        excerpt:
+          type: string
+          nullable: true
+        content:
+          type: string
+        coverImageUrl:
+          type: string
+          nullable: true
+        published:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - content
+
+    GenerateBlogPostBody:
+      type: object
+      properties:
+        topic:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        publish:
+          type: boolean
+      required:
+        - topic
+
+    BlogListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlogPost"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - posts
+        - total
+        - limit
+        - offset
+
+    # ─── Enquiries ─────────────────────────────────────────────────────────────
+    Enquiry:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+        audience:
+          type: string
+          enum: [homeowner, contractor, architect, developer]
+        projectType:
+          type: string
+          nullable: true
+        budget:
+          type: string
+          nullable: true
+        message:
+          type: string
+        productInterest:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - phone
+        - audience
+        - message
+        - isRead
+        - createdAt
+
+    CreateEnquiryBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          nullable: true
+        phone:
+          type: string
+        audience:
+          type: string
+          enum: [homeowner, contractor, architect, developer]
+        projectType:
+          type: string
+          nullable: true
+        budget:
+          type: string
+          nullable: true
+        message:
+          type: string
+        productInterest:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+      required:
+        - name
+        - phone
+        - audience
+        - message
+
+    MarkReadBody:
+      type: object
+      properties:
+        isRead:
+          type: boolean
+      required:
+        - isRead
+
+    EnquiryListResponse:
+      type: object
+      properties:
+        enquiries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Enquiry"
+        total:
+          type: integer
+        unread:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - enquiries
+        - total
+        - unread
+        - limit
+        - offset
+
+    # ─── Media ─────────────────────────────────────────────────────────────────
+    UploadMediaBody:
+      type: object
+      properties:
+        filename:
+          type: string
+        dataUrl:
+          type: string
+        mimeType:
+          type: string
+      required:
+        - filename
+        - dataUrl
+        - mimeType
+
+    MediaItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        filename:
+          type: string
+        url:
+          type: string
+        mimeType:
+          type: string
+        size:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - filename
+        - url
+        - mimeType
+        - size
+        - createdAt
+
+    # ─── Settings ──────────────────────────────────────────────────────────────
+    SiteSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+        companyName:
+          type: string
+        address:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        whatsapp:
+          type: string
+          nullable: true
+        instagramUrl:
+          type: string
+          nullable: true
+        facebookUrl:
+          type: string
+          nullable: true
+        adminPasswordHash:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - companyName
+        - adminPasswordHash
+        - updatedAt
+
+    UpdateSettingsBody:
+      type: object
+      properties:
+        companyName:
+          type: string
+        address:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        whatsapp:
+          type: string
+          nullable: true
+        instagramUrl:
+          type: string
+          nullable: true
+        facebookUrl:
+          type: string
+          nullable: true
+        currentPassword:
+          type: string
+          nullable: true
+        newPassword:
+          type: string
+          nullable: true
+
+    # ─── Stats ─────────────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      properties:
+        totalProducts:
+          type: integer
+        availableProducts:
+          type: integer
+        totalEnquiries:
+          type: integer
+        unreadEnquiries:
+          type: integer
+        totalBlogPosts:
+          type: integer
+        publishedBlogPosts:
+          type: integer
+        totalCategories:
+          type: integer
+        totalMedia:
+          type: integer
+        recentEnquiries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Enquiry"
+      required:
+        - totalProducts
+        - availableProducts
+        - totalEnquiries
+        - unreadEnquiries
+        - totalBlogPosts
+        - publishedBlogPosts
+        - totalCategories
+        - totalMedia
+        - recentEnquiries
+
+    CategoryStat:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          nullable: true
+        categoryName:
+          type: string
+        count:
+          type: integer
+      required:
+        - categoryName
+        - count

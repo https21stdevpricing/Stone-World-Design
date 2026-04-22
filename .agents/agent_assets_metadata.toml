@@ -1,0 +1,32 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "qPgT5Dw6oIZ1w2BuQZ-Sf"
+uri = "file://artifacts/stone-world/public/images/hero-marble.png"
+type = "image"
+title = "Stunning marble slab closeup"
+
+[[generated]]
+id = "g4bWJLqguMau8B9rUKG1U"
+uri = "file://artifacts/stone-world/public/images/cat-marble.png"
+type = "image"
+title = "Marble slab illustration"
+
+[[generated]]
+id = "Ls-rmOl3j_-D-1usqD_6X"
+uri = "file://artifacts/stone-world/public/images/cat-tiles.png"
+type = "image"
+title = "Luxury tile illustration"
+
+[[generated]]
+id = "JiQ6GrKL8MKgfbmz8AtMw"
+uri = "file://artifacts/stone-world/public/images/cat-quartz.png"
+type = "image"
+title = "Quartz stone illustration"
+
+[[generated]]
+id = "topoKIh1IDiJjAdCtnpVa"
+uri = "file://artifacts/stone-world/public/images/cat-cement.png"
+type = "image"
+title = "Premium cement bags"

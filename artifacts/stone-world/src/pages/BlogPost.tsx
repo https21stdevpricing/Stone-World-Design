@@ -16,7 +16,7 @@ export default function BlogPost() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col bg-white pt-16">
+      <div className="min-h-screen flex flex-col bg-white pt-[50px]">
         <div className="flex-1 flex justify-center items-center">
           <Loader2 className="h-8 w-8 animate-spin text-teal-500" />
         </div>
@@ -26,7 +26,7 @@ export default function BlogPost() {
 
   if (!post || isError) {
     return (
-      <div className="min-h-screen flex flex-col bg-white pt-16">
+      <div className="min-h-screen flex flex-col bg-white pt-[50px]">
         <div className="flex-1 flex flex-col justify-center items-center gap-5 text-center px-6">
           <h2 className="text-3xl font-black text-gray-950">Article Not Found</h2>
           <Link href="/blog" className="text-sm font-semibold text-teal-500 hover:text-teal-700 transition-colors">
@@ -39,24 +39,24 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <main className="flex-1 pt-16 pb-32">
+      <main className="flex-1 pt-[50px] pb-32">
 
-        {/* Breadcrumb bar */}
-        <div className="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
-          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-3">
+        {/* Breadcrumb bar — flush under the shrunken navbar */}
+        <div className="sticky top-[50px] z-30 bg-white/90 backdrop-blur-xl border-b border-black/[0.06]">
+          <div className="max-w-4xl mx-auto px-5 sm:px-8 h-10 flex items-center gap-2 min-w-0">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors shrink-0"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               Journal
             </Link>
-            <span className="text-gray-200 text-sm select-none">/</span>
-            <span className="text-sm font-medium text-gray-800 truncate max-w-[200px] sm:max-w-md">{post.title}</span>
+            <span className="text-gray-200 select-none text-xs">›</span>
+            <span className="text-xs font-medium text-gray-600 truncate">{post.title}</span>
           </div>
         </div>
 
-        <article className="max-w-4xl mx-auto px-6 pt-12">
+        <article className="max-w-4xl mx-auto px-5 sm:px-8 pt-10 sm:pt-14">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

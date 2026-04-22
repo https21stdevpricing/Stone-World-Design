@@ -291,7 +291,7 @@ export default function Contact() {
         <div className="flex-1 flex flex-col">
 
           {/* Progress header */}
-          <div className="border-b border-gray-100/80 bg-white/85 backdrop-blur-xl sticky top-16 z-30">
+          <div className="border-b border-gray-100/80 bg-white/85 backdrop-blur-xl sticky top-[50px] z-30">
             <div className="max-w-2xl mx-auto px-6 py-4 flex items-center gap-4">
               {step > 1 && step < 5 && (
                 <button

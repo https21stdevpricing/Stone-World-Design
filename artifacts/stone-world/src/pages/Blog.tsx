@@ -42,7 +42,7 @@ export default function Blog() {
       </div>
 
       {/* Sticky label */}
-      <div className="sticky top-16 z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100/80">
+      <div className="sticky top-[50px] z-30 bg-white/90 backdrop-blur-xl border-b border-gray-100/80">
         <div className="max-w-5xl mx-auto px-6 py-2.5 flex items-center gap-2">
           <BookOpen className="w-3.5 h-3.5 text-teal-500" />
           <span className="text-xs font-bold text-gray-600 tracking-wide">Journal</span>

@@ -328,7 +328,7 @@ export default function Track() {
       </div>
 
       {/* Sticky breadcrumb bar */}
-      <div className="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+      <div className="sticky top-[50px] z-30 bg-white border-b border-gray-200 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
         <div className="max-w-2xl mx-auto px-6 py-3 flex items-center gap-2">
           <Search className="w-4 h-4 text-teal-500 shrink-0" strokeWidth={2.5} />
           <span className="text-sm font-semibold text-gray-700">Track Enquiry</span>

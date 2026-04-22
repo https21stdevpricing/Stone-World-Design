@@ -71,7 +71,7 @@ export default function Discover() {
       </div>
 
       {/* ── STICKY FILTER BAR ── */}
-      <div className="sticky top-16 z-30 bg-white border-b border-gray-200">
+      <div className="sticky top-[50px] z-30 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
           {/* Row 1: Search + Origin toggle */}

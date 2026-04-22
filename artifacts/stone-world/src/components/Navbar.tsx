@@ -32,7 +32,7 @@ export function Navbar() {
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 16);
-      setLogoCompact(y > 80);
+      setLogoCompact(y > 60);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -65,27 +65,35 @@ export function Navbar() {
     { href: "/track",     label: "Track Order",  hasDropdown: false },
   ];
 
-  const glass = scrolled
-    ? "bg-white/90 backdrop-blur-2xl border-b border-black/[0.05] shadow-[0_1px_24px_rgba(0,0,0,0.07)]"
+  const glassClass = scrolled
+    ? "bg-white/92 backdrop-blur-2xl border-b border-black/[0.05]"
     : "bg-transparent";
+
+  const MORPH = { duration: 0.16, ease: [0.4, 0, 0.2, 1] as [number,number,number,number] };
+  const MORPH_HIDDEN  = { opacity: 0, scale: 0.72, filter: "blur(5px)" };
+  const MORPH_VISIBLE = { opacity: 1, scale: 1,    filter: "blur(0px)" };
 
   return (
     <>
       <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      <nav className={`fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-400 ${glass}`}>
+      <motion.nav
+        animate={{ height: scrolled ? 50 : 64 }}
+        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+        className={`fixed top-0 left-0 right-0 z-50 ${glassClass} transition-colors duration-300`}
+      >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 h-full flex items-center justify-between">
 
-          {/* Logo — wordmark → icon on scroll */}
-          <Link href="/" className="shrink-0 h-8 flex items-center overflow-hidden" style={{ minWidth: 36 }}>
-            <AnimatePresence mode="wait" initial={false}>
+          {/* Logo — wordmark ⟷ icon morph on scroll */}
+          <Link href="/" className="shrink-0 flex items-center overflow-hidden" style={{ height: 32, minWidth: 36 }}>
+            <AnimatePresence mode="popLayout" initial={false}>
               {!logoCompact ? (
                 <motion.span
                   key="wordmark"
-                  initial={{ x: 24, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -28, opacity: 0 }}
-                  transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+                  initial={MORPH_HIDDEN}
+                  animate={MORPH_VISIBLE}
+                  exit={MORPH_HIDDEN}
+                  transition={MORPH}
                   className="font-black tracking-[-0.05em] text-[21px] leading-none text-gray-950 whitespace-nowrap select-none block"
                 >
                   Stone World
@@ -95,11 +103,11 @@ export function Navbar() {
                   key="mark"
                   src={`${import.meta.env.BASE_URL}sw-logo.png`}
                   alt="Stone World"
-                  className="h-8 w-auto object-contain block"
-                  initial={{ x: 24, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -28, opacity: 0 }}
-                  transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+                  className="h-7 w-auto object-contain block"
+                  initial={MORPH_HIDDEN}
+                  animate={MORPH_VISIBLE}
+                  exit={MORPH_HIDDEN}
+                  transition={MORPH}
                 />
               )}
             </AnimatePresence>
@@ -219,7 +227,7 @@ export function Navbar() {
             </button>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Mobile drawer */}
       <AnimatePresence>

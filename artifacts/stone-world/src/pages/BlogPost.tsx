@@ -7,6 +7,7 @@ import { Loader2, ArrowLeft, Clock, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
@@ -81,7 +82,7 @@ export default function BlogPost() {
 
           <div
             className="prose prose-lg md:prose-xl max-w-none prose-headings:font-serif prose-a:text-primary hover:prose-a:text-primary/80"
-            dangerouslySetInnerHTML={{ __html: marked(post.content) as string }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked(post.content) as string) }}
           />
         </article>
       </main>

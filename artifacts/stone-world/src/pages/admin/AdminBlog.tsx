@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Pencil, Trash2, Wand2, Eye, PenLine } from "lucide-react";
 import { format } from "date-fns";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -187,7 +188,7 @@ export default function AdminBlog() {
                         <TabsContent value="preview">
                           <div
                             className="min-h-[300px] border rounded-md p-4 prose prose-sm max-w-none overflow-auto"
-                            dangerouslySetInnerHTML={{ __html: marked(field.value || "") as string }}
+                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked(field.value || "") as string) }}
                           />
                         </TabsContent>
                       </Tabs>

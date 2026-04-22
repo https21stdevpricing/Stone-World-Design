@@ -12,6 +12,16 @@ function stripHash(settings: SiteSettings) {
   return safe;
 }
 
+router.get("/settings/public", async (_req, res): Promise<void> => {
+  const [settings] = await db.select().from(siteSettingsTable).limit(1);
+  if (!settings) {
+    res.status(404).json({ error: "Settings not found" });
+    return;
+  }
+  const { adminPasswordHash: _hash, id: _id, updatedAt: _updatedAt, ...publicFields } = settings;
+  res.json(publicFields);
+});
+
 router.get("/settings", requireAdmin, async (_req, res): Promise<void> => {
   const [settings] = await db.select().from(siteSettingsTable).limit(1);
   if (!settings) {

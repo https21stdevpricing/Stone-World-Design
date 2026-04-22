@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRoute, Link } from "wouter";
 import { Footer } from "@/components/Footer";
 import { useGetProduct, getGetProductQueryKey, useListProducts } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Loader2, CheckCircle2, XCircle, ArrowRight, ChevronLeft,
-  Package, MapPin, Layers, Truck, Phone, Star, Shield, ArrowUpRight, Maximize2
+  Package, MapPin, Layers, Truck, Phone, Star, Shield, ArrowUpRight, Maximize2, Share2, Check
 } from "lucide-react";
 import { ProductImage } from "@/components/ProductImage";
 import { ImageLightbox } from "@/components/ImageLightbox";
@@ -80,6 +81,8 @@ export default function ProductDetail() {
   const id = params?.id ? parseInt(params.id) : 0;
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const { toast } = useToast();
 
   const { data: product, isLoading } = useGetProduct(id, {
     query: {
@@ -95,6 +98,28 @@ export default function ProductDetail() {
   const relatedProducts = (relatedData?.products ?? [])
     .filter(p => p.id !== id)
     .slice(0, 6);
+
+  const handleShare = useCallback(async () => {
+    const url = window.location.href;
+    const title = product?.name ?? "Check out this product";
+    const text = `${title} — Stone World`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch {
+        // user cancelled or share failed — no-op
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2000);
+        toast({ title: "Link copied!", description: "The product link has been copied to your clipboard." });
+      } catch {
+        // clipboard not available
+      }
+    }
+  }, [product?.name, toast]);
 
   if (isLoading) {
     return (
@@ -215,6 +240,16 @@ export default function ProductDetail() {
                     <MapPin className="w-3 h-3" />{product.origin}
                   </span>
                 )}
+                <button
+                  onClick={handleShare}
+                  aria-label="Share this product"
+                  className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-full transition-colors"
+                >
+                  {shareCopied
+                    ? <><Check className="w-3.5 h-3.5 text-teal-500" /><span className="text-teal-600">Copied!</span></>
+                    : <><Share2 className="w-3.5 h-3.5" />Share</>
+                  }
+                </button>
               </div>
 
               {/* Name + Price */}

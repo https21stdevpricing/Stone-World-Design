@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, siteSettingsTable, type SiteSettings } from "@workspace/db";
 import bcrypt from "bcryptjs";
+import { eq } from "drizzle-orm";
 import { UpdateSettingsBody } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
 
@@ -56,6 +57,7 @@ router.put("/settings", requireAdmin, async (req, res): Promise<void> => {
   const [updated] = await db
     .update(siteSettingsTable)
     .set(updateData)
+    .where(eq(siteSettingsTable.id, current.id))
     .returning();
 
   res.json(stripHash(updated));

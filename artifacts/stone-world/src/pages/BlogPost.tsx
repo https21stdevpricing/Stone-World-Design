@@ -2,12 +2,12 @@ import { useRoute } from "wouter";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useGetBlogPostBySlug } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
-import { Loader2, ArrowLeft, Clock, Calendar } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
+import { motion } from "framer-motion";
 
 export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
@@ -22,7 +22,6 @@ export default function BlogPost() {
         <div className="flex-1 flex justify-center items-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-        <Footer />
       </div>
     );
   }
@@ -31,59 +30,70 @@ export default function BlogPost() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
-        <div className="flex-1 flex flex-col justify-center items-center gap-4">
-          <h2 className="text-2xl font-serif">Article Not Found</h2>
-          <Button asChild variant="outline">
-            <Link href="/blog">Back to Journal</Link>
-          </Button>
+        <div className="flex-1 flex flex-col justify-center items-center gap-6">
+          <h2 className="text-3xl font-serif">Article Not Found</h2>
+          <Link href="/blog" className="text-sm tracking-widest uppercase hover:text-primary">Back to Journal</Link>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-background font-sans">
       <Navbar />
       
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-4xl">
-        <Button asChild variant="ghost" className="mb-8 -ml-4 text-muted-foreground">
-          <Link href="/blog"><ArrowLeft className="mr-2 h-4 w-4" /> Back to Journal</Link>
-        </Button>
-
-        <article>
-          <header className="mb-12 text-center space-y-6">
-            <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center"><Calendar className="w-4 h-4 mr-2" /> {format(new Date(post.createdAt), 'MMMM d, yyyy')}</span>
+      <main className="flex-1 pt-24 pb-32">
+        <article className="container mx-auto px-4 max-w-4xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center space-y-8 mb-16"
+          >
+            <Link href="/blog" className="inline-block text-xs tracking-widest uppercase text-muted-foreground hover:text-primary mb-8 border-b border-transparent hover:border-primary pb-1 transition-all">
+              ← Back to Journal
+            </Link>
+            
+            <div className="flex justify-center items-center gap-4 text-xs tracking-widest uppercase text-muted-foreground">
+              <span>{format(new Date(post.createdAt), 'MMMM dd, yyyy')}</span>
               <span>•</span>
-              <span className="flex items-center"><Clock className="w-4 h-4 mr-2" /> {post.readTimeMinutes} min read</span>
+              <span>{post.readTimeMinutes} Min Read</span>
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-serif text-foreground leading-tight">
+            <h1 className="text-5xl md:text-7xl font-serif text-foreground leading-tight max-w-4xl mx-auto">
               {post.title}
             </h1>
-            
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex justify-center flex-wrap gap-2 pt-4">
-                {post.tags.map((tag) => (
-                  <span key={tag} className="bg-muted px-3 py-1 rounded-full text-xs uppercase tracking-wider text-muted-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </header>
+          </motion.div>
 
           {post.coverImageUrl && (
-            <div className="aspect-video bg-muted rounded-2xl overflow-hidden mb-16">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="aspect-[21/9] w-full overflow-hidden bg-muted mb-20"
+            >
               <img src={post.coverImageUrl} alt={post.title} className="w-full h-full object-cover" />
-            </div>
+            </motion.div>
           )}
 
-          <div
-            className="prose prose-lg md:prose-xl max-w-none prose-headings:font-serif prose-a:text-primary hover:prose-a:text-primary/80"
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="prose prose-lg md:prose-xl max-w-3xl mx-auto prose-headings:font-serif prose-headings:font-normal prose-h2:text-3xl prose-h2:mt-16 prose-p:font-light prose-p:leading-relaxed prose-p:text-muted-foreground prose-a:text-foreground prose-a:underline hover:prose-a:text-primary"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked(post.content) as string) }}
           />
+
+          {post.tags && post.tags.length > 0 && (
+            <div className="max-w-3xl mx-auto mt-20 pt-10 border-t border-border flex flex-wrap gap-3">
+              <span className="text-xs uppercase tracking-widest text-muted-foreground self-center mr-4">Tags:</span>
+              {post.tags.map((tag) => (
+                <span key={tag} className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background transition-colors cursor-pointer">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </article>
       </main>
 

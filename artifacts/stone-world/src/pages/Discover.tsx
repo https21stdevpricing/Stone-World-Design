@@ -74,61 +74,58 @@ export default function Discover() {
       <div className="sticky top-[50px] z-30 bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
-          {/* Row 1: Search + Origin toggle */}
-          <div className="flex items-center gap-2 sm:gap-3 py-3">
-            {/* Search — always visible */}
-            <div className="flex-1 relative min-w-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          {/* Row 1: Full-width search */}
+          <div className="pt-3 pb-2">
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search materials, types..."
-                className="w-full pl-9 pr-8 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/15 transition-all"
+                placeholder="Search materials, types, origins…"
+                autoComplete="off"
+                spellCheck={false}
+                className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/15 transition-all"
               />
-              {search && (
+              {search ? (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
+              ) : (
+                <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-gray-300 tracking-wide select-none hidden sm:block">
+                  ⌘F
+                </span>
               )}
             </div>
-
-            {/* Origin toggle */}
-            <div className="flex items-center rounded-xl border border-gray-200 p-0.5 shrink-0 bg-gray-50">
-              {[
-                { value: undefined,                         label: "All"      },
-                { value: "national"  as ListProductsOrigin, label: "Indian"   },
-                { value: "imported"  as ListProductsOrigin, label: "Imported" },
-              ].map(({ value, label }) => (
-                <button
-                  key={label}
-                  onClick={() => setOrigin(value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
-                    origin === value
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Clear */}
-            {hasFilters && (
-              <button
-                onClick={clearAll}
-                className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
-              >
-                <X className="w-3 h-3" /> Clear
-              </button>
-            )}
           </div>
 
-          {/* Row 2: Category pills */}
+          {/* Row 2: Origin pills + category pills — single horizontal scroll */}
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-3">
+            {/* Origin pills */}
+            {[
+              { value: undefined,                          label: "All Origins" },
+              { value: "national"  as ListProductsOrigin,  label: "🇮🇳 Indian"   },
+              { value: "imported"  as ListProductsOrigin,  label: "Imported"    },
+            ].map(({ value, label }) => (
+              <button
+                key={label}
+                onClick={() => setOrigin(value)}
+                className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
+                  origin === value
+                    ? "bg-teal-500 text-white shadow-sm shadow-teal-500/20"
+                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+
+            {/* Divider */}
+            <div className="shrink-0 w-px h-4 bg-gray-200 mx-0.5" />
+
+            {/* Category pills */}
             <button
               onClick={() => setCategoryId(undefined)}
               className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 ${
@@ -137,7 +134,7 @@ export default function Discover() {
                   : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
               }`}
             >
-              All
+              All Categories
             </button>
             {categories?.map((cat) => (
               <button
@@ -152,6 +149,19 @@ export default function Discover() {
                 {cat.name}
               </button>
             ))}
+
+            {/* Clear all — shown only when filters are active */}
+            {hasFilters && (
+              <>
+                <div className="shrink-0 w-px h-4 bg-gray-200 mx-0.5" />
+                <button
+                  onClick={clearAll}
+                  className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <X className="w-3 h-3" /> Reset
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>

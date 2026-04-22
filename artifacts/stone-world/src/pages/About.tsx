@@ -17,13 +17,13 @@ export default function About() {
         >
           <img src="/images/hero-marble.png" alt="AB Stone World Legacy" className="w-full h-full object-cover opacity-50 grayscale hover:grayscale-0 transition-all duration-1000" />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 text-center space-y-6 max-w-4xl px-4 mt-20">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-serif text-white"
+            className="text-6xl md:text-8xl font-bold tracking-tight text-white"
           >
             A Legacy Carved in Stone
           </motion.h1>
@@ -31,7 +31,7 @@ export default function About() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-lg text-white/80 tracking-widest uppercase text-sm"
+            className="text-white/80 tracking-widest uppercase text-sm font-bold"
           >
             Since 2003 • Pitampura, Delhi
           </motion.p>
@@ -41,8 +41,8 @@ export default function About() {
       <main className="flex-1">
         {/* Story Section */}
         <section className="py-24 md:py-32 container mx-auto px-4">
-          <div className="max-w-3xl mx-auto space-y-8 text-lg leading-relaxed text-muted-foreground font-light">
-            <p className="text-3xl font-serif text-foreground leading-snug">
+          <div className="max-w-3xl mx-auto space-y-8 text-lg leading-relaxed text-muted-foreground font-normal">
+            <p className="text-3xl font-bold tracking-tight text-foreground leading-snug">
               Based in India's capital region, AB Stone World Pvt. Ltd. has stood as a bastion of luxury building materials for over two decades.
             </p>
             <p>
@@ -65,8 +65,8 @@ export default function About() {
                 transition={{ duration: 0.8 }}
                 className="space-y-6"
               >
-                <div className="text-primary text-sm tracking-widest uppercase">Our Mission</div>
-                <h2 className="text-4xl font-serif leading-snug">Making every home an amazing place to live with breathtaking building materials.</h2>
+                <div className="text-primary text-sm tracking-widest uppercase font-bold">Our Mission</div>
+                <h2 className="text-4xl font-bold tracking-tight leading-snug">Making every home an amazing place to live with breathtaking building materials.</h2>
               </motion.div>
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
@@ -75,8 +75,8 @@ export default function About() {
                 transition={{ duration: 0.8, delay: 0.2 }}
                 className="space-y-6"
               >
-                <div className="text-primary text-sm tracking-widest uppercase">Our Vision</div>
-                <h2 className="text-4xl font-serif leading-snug">Making every person's material selection journey completely hassle-free — a true 360° experience.</h2>
+                <div className="text-primary text-sm tracking-widest uppercase font-bold">Our Vision</div>
+                <h2 className="text-4xl font-bold tracking-tight leading-snug">Making every person's material selection journey completely hassle-free — a true 360° experience.</h2>
               </motion.div>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default function About() {
         <section className="py-32 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-20">
-              <h2 className="text-4xl font-serif text-foreground">The Pillars of Our Atelier</h2>
+              <h2 className="text-4xl font-bold tracking-tight text-foreground">The Pillars of Our Atelier</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-16 max-w-6xl mx-auto">
               {[
@@ -97,9 +97,9 @@ export default function About() {
                 { title: "Sustainability", desc: "Responsible sourcing and efficient logistics designed to respect the earth from which our materials originate." }
               ].map((value, i) => (
                 <div key={value.title} className="space-y-4">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-serif">0{i+1}</div>
-                  <h3 className="text-2xl font-serif text-foreground">{value.title}</h3>
-                  <p className="text-muted-foreground font-light leading-relaxed">{value.desc}</p>
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">0{i+1}</div>
+                  <h3 className="text-xl font-bold text-foreground">{value.title}</h3>
+                  <p className="text-muted-foreground font-normal leading-relaxed text-lg">{value.desc}</p>
                 </div>
               ))}
             </div>
@@ -111,9 +111,9 @@ export default function About() {
           <div className="container mx-auto px-4 max-w-6xl">
             <div className="aspect-video overflow-hidden bg-muted relative">
               <img src="/images/cat-marble.png" alt="Stone World Collection" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/20" />
+              <div className="absolute inset-0 bg-black/40" />
               <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-white text-3xl md:text-5xl font-serif max-w-3xl text-center leading-snug px-4">
+                <p className="text-white text-3xl md:text-5xl font-bold tracking-tight max-w-3xl text-center leading-snug px-4">
                   "No customer should feel left behind — every dream project gets its own look, its own attention, and its own masterpiece."
                 </p>
               </div>

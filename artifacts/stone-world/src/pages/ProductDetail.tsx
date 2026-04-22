@@ -34,8 +34,8 @@ export default function ProductDetail() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col justify-center items-center gap-6 pt-24">
-          <h2 className="text-3xl font-serif">Product Not Found</h2>
-          <Button asChild variant="outline" className="rounded-none uppercase tracking-widest text-xs px-8">
+          <h2 className="text-3xl font-bold">Product Not Found</h2>
+          <Button asChild variant="outline" className="rounded-full font-bold uppercase tracking-widest text-xs px-8">
             <Link href="/discover">Back to Collection</Link>
           </Button>
         </div>
@@ -62,7 +62,9 @@ export default function ProductDetail() {
                 {product.imageUrl ? (
                   <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">No Image</div>
+                  <div className="w-full h-full bg-gradient-to-br from-primary to-slate-900 flex items-center justify-center">
+                    <span className="text-white/20 font-bold text-6xl tracking-tighter">SW</span>
+                  </div>
                 )}
               </div>
               
@@ -85,34 +87,34 @@ export default function ProductDetail() {
               className="lg:sticky lg:top-32 space-y-10"
             >
               <div className="space-y-4 border-b border-border/40 pb-10">
-                <div className="flex items-center gap-3 text-xs tracking-widest uppercase text-muted-foreground">
+                <div className="flex items-center gap-3 text-xs font-bold tracking-widest uppercase text-muted-foreground">
                   <Link href={`/discover?categoryId=${product.categoryId}`} className="hover:text-primary transition-colors">{product.categoryName}</Link>
                   <span>/</span>
                   <span>{product.origin}</span>
                 </div>
-                <h1 className="text-4xl md:text-6xl font-serif text-foreground leading-tight">{product.name}</h1>
+                <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-tight">{product.name}</h1>
                 
                 {product.price && (
                   <div className="pt-4">
-                    <p className="text-3xl font-light">₹{product.price} <span className="text-sm tracking-widest uppercase text-muted-foreground ml-2">/ {product.priceUnit || 'sq.ft'}</span></p>
+                    <p className="text-3xl font-bold">₹{product.price} <span className="text-sm font-bold tracking-widest uppercase text-muted-foreground ml-2">/ {product.priceUnit || 'sq.ft'}</span></p>
                   </div>
                 )}
               </div>
 
               {product.description && (
-                <div className="prose prose-lg text-muted-foreground font-light leading-relaxed">
+                <div className="prose prose-lg text-muted-foreground font-medium leading-relaxed">
                   <p>{product.description}</p>
                 </div>
               )}
 
               <div className="space-y-4 pt-6">
-                <div className="flex items-center gap-3 text-sm">
+                <div className="flex items-center gap-3 text-sm font-bold">
                   <CheckCircle2 className={`w-5 h-5 ${product.available ? 'text-primary' : 'text-muted-foreground'}`} />
                   <span className={product.available ? 'text-foreground' : 'text-muted-foreground'}>
                     {product.available ? 'Available in Stock' : 'Currently Unavailable (Enquire for ETA)'}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-sm">
+                <div className="flex items-center gap-3 text-sm font-bold">
                   <CheckCircle2 className={`w-5 h-5 ${product.deliveryAvailable ? 'text-primary' : 'text-muted-foreground'}`} />
                   <span className={product.deliveryAvailable ? 'text-foreground' : 'text-muted-foreground'}>
                     {product.deliveryAvailable ? 'Pan-India Delivery Available' : 'Store Pickup Only'}
@@ -121,7 +123,7 @@ export default function ProductDetail() {
               </div>
 
               <div className="pt-10">
-                <Button asChild size="lg" className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-none h-16 text-sm tracking-[0.2em] uppercase">
+                <Button asChild size="lg" className="w-full bg-foreground text-background hover:bg-foreground/90 rounded-full h-16 font-bold text-sm tracking-[0.2em] uppercase">
                   <Link href={`/contact?interest=${encodeURIComponent(product.name)}`}>
                     Request Quote & Details
                   </Link>
@@ -131,7 +133,7 @@ export default function ProductDetail() {
               {product.tags && product.tags.length > 0 && (
                 <div className="pt-10 flex flex-wrap gap-2">
                   {product.tags.map((tag) => (
-                    <span key={tag} className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-muted-foreground">
+                    <span key={tag} className="border border-border px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {tag}
                     </span>
                   ))}

@@ -23,36 +23,41 @@ export function Navbar() {
     { href: "/contact", label: "CONTACT" },
   ];
 
+  const wordmark = "Stone World";
+  const chars = wordmark.split("");
+
   return (
-    <nav className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md border-b' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled || location !== "/" ? 'bg-white/90 backdrop-blur-md border-b' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 md:px-8 h-24 flex items-center justify-between">
         
-        <Link href="/" className="flex items-center">
-          <AnimatePresence mode="wait">
-            {!scrolled ? (
-              <motion.span 
-                key="wordmark"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className={`text-2xl font-serif tracking-wide ${location === "/" && !scrolled ? 'text-white' : 'text-foreground'}`}
+        <Link href="/" className="flex items-center relative w-[180px] h-10">
+          <div className="absolute inset-0 flex items-center">
+            {chars.map((char, i) => (
+              <span
+                key={i}
+                className={`text-2xl font-bold tracking-tight transition-opacity duration-300 ${location === "/" && !scrolled ? 'text-white' : 'text-foreground'}`}
+                style={{
+                  opacity: scrolled ? 0 : 1,
+                  transitionDelay: scrolled ? `${i * 20}ms` : `${(chars.length - i) * 15}ms`
+                }}
               >
-                Stone World
-              </motion.span>
-            ) : (
-              <motion.img 
-                key="monogram"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.3 }}
-                src="/sw-logo.png" 
-                alt="Stone World" 
-                className="h-10 object-contain" 
-              />
-            )}
-          </AnimatePresence>
+                {char === " " ? "\u00A0" : char}
+              </span>
+            ))}
+          </div>
+          <div className="absolute inset-0 flex items-center">
+            <img 
+              src="/sw-logo.png" 
+              alt="Stone World" 
+              className="h-10 object-contain transition-all duration-300"
+              style={{
+                opacity: scrolled ? 1 : 0,
+                transform: scrolled ? 'scale(1)' : 'scale(0.9)',
+                pointerEvents: scrolled ? 'auto' : 'none',
+                transitionDelay: scrolled ? '200ms' : '0ms'
+              }}
+            />
+          </div>
         </Link>
 
         {/* Desktop Nav */}
@@ -64,7 +69,7 @@ export function Navbar() {
               <Link 
                 key={link.href} 
                 href={link.href} 
-                className={`text-xs font-semibold tracking-[0.2em] transition-all duration-300 relative py-2 ${isHeroTransparent ? 'text-white/90 hover:text-white' : 'text-foreground/80 hover:text-foreground'}`}
+                className={`text-xs font-bold tracking-[0.2em] transition-all duration-300 relative py-2 ${isHeroTransparent ? 'text-white/90 hover:text-white' : 'text-foreground/80 hover:text-foreground'}`}
               >
                 {link.label}
                 {isActive && (
@@ -77,7 +82,7 @@ export function Navbar() {
               </Link>
             );
           })}
-          <Button asChild className="rounded-full px-8 text-xs tracking-widest font-semibold ml-4">
+          <Button asChild className="rounded-full px-8 text-xs tracking-widest font-bold ml-4">
             <Link href="/contact">ENQUIRE NOW</Link>
           </Button>
         </div>
@@ -98,14 +103,14 @@ export function Navbar() {
                     <Link 
                       key={link.href} 
                       href={link.href} 
-                      className={`text-3xl font-serif transition-colors ${isActive ? 'text-primary' : 'text-foreground hover:text-primary'}`}
+                      className={`text-3xl font-bold tracking-tight transition-colors ${isActive ? 'text-primary' : 'text-foreground hover:text-primary'}`}
                     >
                       {link.label}
                     </Link>
                   );
                 })}
                 <div className="pt-8 border-t mt-4">
-                  <Button asChild size="lg" className="w-full rounded-full text-sm tracking-widest h-14">
+                  <Button asChild size="lg" className="w-full rounded-full text-sm tracking-widest h-14 font-bold">
                     <Link href="/contact">ENQUIRE NOW</Link>
                   </Button>
                 </div>

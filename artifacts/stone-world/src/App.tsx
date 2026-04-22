@@ -25,13 +25,15 @@ import AdminSettings from "@/pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [location]);
+  return null;
+}
+
 const PageTransition = ({ children }: { children: React.ReactNode }) => {
   const [location] = useLocation();
   
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [location]);
-
   return (
     <motion.div
       key={location}
@@ -82,6 +84,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <ScrollToTop />
           <Router />
         </WouterRouter>
         <Toaster />

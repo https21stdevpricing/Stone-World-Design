@@ -75,9 +75,9 @@ export default function Contact() {
                   className="space-y-12 pt-12"
                 >
                   <div className="space-y-4">
-                    <p className="text-primary text-sm tracking-widest uppercase">Step 01</p>
-                    <h1 className="text-4xl md:text-5xl font-serif text-foreground">Who are you?</h1>
-                    <p className="text-muted-foreground text-lg font-light">Help us tailor the experience to your needs.</p>
+                    <p className="text-primary text-sm tracking-widest uppercase font-bold">Step 01</p>
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Who are you?</h1>
+                    <p className="text-muted-foreground text-lg font-medium">Help us tailor the experience to your needs.</p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,9 +90,9 @@ export default function Contact() {
                       <button
                         key={role.id}
                         onClick={() => handleAudienceSelect(role.id as EnquiryAudience)}
-                        className="p-8 text-left border border-border/50 bg-muted/20 hover:bg-muted/50 hover:border-primary/50 transition-all duration-300 group"
+                        className="p-8 text-left border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-primary/60 rounded-2xl transition-all duration-300 group"
                       >
-                        <h3 className="text-xl font-serif text-foreground group-hover:text-primary transition-colors">{role.label}</h3>
+                        <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">{role.label}</h3>
                       </button>
                     ))}
                   </div>
@@ -108,9 +108,9 @@ export default function Contact() {
                   className="space-y-12 pt-12"
                 >
                   <div className="space-y-4">
-                    <p className="text-primary text-sm tracking-widest uppercase">Step 02</p>
-                    <h1 className="text-4xl md:text-5xl font-serif text-foreground">What are you looking for?</h1>
-                    <p className="text-muted-foreground text-lg font-light">Select all that apply to your project.</p>
+                    <p className="text-primary text-sm tracking-widest uppercase font-bold">Step 02</p>
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">What are you looking for?</h1>
+                    <p className="text-muted-foreground text-lg font-medium">Select all that apply to your project.</p>
                   </div>
                   
                   <div className="flex flex-wrap gap-3">
@@ -120,7 +120,7 @@ export default function Contact() {
                         <button
                           key={tag}
                           onClick={() => toggleInterest(tag)}
-                          className={`px-6 py-3 rounded-full text-sm tracking-wider transition-all duration-300 border ${
+                          className={`px-6 py-3 rounded-full text-sm font-bold tracking-wider transition-all duration-300 border ${
                             isSelected 
                               ? 'bg-primary text-primary-foreground border-primary' 
                               : 'bg-transparent border-border text-foreground hover:border-foreground'
@@ -133,8 +133,8 @@ export default function Contact() {
                   </div>
 
                   <div className="pt-8 flex gap-4">
-                    <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
-                    <Button onClick={() => setStep(3)} className="rounded-none px-8">Continue <ArrowRight className="ml-2 w-4 h-4" /></Button>
+                    <Button variant="ghost" onClick={() => setStep(1)} className="rounded-full font-bold">Back</Button>
+                    <Button onClick={() => setStep(3)} className="rounded-full px-8 font-bold">Continue <ArrowRight className="ml-2 w-4 h-4" /></Button>
                   </div>
                 </motion.div>
               )}
@@ -148,68 +148,68 @@ export default function Contact() {
                   className="space-y-12 pt-12 max-w-2xl"
                 >
                   <div className="space-y-4">
-                    <p className="text-primary text-sm tracking-widest uppercase">Step 03</p>
-                    <h1 className="text-4xl md:text-5xl font-serif text-foreground">Tell us about your project</h1>
+                    <p className="text-primary text-sm tracking-widest uppercase font-bold">Step 03</p>
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">Tell us about your project</h1>
                   </div>
                   
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Name *</label>
+                        <label className="text-sm font-bold">Name *</label>
                         <Input 
                           value={formData.name} 
                           onChange={e => setFormData({...formData, name: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent"
+                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
                           placeholder="Your full name"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Phone *</label>
+                        <label className="text-sm font-bold">Phone *</label>
                         <Input 
                           value={formData.phone} 
                           onChange={e => setFormData({...formData, phone: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent"
+                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
                           placeholder="+91 98765 43210"
                         />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Email (Optional)</label>
+                        <label className="text-sm font-bold">Email (Optional)</label>
                         <Input 
                           value={formData.email} 
                           onChange={e => setFormData({...formData, email: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent"
+                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
                           placeholder="your@email.com"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Location / City</label>
+                        <label className="text-sm font-bold">Location / City</label>
                         <Input 
                           value={formData.location} 
                           onChange={e => setFormData({...formData, location: e.target.value})} 
-                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent"
+                          className="rounded-none border-b-2 border-t-0 border-x-0 border-border focus-visible:ring-0 focus-visible:border-primary px-0 bg-transparent transition-colors"
                           placeholder="Delhi, Mumbai..."
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium">Message *</label>
+                      <label className="text-sm font-bold">Message *</label>
                       <Textarea 
                         value={formData.message} 
                         onChange={e => setFormData({...formData, message: e.target.value})} 
-                        className="rounded-none border-2 border-border focus-visible:ring-0 focus-visible:border-primary bg-transparent min-h-[120px] resize-none"
+                        className="rounded-none border-2 border-border focus-visible:ring-0 focus-visible:border-primary bg-transparent min-h-[120px] resize-none transition-colors"
                         placeholder="Briefly describe your requirement or vision..."
                       />
                     </div>
                   </div>
 
                   <div className="pt-4 flex gap-4">
-                    <Button variant="ghost" onClick={() => setStep(2)}>Back</Button>
+                    <Button variant="ghost" onClick={() => setStep(2)} className="rounded-full font-bold">Back</Button>
                     <Button 
                       onClick={submitForm} 
                       disabled={!formData.name || !formData.phone || !formData.message || createEnquiry.isPending}
-                      className="rounded-none px-8"
+                      className="rounded-full px-8 font-bold"
                     >
                       {createEnquiry.isPending ? "Sending..." : "Submit Enquiry"}
                     </Button>
@@ -225,11 +225,11 @@ export default function Contact() {
                   className="flex flex-col items-center justify-center h-full text-center space-y-6 pt-24"
                 >
                   <CheckCircle2 className="w-20 h-20 text-primary mb-4" />
-                  <h1 className="text-4xl font-serif text-foreground">Enquiry Received</h1>
-                  <p className="text-muted-foreground text-lg font-light max-w-md">
+                  <h1 className="text-4xl font-bold tracking-tight text-foreground">Enquiry Received</h1>
+                  <p className="text-muted-foreground text-lg font-medium max-w-md">
                     Thank you for reaching out to AB Stone World. One of our experts will contact you shortly to discuss your project.
                   </p>
-                  <Button variant="outline" className="rounded-none mt-8" onClick={() => window.location.reload()}>
+                  <Button variant="outline" className="rounded-full mt-8 font-bold" onClick={() => window.location.reload()}>
                     Send Another Message
                   </Button>
                 </motion.div>
@@ -241,8 +241,8 @@ export default function Contact() {
           <div className="w-full md:w-80 flex-shrink-0 pt-12 md:border-l border-border/40 md:pl-16">
             <div className="space-y-10 sticky top-32">
               <div>
-                <h3 className="font-serif text-2xl mb-6">Connect Directly</h3>
-                <p className="text-muted-foreground font-light text-sm">
+                <h3 className="font-bold tracking-tight text-2xl mb-6">Connect Directly</h3>
+                <p className="text-muted-foreground font-medium text-sm">
                   Prefer speaking with someone immediately? Reach out through our direct channels.
                 </p>
               </div>
@@ -251,25 +251,25 @@ export default function Contact() {
                 {settings?.address && (
                   <div className="flex gap-4 items-start">
                     <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <div className="text-sm text-foreground/80 leading-relaxed">{settings.address}</div>
+                    <div className="text-sm font-medium text-foreground/80 leading-relaxed">{settings.address}</div>
                   </div>
                 )}
                 {settings?.phone && (
                   <div className="flex gap-4 items-start">
                     <Phone className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <a href={`tel:${settings.phone}`} className="text-sm text-foreground/80 hover:text-primary transition-colors">{settings.phone}</a>
+                    <a href={`tel:${settings.phone}`} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">{settings.phone}</a>
                   </div>
                 )}
                 {settings?.whatsapp && (
                   <div className="flex gap-4 items-start">
                     <MessageSquare className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <a href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-sm text-foreground/80 hover:text-primary transition-colors">WhatsApp Us</a>
+                    <a href={`https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">WhatsApp Us</a>
                   </div>
                 )}
                 {settings?.email && (
                   <div className="flex gap-4 items-start">
                     <Mail className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                    <a href={`mailto:${settings.email}`} className="text-sm text-foreground/80 hover:text-primary transition-colors">{settings.email}</a>
+                    <a href={`mailto:${settings.email}`} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">{settings.email}</a>
                   </div>
                 )}
               </div>

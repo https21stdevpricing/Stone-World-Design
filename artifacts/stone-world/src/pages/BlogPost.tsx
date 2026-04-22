@@ -31,8 +31,8 @@ export default function BlogPost() {
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col justify-center items-center gap-6">
-          <h2 className="text-3xl font-serif">Article Not Found</h2>
-          <Link href="/blog" className="text-sm tracking-widest uppercase hover:text-primary">Back to Journal</Link>
+          <h2 className="text-3xl font-bold">Article Not Found</h2>
+          <Link href="/blog" className="text-sm font-bold tracking-widest uppercase hover:text-primary">Back to Journal</Link>
         </div>
       </div>
     );
@@ -50,17 +50,17 @@ export default function BlogPost() {
             transition={{ duration: 0.8 }}
             className="text-center space-y-8 mb-16"
           >
-            <Link href="/blog" className="inline-block text-xs tracking-widest uppercase text-muted-foreground hover:text-primary mb-8 border-b border-transparent hover:border-primary pb-1 transition-all">
+            <Link href="/blog" className="inline-block text-xs font-bold tracking-widest uppercase text-muted-foreground hover:text-primary mb-8 border-b border-transparent hover:border-primary pb-1 transition-all">
               ← Back to Journal
             </Link>
             
-            <div className="flex justify-center items-center gap-4 text-xs tracking-widest uppercase text-muted-foreground">
+            <div className="flex justify-center items-center gap-4 text-xs font-bold tracking-widest uppercase text-muted-foreground">
               <span>{format(new Date(post.createdAt), 'MMMM dd, yyyy')}</span>
               <span>•</span>
               <span>{post.readTimeMinutes} Min Read</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-serif text-foreground leading-tight max-w-4xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground leading-tight max-w-4xl mx-auto">
               {post.title}
             </h1>
           </motion.div>
@@ -80,15 +80,15 @@ export default function BlogPost() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="prose prose-lg md:prose-xl max-w-3xl mx-auto prose-headings:font-serif prose-headings:font-normal prose-h2:text-3xl prose-h2:mt-16 prose-p:font-light prose-p:leading-relaxed prose-p:text-muted-foreground prose-a:text-foreground prose-a:underline hover:prose-a:text-primary"
+            className="prose prose-lg md:prose-xl max-w-3xl mx-auto prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-3xl prose-h2:mt-16 prose-p:font-medium prose-p:leading-relaxed prose-p:text-muted-foreground prose-a:text-foreground prose-a:underline hover:prose-a:text-primary"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked(post.content) as string) }}
           />
 
           {post.tags && post.tags.length > 0 && (
             <div className="max-w-3xl mx-auto mt-20 pt-10 border-t border-border flex flex-wrap gap-3">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground self-center mr-4">Tags:</span>
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground self-center mr-4">Tags:</span>
               {post.tags.map((tag) => (
-                <span key={tag} className="border border-border px-4 py-2 text-xs uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background transition-colors cursor-pointer">
+                <span key={tag} className="border border-border px-4 py-2 text-xs font-bold uppercase tracking-widest text-foreground hover:bg-foreground hover:text-background transition-colors cursor-pointer">
                   {tag}
                 </span>
               ))}

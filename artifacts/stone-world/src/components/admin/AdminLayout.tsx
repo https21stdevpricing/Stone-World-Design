@@ -1,8 +1,9 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useGetAdminSession, useAdminLogout } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, FileText, Inbox, Tags, Image as ImageIcon, Settings, LogOut } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { LayoutDashboard, Package, FileText, Inbox, Tags, Image as ImageIcon, Settings, LogOut, Menu } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -14,8 +15,28 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
+function NavItems({ location, onSelect }: { location: string; onSelect?: () => void }) {
+  return (
+    <div className="flex-1 py-6 px-4 space-y-1">
+      {NAV_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const isActive = location.startsWith(item.href);
+        return (
+          <Link key={item.href} href={item.href} onClick={onSelect}>
+            <Button variant={isActive ? "secondary" : "ghost"} className="w-full justify-start">
+              <Icon className="mr-3 h-4 w-4" />
+              {item.label}
+            </Button>
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 export function AdminLayout({ children }: { children: ReactNode }) {
   const [location, setLocation] = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { data: session, isLoading, isError } = useGetAdminSession();
   const logout = useAdminLogout();
 
@@ -40,25 +61,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-muted/20 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-card border-r flex-shrink-0 flex flex-col hidden md:flex">
+      {/* Desktop Sidebar */}
+      <aside className="w-64 bg-card border-r flex-shrink-0 flex-col hidden md:flex">
         <div className="h-20 flex items-center px-6 border-b">
-          <img src="/sw-logo.png" alt="Stone World" className="h-8 invert dark:invert-0" />
+          <img src="/sw-logo.png" alt="Stone World" className="h-8 object-contain" />
         </div>
-        <div className="flex-1 py-6 px-4 space-y-1">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.startsWith(item.href);
-            return (
-              <Link key={item.href} href={item.href}>
-                <Button variant={isActive ? "secondary" : "ghost"} className="w-full justify-start">
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.label}
-                </Button>
-              </Link>
-            );
-          })}
-        </div>
+        <NavItems location={location} />
         <div className="p-4 border-t">
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={handleLogout}>
             <LogOut className="mr-3 h-4 w-4" />
@@ -68,12 +76,32 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-20 bg-card border-b flex items-center px-8 md:hidden">
-          <img src="/sw-logo.png" alt="Stone World" className="h-8 invert dark:invert-0" />
-          {/* Mobile nav could go here */}
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* Mobile Header */}
+        <header className="h-16 bg-card border-b flex items-center justify-between px-4 md:hidden">
+          <img src="/sw-logo.png" alt="Stone World" className="h-8 object-contain" />
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-0 flex flex-col">
+              <div className="h-16 flex items-center px-6 border-b">
+                <img src="/sw-logo.png" alt="Stone World" className="h-8 object-contain" />
+              </div>
+              <NavItems location={location} onSelect={() => setMobileOpen(false)} />
+              <div className="p-4 border-t">
+                <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground" onClick={handleLogout}>
+                  <LogOut className="mr-3 h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </header>
-        <div className="flex-1 overflow-auto p-8">
+
+        <div className="flex-1 overflow-auto p-4 md:p-8">
           {children}
         </div>
       </main>

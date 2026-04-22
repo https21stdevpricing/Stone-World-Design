@@ -1,5 +1,5 @@
-import { db, productsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { db, productsTable, mediaTable } from "@workspace/db";
+import { eq, like } from "drizzle-orm";
 import { logger } from "./lib/logger";
 
 const PRODUCT_IMAGES: Record<string, string> = {
@@ -28,6 +28,17 @@ const PRODUCT_IMAGES: Record<string, string> = {
   "fe-500d-tmt-bars":
     "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80&auto=format&fit=crop",
 };
+
+export async function removeStaleMediaRecords(): Promise<void> {
+  const deleted = await db
+    .delete(mediaTable)
+    .where(like(mediaTable.url, "/api/media/file/%"))
+    .returning({ id: mediaTable.id });
+
+  if (deleted.length > 0) {
+    logger.info({ count: deleted.length }, "Removed stale media records pointing to ephemeral /tmp storage");
+  }
+}
 
 export async function backfillProductImages(): Promise<void> {
   const products = await db.select().from(productsTable);

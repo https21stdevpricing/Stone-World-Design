@@ -8,6 +8,7 @@ import enquiriesRouter from "./enquiries";
 import mediaRouter from "./media";
 import settingsRouter from "./settings";
 import statsRouter from "./stats";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(enquiriesRouter);
 router.use(mediaRouter);
 router.use(settingsRouter);
 router.use(statsRouter);
+router.use(storageRouter);
 
 export default router;

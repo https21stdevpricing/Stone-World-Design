@@ -53,7 +53,7 @@ lib/
 - `/admin/categories` — Category CRUD
 - `/admin/blog` — Blog CRUD + AI generation
 - `/admin/enquiries` — Enquiry inbox + CSV export + status management (New → In Discussion → Quoted → Closed)
-- `/admin/media` — Media library with base64 upload
+- `/admin/media` — Media library with base64 upload (stored in Replit Object Storage)
 - `/admin/settings` — Company info + password change
 
 ## Database Schema
@@ -66,6 +66,15 @@ Tables: `categories`, `products`, `blog_posts`, `enquiries` (with `reference_num
 - Customers see the reference number on the contact form success screen and can track at `/track`
 - Admin can update enquiry status (new/in_discussion/quoted/closed) in the enquiries admin panel
 - Public track endpoint: `GET /api/enquiries/track?ref=SWXXXXXX`
+
+## Media Storage
+
+Uploaded images are stored in Replit Object Storage (Google Cloud Storage) for permanent persistence.
+
+- **Upload flow**: Admin uploads image via base64 data URL → server decodes and saves to GCS → URL stored in DB as `/api/storage/objects/uploads/<uuid>`
+- **Serving**: Files served via `GET /api/storage/objects/<path>` (proxied from GCS)
+- **Key files**: `artifacts/api-server/src/routes/media.ts`, `artifacts/api-server/src/lib/objectStorage.ts`
+- **Env vars**: `DEFAULT_OBJECT_STORAGE_BUCKET_ID`, `PRIVATE_OBJECT_DIR`, `PUBLIC_OBJECT_SEARCH_PATHS`
 
 ## Key Commands
 

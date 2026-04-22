@@ -3,14 +3,23 @@ import { db, mediaTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { UploadMediaBody, DeleteMediaParams } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
-import { writeFileSync, mkdirSync } from "fs";
-import { join } from "path";
+import { randomUUID } from "crypto";
+import { objectStorageClient } from "../lib/objectStorage";
 
 const router: IRouter = Router();
-const MEDIA_DIR = "/tmp/sw-media";
 
-function ensureMediaDir() {
-  try { mkdirSync(MEDIA_DIR, { recursive: true }); } catch {}
+function getPrivateObjectDir(): string {
+  const dir = process.env.PRIVATE_OBJECT_DIR || "";
+  if (!dir) {
+    throw new Error("PRIVATE_OBJECT_DIR not set");
+  }
+  return dir;
+}
+
+function parseObjectPath(path: string): { bucketName: string; objectName: string } {
+  if (!path.startsWith("/")) path = `/${path}`;
+  const parts = path.split("/");
+  return { bucketName: parts[1], objectName: parts.slice(2).join("/") };
 }
 
 router.get("/media", requireAdmin, async (_req, res): Promise<void> => {
@@ -28,22 +37,24 @@ router.post("/media", requireAdmin, async (req, res): Promise<void> => {
   const { filename, dataUrl, mimeType } = parsed.data;
 
   const matches = dataUrl.match(/^data:[^;]+;base64,(.+)$/);
-  let size = 0;
-  let savedUrl = dataUrl;
-
-  if (matches) {
-    try {
-      ensureMediaDir();
-      const buffer = Buffer.from(matches[1], "base64");
-      const safeName = `${Date.now()}-${filename.replace(/[^a-z0-9._-]/gi, "_")}`;
-      const filePath = join(MEDIA_DIR, safeName);
-      writeFileSync(filePath, buffer);
-      size = buffer.length;
-      savedUrl = `/api/media/file/${safeName}`;
-    } catch {
-      size = Math.round(dataUrl.length * 0.75);
-    }
+  if (!matches) {
+    res.status(400).json({ error: "dataUrl must be a valid base64 data URL" });
+    return;
   }
+
+  const buffer = Buffer.from(matches[1], "base64");
+  const size = buffer.length;
+
+  const privateObjectDir = getPrivateObjectDir();
+  const objectId = randomUUID();
+  const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+  const { bucketName, objectName } = parseObjectPath(fullPath);
+
+  const bucket = objectStorageClient.bucket(bucketName);
+  const file = bucket.file(objectName);
+  await file.save(buffer, { contentType: mimeType, resumable: false });
+
+  const savedUrl = `/api/storage/objects/uploads/${objectId}`;
 
   const [media] = await db
     .insert(mediaTable)

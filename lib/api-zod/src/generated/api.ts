@@ -705,3 +705,10 @@ export const GetProductsByCategoryResponseItem = zod.object({
 export const GetProductsByCategoryResponse = zod.array(
   GetProductsByCategoryResponseItem,
 );
+
+/**
+ * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
+});

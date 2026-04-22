@@ -1,14 +1,9 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
-import { join } from "path";
-import { mkdirSync } from "fs";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import { backfillProductImages } from "./seed";
-
-const MEDIA_DIR = "/tmp/sw-media";
-try { mkdirSync(MEDIA_DIR, { recursive: true }); } catch {}
+import { backfillProductImages, removeStaleMediaRecords } from "./seed";
 
 const app: Express = express();
 
@@ -35,8 +30,15 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-app.use("/api/media/file", express.static(MEDIA_DIR));
+app.use("/api/media/file", (_req, res) => {
+  res.status(410).json({ error: "Media files have been migrated to permanent storage. Re-upload images to get updated URLs." });
+});
+
 app.use("/api", router);
+
+removeStaleMediaRecords().catch((err) => {
+  logger.warn({ err }, "Stale media cleanup failed — non-fatal");
+});
 
 backfillProductImages().catch((err) => {
   logger.warn({ err }, "Product image backfill failed — non-fatal");

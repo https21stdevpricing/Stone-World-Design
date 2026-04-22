@@ -69,9 +69,9 @@ export function Navbar() {
     ? "bg-white/92 backdrop-blur-2xl border-b border-black/[0.05]"
     : "bg-transparent";
 
-  const MORPH = { duration: 0.16, ease: [0.4, 0, 0.2, 1] as [number,number,number,number] };
-  const MORPH_HIDDEN  = { opacity: 0, scale: 0.72, filter: "blur(5px)" };
-  const MORPH_VISIBLE = { opacity: 1, scale: 1,    filter: "blur(0px)" };
+  const MORPH = { duration: 0.5, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] };
+  const MORPH_HIDDEN  = { opacity: 0, scale: 0.55, y: 4, filter: "blur(8px)" };
+  const MORPH_VISIBLE = { opacity: 1, scale: 1,    y: 0, filter: "blur(0px)" };
 
   return (
     <>
@@ -85,7 +85,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-5 sm:px-8 h-full flex items-center justify-between">
 
           {/* Logo — wordmark ⟷ icon morph on scroll */}
-          <Link href="/" className="shrink-0 flex items-center overflow-hidden" style={{ height: 32, minWidth: 36 }}>
+          <Link href="/" className="shrink-0 flex items-center overflow-visible" style={{ height: 36, minWidth: 36 }}>
             <AnimatePresence mode="popLayout" initial={false}>
               {!logoCompact ? (
                 <motion.span
@@ -103,7 +103,7 @@ export function Navbar() {
                   key="mark"
                   src={`${import.meta.env.BASE_URL}sw-logo.png`}
                   alt="Stone World"
-                  className="h-7 w-auto object-contain block"
+                  className="h-9 w-auto object-contain block"
                   initial={MORPH_HIDDEN}
                   animate={MORPH_VISIBLE}
                   exit={MORPH_HIDDEN}

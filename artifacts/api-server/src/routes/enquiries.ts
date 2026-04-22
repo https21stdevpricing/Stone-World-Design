@@ -14,6 +14,7 @@ import {
 } from "@workspace/api-zod";
 import { requireAdmin } from "./admin";
 import { sendStatusNotification } from "../lib/notify";
+import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 
@@ -208,6 +209,13 @@ router.put("/enquiries/:id/status", requireAdmin, async (req, res): Promise<void
     return;
   }
 
+  const [current] = await db
+    .select({ status: enquiriesTable.status })
+    .from(enquiriesTable)
+    .where(eq(enquiriesTable.id, params.data.id));
+
+  const previousStatus = current?.status;
+
   const [updated] = await db
     .update(enquiriesTable)
     .set({ status: parsed.data.status })
@@ -221,7 +229,8 @@ router.put("/enquiries/:id/status", requireAdmin, async (req, res): Promise<void
 
   res.json(updated);
 
-  if (updated.email && updated.referenceNumber) {
+  const statusChanged = previousStatus !== updated.status;
+  if (statusChanged && updated.email && updated.referenceNumber) {
     const baseUrl = process.env.APP_BASE_URL ?? `http://localhost:${process.env.PORT ?? 3001}`;
     const trackingUrl = `${baseUrl}/track?ref=${updated.referenceNumber}`;
     sendStatusNotification({
@@ -231,7 +240,7 @@ router.put("/enquiries/:id/status", requireAdmin, async (req, res): Promise<void
       newStatus: updated.status,
       trackingUrl,
     }).catch((err: unknown) => {
-      console.error("[notify] Failed to send status email:", err);
+      logger.error({ err, enquiryId: updated.id }, "[notify] Failed to send status email");
     });
   }
 });

@@ -10,12 +10,10 @@ interface NotificationData {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Pending Review",
-  reviewing: "Under Review",
+  new: "Enquiry Received",
+  in_discussion: "In Discussion",
   quoted: "Quote Sent",
-  confirmed: "Order Confirmed",
-  completed: "Completed",
-  cancelled: "Cancelled",
+  closed: "Closed",
 };
 
 function buildEmailHtml(data: NotificationData): string {

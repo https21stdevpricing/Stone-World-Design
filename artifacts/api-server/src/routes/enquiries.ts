@@ -131,7 +131,7 @@ router.get("/enquiries/track-by-phone", async (req, res): Promise<void> => {
     return;
   }
 
-  res.json(rows[0]);
+  res.json(rows);
 });
 
 router.post("/enquiries", async (req, res): Promise<void> => {
